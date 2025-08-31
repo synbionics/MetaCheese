@@ -4,56 +4,65 @@ Il programma esegue tutti i passaggi principali dell’analisi metagenomica e sa
 
 ---
 
+## Workflow
+
+![Workflow overview](docs/img/workflow.png)
+
+
+---
+
 ## Funzionalità principali
 La pipeline esegue automaticamente questi passaggi, in ordine:
 
-1. **Estrazione e rimozione adattatori**  
-   *Tool: AdapterRemoval*  
-   Estrae i file FASTQ dagli archivi (se presenti), poi rimuove le sequenze di adattatori e di bassa qualità, ottenendo reads “puliti”.
+- ### Pre-processing 🟠
+    **1. Estrazione e rimozione adattatori**  
+     *Tool: AdapterRemoval*  
+     Estrae i file FASTQ dagli archivi (se presenti), poi rimuove le sequenze di adattatori e di bassa qualità, ottenendo reads “puliti”.
+  
+    **2. Filtraggio del genoma ospite**  
+     *Tool: Bowtie2*  
+     Allinea i reads al genoma della specie ospite (es. *Bos taurus*) e scarta quelli che si mappano, lasciando solo le sequenze microbiche.
+- ### A) Profilazione del microbioma 🔴
+    **3. Profilazione tassonomica**  
+       *Tool: MetaPhlAn*  
+       Stima la composizione tassonomica del campione, indicando specie presenti e abbondanza relativa.
+    
+    **4. Profilazione funzionale**  
+       *Tool: HUMAnN*  
+       Analizza le funzioni biologiche/metaboliche potenzialmente presenti nel microbioma.
 
-2. **Filtraggio del genoma ospite**  
-   *Tool: Bowtie2*  
-   Allinea i reads al genoma della specie ospite (es. *Bos taurus*) e scarta quelli che si mappano, lasciando solo le sequenze microbiche.
-
-3. **Profilazione tassonomica**  
-   *Tool: MetaPhlAn*  
-   Stima la composizione tassonomica del campione, indicando specie presenti e abbondanza relativa.
-
-4. **Profilazione funzionale**  
-   *Tool: HUMAnN*  
-   Analizza le funzioni biologiche/metaboliche potenzialmente presenti nel microbioma.
-
-5. **Assemblaggio del metagenoma**  
-   *Tool: SPAdes*  
-   Ricostruisce sequenze contigue (contig) assemblando i reads.
-
-6. **Filtraggio dei contig**  
-   *Tool: script custom*  
-   Seleziona solo i contig sopra soglie di lunghezza/copertura.
-
-7. **Creazione indici per binning**  
-   *Tool: Bowtie2*  
-   Costruisce indici per il binning dei contig.
-
-8. **Mappatura e calcolo copertura**  
-   *Tool: Bowtie2 + script custom*  
-   Mappa nuovamente i reads e calcola la copertura di ciascun contig.
-
-9. **Binning metagenomico**  
-   *Tool: MetaBAT2*  
-   Raggruppa i contig in MAGs (genomi metagenomici assemblati).
-
-10. **Valutazione qualità MAGs**  
-    *Tool: CheckM, CheckM2*  
-    Valuta completezza e contaminazione dei MAGs.
-
-11. **Filtraggio e annotazione MAGs di alta qualità**  
-    *Tool: script custom + TORMES*  
-    Seleziona i MAGs migliori e li annota (geni, pathway, resistenze, ecc).
-
-12. **Analisi finale e report**  
-    *Tool: script custom, R*  
-    Produce tabelle riassuntive e grafici dei risultati.
+- ### B) Assemblaggio e binning 🔵
+    **5. Assemblaggio del metagenoma**  
+       *Tool: SPAdes*  
+       Ricostruisce sequenze contigue (contig) assemblando i reads.
+    
+    **6. Filtraggio dei contig**  
+       *Tool: script custom*  
+       Seleziona solo i contig sopra soglie di lunghezza/copertura.
+    
+    **7. Creazione indici per binning**  
+       *Tool: Bowtie2*  
+       Costruisce indici per il binning dei contig.
+    
+    **8. Mappatura e calcolo copertura**  
+       *Tool: Bowtie2 + script custom*  
+       Mappa nuovamente i reads e calcola la copertura di ciascun contig.
+    
+    **9. Binning metagenomico**  
+       *Tool: MetaBAT2*  
+       Raggruppa i contig in MAGs (genomi metagenomici assemblati).
+    
+    **10. Valutazione qualità MAGs**  
+        *Tool: CheckM, CheckM2*  
+        Valuta completezza e contaminazione dei MAGs.
+    
+    **11. Filtraggio e annotazione MAGs di alta qualità**  
+        *Tool: script custom + TORMES*  
+        Seleziona i MAGs migliori e li annota (geni, pathway, resistenze, ecc).
+    
+    **12. Analisi finale e report**  
+        *Tool: script custom, R*  
+        Produce tabelle riassuntive e grafici dei risultati.
 
 ---
 
@@ -345,3 +354,4 @@ Se il valore è vuoto (`""`), **non viene preservato nulla** e l’intera cartel
 ## Crediti e licenza
 
 Autore/i: Dorin / Peraz  
+
