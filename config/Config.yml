@@ -1,95 +1,95 @@
 step00_01:
-  dir1: "../../input/@input_sample@"
-  dir2: "../../output/@output_folder@/01_AdapterRemoval"
-  dir3: "../../output/@output_folder@/01_AdapterRemoval"
-  dir4: "X204SC24020161-Z01-F003_01.tar"
-  dir5: "X204SC24020161-Z01-F003_02.tar"
-  par1: 80
-  par2: 50
-  par3: 30
-  par4: 10
-  par5: 2
-  par6: 2
+  dir1: "../../input/@input_sample@"                   # cd command for where the .tar samples are
+  dir2: "../../output/@output_folder@/01_AdapterRemoval" # extraction output directory
+  dir3: "../../output/@output_folder@/01_AdapterRemoval" # AdapterRemoval output directory
+  dir4: "X204SC24020161-Z01-F003_01.tar"                # tar file 01
+  dir5: "X204SC24020161-Z01-F003_02.tar"                # tar file 02
+  par1: 80                                              # threads
+  par2: 50                                              # minimum length
+  par3: 30                                              # minimum quality
+  par4: 10                                              # max Ns
+  par5: 2                                               # trim5p
+  par6: 2                                               # trim3p
 
 step02:
   reference_genome: "/hpc/home/luca.bettera/Downloads/ncbi_dataset/data/GCA_002263795.4/GCA_002263795.4_ARS-UCD2.0_genomic.fna Bos_taurus"
 
 step03:
-  dir1: "../../output/@output_folder@/01_AdapterRemoval"
-  dir2: "../../output/@output_folder@/03_bowtie2_output"
-  dir3: "../../data/gene/Bos_taurus/Bos_taurus"
+  dir1: "../../output/@output_folder@/01_AdapterRemoval" # input directory
+  dir2: "../../output/@output_folder@/03_bowtie2_output" # output directory
+  dir3: "../../data/gene/Bos_taurus/Bos_taurus"          # database
 
 step04:
-  #dir1: "../../data/metaphlan_database"
-  dir2: "../../output/@output_folder@/03_bowtie2_output"
-  dir3: "../../output/@output_folder@/04_metaphlan_output"
-  rscript: "../../data/calculate_diversity.R"
+  #dir1: "../../data/metaphlan_database"                 # Metaphlan DB
+  dir2: "../../output/@output_folder@/03_bowtie2_output" # input fastq folder
+  dir3: "../../output/@output_folder@/04_metaphlan_output" # metaphlan output
+  rscript: "../../data/calculate_diversity.R"            # → Rscript for diversity analysis
   
 step04b_1:
-  dir1: "../../output/@output_folder@/04_metaphlan_output"
-  dir2: "../../output/@output_folder@/03_bowtie2_output"
-  dir3: "../../output/@output_folder@/04b_humann_output"
+  dir1: "../../output/@output_folder@/04_metaphlan_output" # metaphlan output
+  dir2: "../../output/@output_folder@/03_bowtie2_output"   # input fastq folder
+  dir3: "../../output/@output_folder@/04b_humann_output"   # humann output
 
 step04b_2:
-  dir1: "../../output/@output_folder@/04_metaphlan_output"
-  dir2: "../../output/@output_folder@/03_bowtie2_output"
-  dir3: "../../output/@output_folder@/04b_humann_output"
+  dir1: "../../output/@output_folder@/04_metaphlan_output" # metaphlan output
+  dir2: "../../output/@output_folder@/03_bowtie2_output"   # input fastq folder
+  dir3: "../../output/@output_folder@/04b_humann_output"   # humann output
   
 step04b_last:
-  dir1: "../../output/@output_folder@/04b_humann_output"
-  dir2: "../../output/@output_folder@/04b_humann_output/merged_tables"
+  dir1: "../../output/@output_folder@/04b_humann_output"       # humann output
+  dir2: "../../output/@output_folder@/04b_humann_output/merged_tables" # merged tables output
 
 step05:
-  var1: "../../output/@output_folder@/03_bowtie2_output"
-  var2: "../../output/@output_folder@/05_spades_output"
-  par1: 24
-  par2: 200
+  var1: "../../output/@output_folder@/03_bowtie2_output"  # input directory
+  var2: "../../output/@output_folder@/05_spades_output"   # output directory
+  par1: 24                                                # threads
+  par2: 200                                               # memory in GB
 
 step06:
-  var1: "../../output/@output_folder@/05_spades_output"
-  var2: "contigs"
-  var3: "filtered"
-  filter1: 32
+  var1: "../../output/@output_folder@/05_spades_output"  # input directory
+  var2: "contigs"                                        # directory containing the copied input files (created inside the input directory)
+  var3: "filtered"                                       # output directory (created inside the previous directory)
+  filter1: 32                                            # num threads for xargs
 
 step07:
-  dir1: "../../output/@output_folder@/07_Bowtie_Index"
-  dir2: "../../output/@output_folder@/05_spades_output/contigs/filtered"
-  par1: 24
+  dir1: "../../output/@output_folder@/07_Bowtie_Index"                    # output folder
+  dir2: "../../output/@output_folder@/05_spades_output/contigs/filtered"  # folder with contigs .fasta
+  par1: 24                                                                 # threads
 
 step08_09:
-  dir1: "../../output/@output_folder@/03_bowtie2_output"
-  dir2: "../../output/@output_folder@/07_Bowtie_Index"
-  dir3: "../../output/@output_folder@/08_mapping_coverage"
+  dir1: "../../output/@output_folder@/03_bowtie2_output" # input fastq files
+  dir2: "../../output/@output_folder@/07_Bowtie_Index"   # Bowtie2 index input
+  dir3: "../../output/@output_folder@/08_mapping_coverage" # BAM + log output
 
 step10_11:
-  dir1: "../../output/@output_folder@/08_mapping_coverage"
-  dir2: "../../output/@output_folder@/10_metabat_depth"
-  dir3: "../../output/@output_folder@/05_spades_output/contigs/filtered"
-  dir4: "../../output/@output_folder@/11_metabat_MAG"
-  dir5: "../../output/@output_folder@/11b_metabat_MAG"
-  par1: 1500
-  par2: 200
+  dir1: "../../output/@output_folder@/08_mapping_coverage"              # output from step 08-09
+  dir2: "../../output/@output_folder@/10_metabat_depth"                 # output step 10
+  dir3: "../../output/@output_folder@/05_spades_output/contigs/filtered" # output step 05
+  dir4: "../../output/@output_folder@/11_metabat_MAG"                   # output step 11
+  dir5: "../../output/@output_folder@/11b_metabat_MAG"                  # output step 11b
+  par1: 1500                                                            # min contig length for binning
+  par2: 200                                                             # number of threads
 
 step12_13:
-  var1: "../../output/@output_folder@/11_metabat_MAG"
-  var2: "../../output/@output_folder@/12_checkm"
-  var3: "../../output/@output_folder@/13_checkm2"
-  par1: 20
-  par2: 4
-  par3: 24
+  var1: "../../output/@output_folder@/11_metabat_MAG"  # input MAGs .fa
+  var2: "../../output/@output_folder@/12_checkm"       # checkm output
+  var3: "../../output/@output_folder@/13_checkm2"      # checkm2 output
+  par1: 20                                            # threads for checkm
+  par2: 4                                             # threads for pplacer
+  par3: 24                                            # threads for checkm2
 
 step14:
-  var1: "../../output/@output_folder@/13_checkm2/quality_report.tsv"
-  var2: "../../output/@output_folder@/11_metabat_MAG"
-  var3: "../../output/@output_folder@/14_MAGs_high_quality"
-  var4: "../../output/@output_folder@/14_MAGs_high_quality"
-  var5: 50
-  var6: 10
-  var7: "my-metadata2.txt"
-  var8: "all_metadata.tsv"
+  var1: "../../output/@output_folder@/13_checkm2/quality_report.tsv"   # TSV_FILE
+  var2: "../../output/@output_folder@/11_metabat_MAG"                  # SOURCE_DIR (MAGs to filter)
+  var3: "../../output/@output_folder@/14_MAGs_high_quality"            # TARGET_DIR (filtered MAGs output)
+  var4: "../../output/@output_folder@/14_MAGs_high_quality"            # ALL_MAGS_DIR (for complete metadata)
+  var5: 50                                                             # COMPLETENESS
+  var6: 10                                                             # CONTAMINATION
+  var7: "my-metadata2.txt"                                             # METADATA_FILTERED
+  var8: "all_metadata.tsv"                                             # METADATA_ALL
 
 step15:
-  var1: "../../output/@output_folder@"
-  var2: "14_MAGs_high_quality/my-metadata2.txt"
-  par1: "15_tormes_MAGs/"
-  par2: 24
+  var1: "../../output/@output_folder@"                  # working dir → parameterized
+  var2: "14_MAGs_high_quality/my-metadata2.txt"         # input metadata
+  par1: "15_tormes_MAGs/"                               # output
+  par2: 24                                              # threads
