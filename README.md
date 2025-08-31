@@ -14,53 +14,56 @@ The program runs the main steps of a metagenomic analysis and saves results in n
 ## Main features
 The pipeline automatically executes these steps, in order:
 
-1. **Extraction and adapter trimming**  
-   *Tool: AdapterRemoval*  
-   Extracts FASTQ files from archives (if present), then removes adapter and low-quality sequences, producing “clean” reads.
+- ### Pre-processing 🟠
+    **1. Extraction and adapter trimming**  
+         *Tool: AdapterRemoval*  
+         Extracts FASTQ files from archives (if present), then removes adapter and low-quality sequences, producing “clean” reads.
+      
+     **2. Host genome filtering**  
+         *Tool: Bowtie2*  
+         Aligns reads to the host species genome (e.g., *Bos taurus*) and discards mapped reads, keeping only microbial sequences.
 
-2. **Host genome filtering**  
-   *Tool: Bowtie2*  
-   Aligns reads to the host species genome (e.g., *Bos taurus*) and discards mapped reads, keeping only microbial sequences.
+- ### A) Microbiome profiling 🔴
+     **3. Taxonomic profiling**  
+        *Tool: MetaPhlAn*  
+        Estimates the sample’s taxonomic composition, reporting detected species and relative abundance.
+  
+     **4. Functional profiling**  
+        *Tool: HUMAnN*  
+        Analyzes the biological/metabolic functions potentially present in the microbiome.
 
-3. **Taxonomic profiling**  
-   *Tool: MetaPhlAn*  
-   Estimates the sample’s taxonomic composition, reporting detected species and relative abundance.
-
-4. **Functional profiling**  
-   *Tool: HUMAnN*  
-   Analyzes the biological/metabolic functions potentially present in the microbiome.
-
-5. **Metagenome assembly**  
-   *Tool: SPAdes*  
-   Reconstructs contiguous sequences (contigs) by assembling reads.
-
-6. **Contig filtering**  
-   *Tool: custom scripts*  
-   Selects contigs above length/coverage thresholds.
-
-7. **Index creation for binning**  
-   *Tool: Bowtie2*  
-   Builds indices for contig binning.
-
-8. **Read mapping and coverage calculation**  
-   *Tool: Bowtie2 + custom scripts*  
-   Maps reads back and computes coverage for each contig.
-
-9. **Metagenomic binning**  
-   *Tool: MetaBAT2*  
-   Groups contigs into MAGs (Metagenome-Assembled Genomes).
-
-10. **MAG quality assessment**  
-    *Tool: CheckM, CheckM2*  
-    Evaluates completeness and contamination of MAGs.
-
-11. **Filtering and annotation of high-quality MAGs**  
-    *Tool: custom scripts + TORMES*  
-    Selects the best MAGs and annotates them (genes, pathways, resistance, etc.).
-
-12. **Final analysis and reporting**  
-    *Tool: custom scripts, R*  
-    Produces summary tables and plots.
+- ### B) Assembly and binning 🔵
+     **5. Metagenome assembly**  
+        *Tool: SPAdes*  
+        Reconstructs contiguous sequences (contigs) by assembling reads.
+  
+     **6. Contig filtering**  
+        *Tool: custom scripts*  
+        Selects contigs above length/coverage thresholds.
+    
+     **7. Index creation for binning**  
+        *Tool: Bowtie2*  
+        Builds indices for contig binning.
+    
+     **8. Read mapping and coverage calculation**  
+        *Tool: Bowtie2 + custom scripts*  
+        Maps reads back and computes coverage for each contig.
+    
+     **9. Metagenomic binning**  
+        *Tool: MetaBAT2*  
+        Groups contigs into MAGs (Metagenome-Assembled Genomes).
+    
+     **10. MAG quality assessment**  
+         *Tool: CheckM, CheckM2*  
+         Evaluates completeness and contamination of MAGs.
+    
+     **11. Filtering and annotation of high-quality MAGs**  
+         *Tool: custom scripts + TORMES*  
+         Selects the best MAGs and annotates them (genes, pathways, resistance, etc.).
+    
+     **12. Final analysis and reporting**  
+         *Tool: custom scripts, R*  
+         Produces summary tables and plots.
 
 ---
 
@@ -353,4 +356,5 @@ If the value is empty (`""`), **nothing is preserved** and the entire folder is 
 ## Credits & License
 
 Author(s): Dorin / Davide  
+
 
