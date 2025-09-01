@@ -14,21 +14,40 @@ function generate_scripts() {
     rm -rf "$PIPELINE_DIR"/*
     mkdir -p "$PIPELINE_DIR"
 
-    # Step definitions: [key]="template.sh output.sh prefix param=YAMLkey ..."
+    # FORMAT OF STEP DEFINITIONS:
+    # [stepXX]="<TEMPLATE_FILE> <OUTPUT_FILE> <PREFIX> <ph1=YAMLkey1> <ph2=YAMLkey2> ..."
+    #
+    # - TEMPLATE_FILE  = name of the template script (inside scripts/templates/)
+    # - OUTPUT_FILE    = path where the generated script will be written
+    # - PREFIX         = prefix used in placeholders (usually the step number, e.g. 03 or 00-01)
+    # - ph=YAMLkey     = mapping between:
+    #                     • ph  = placeholder name used in the template (@<PREFIX>_<ph>@)
+    #                     • YAMLkey = key name inside config.yml (under section stepXX)
+    #
+    # HOW TO CHANGE NAME OR VALUE:
+    # - If you only want to change the value → edit config.yml
+    # - If you want to rename the placeholder in the template → also change the left part (ph) in STEPS
+    # - If you want to rename the key in config.yml → also change the right part (YAMLkey) in STEPS
+    #
+    # Example of renaming:
+    #   Template:   @03_vartemplate@
+    #   STEPS:      vartemplate=newvarconfig
+    #   Config.yml: step03.newvarconfig: /new/path
+    # → Result: @03_vartemplate@ becomes /new/path
     declare -A STEPS=(
-        [step00_01]="template_00-01.extract_and_adapter.sh scripts/pipeline/00-01.extract_and_adapter.sh 00-01 dir1=dir1 dir2=dir2 dir3=dir3 dir4=dir4 dir5=dir5 par1=par1 par2=par2 par3=par3 par4=par4 par5=par5 par6=par6"
-        [step03]="template_03.bowtie-remove_host.sh scripts/pipeline/03.bowtie-remove_host.sh 03 var1=dir1 var2=dir2 var3=dir3"
-        [step04]="template_04.metaphlan.sh scripts/pipeline/04.metaphlan.sh 04 var2=dir2 var3=dir3 Rscript=rscript"
-        [step04b_1]="template_04b-1.humann_job_array.sh scripts/pipeline/04b-1.humann_job_array.sh 04b_1 var1=dir1 var2=dir2 var3=dir3"
-        [step04b_last]="template_04b-last.humann_join_tables.sh scripts/pipeline/04b-last.humann_join_tables.sh 04b_last dir1=dir1 dir2=dir2"
-        [step05]="template_05.spades.assembly.sh scripts/pipeline/05.spades.assembly.sh 05 var1=var1 var2=var2 par1=par1 par2=par2"
-        [step06]="template_06.contig_filter.sh scripts/pipeline/06.contig_filter.sh 06 var1=var1 var2=var2 var3=var3 filter1=filter1"
-        [step07]="template_07.bowtie-MAG_database.sh scripts/pipeline/07.bowtie-MAG_database.sh 07 var1=dir1 var2=dir2 par1=par1"
-        [step08_09]="template_08-09.mapp_coverage.sh scripts/pipeline/08-09.mapp_coverage.sh 08-09 var1=dir1 var2=dir2 var3=dir3"
-        [step10_11]="template_10-11-11b.metabat.sh scripts/pipeline/10-11-11b.metabat.sh 10-11 var1=dir1 var2=dir2 var3=dir3 var4=dir4 var5=var5 par1=par1 par2=par2"
-        [step12_13]="template_12-13.checkm.sh scripts/pipeline/12-13.checkm.sh 12-13 var1=var1 var2=var2 var3=var3 par1=par1 par2=par2 par3=par3"
-        [step14]="template_14.filter-metadata.sh scripts/pipeline/14.filter-metadata.sh 14 var1=var1 var2=var2 var3=var3 var4=var4 var5=var5 var6=var6 var7=var7 var8=var8"
-        [step15]="template_15.tormes_MAG.sh scripts/pipeline/15.tormes_MAG.sh 15 var1=var1 var2=var2 par1=par1 par2=par2"
+        [step00_01]="template_00-01.extract_and_adapter.sh      scripts/pipeline/00-01.extract_and_adapter.sh   00-01       dir1=dir1 dir2=dir2 dir3=dir3 dir4=dir4 dir5=dir5 par1=par1 par2=par2 par3=par3 par4=par4 par5=par5 par6=par6"
+        [step03]="template_03.bowtie-remove_host.sh             scripts/pipeline/03.bowtie-remove_host.sh       03          var1=dir1 var2=dir2 var3=dir3"
+        [step04]="template_04.metaphlan.sh                      scripts/pipeline/04.metaphlan.sh                04          var2=dir2 var3=dir3 Rscript=rscript"
+        [step04b_1]="template_04b-1.humann_job_array.sh         scripts/pipeline/04b-1.humann_job_array.sh      04b_1       var1=dir1 var2=dir2 var3=dir3"
+        [step04b_last]="template_04b-last.humann_join_tables.sh scripts/pipeline/04b-last.humann_join_tables.sh 04b_last    dir1=dir1 dir2=dir2"
+        [step05]="template_05.spades.assembly.sh                scripts/pipeline/05.spades.assembly.sh          05          var1=var1 var2=var2 par1=par1 par2=par2"
+        [step06]="template_06.contig_filter.sh                  scripts/pipeline/06.contig_filter.sh            06          var1=var1 var2=var2 var3=var3 filter1=filter1"
+        [step07]="template_07.bowtie-MAG_database.sh            scripts/pipeline/07.bowtie-MAG_database.sh      07          var1=dir1 var2=dir2 par1=par1"
+        [step08_09]="template_08-09.mapp_coverage.sh            scripts/pipeline/08-09.mapp_coverage.sh         08-09       var1=dir1 var2=dir2 var3=dir3"
+        [step10_11]="template_10-11-11b.metabat.sh              scripts/pipeline/10-11-11b.metabat.sh           10-11       var1=dir1 var2=dir2 var3=dir3 var4=dir4 var5=var5 par1=par1 par2=par2"
+        [step12_13]="template_12-13.checkm.sh                   scripts/pipeline/12-13.checkm.sh                12-13       var1=var1 var2=var2 var3=var3 par1=par1 par2=par2 par3=par3"
+        [step14]="template_14.filter-metadata.sh                scripts/pipeline/14.filter-metadata.sh          14          var1=var1 var2=var2 var3=var3 var4=var4 var5=var5 var6=var6 var7=var7 var8=var8"
+        [step15]="template_15.tormes_MAG.sh                     scripts/pipeline/15.tormes_MAG.sh               15          var1=var1 var2=var2 par1=par1 par2=par2"
     )
 
     # Separator after prefix (usually _)

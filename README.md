@@ -221,6 +221,24 @@ The script creates index files with **prefix** `data/gene/Bos_taurus/Bos_taurus`
 
 2) **(Optional) Configure resources**  
    Edit `config/Config.yml` to set threads/RAM and other step parameters.
+     FORMAT OF STEP DEFINITIONS: [stepXX]="<TEMPLATE_FILE> <OUTPUT_FILE> <PREFIX> <ph1=YAMLkey1> <ph2=YAMLkey2> ..."
+    	- TEMPLATE_FILE  = name of the template script (inside scripts/templates/)
+     	- OUTPUT_FILE    = path where the generated script will be written
+    	- PREFIX         = prefix used in placeholders (usually the step number, e.g. 03 or 00-01)
+     	- ph=YAMLkey     = mapping between:
+                        	• ph  = placeholder name used in the template (@<PREFIX>_<ph>@)
+                         	• YAMLkey = key name inside config.yml (under section stepXX)
+    
+     HOW TO CHANGE NAME OR VALUE:
+     	- If you only want to change the value → edit config.yml
+     	- If you want to rename the placeholder in the template → also change the left part (ph) in STEPS
+     	- If you want to rename the key in config.yml → also change the right part (YAMLkey) in STEPS
+    
+     Example of renaming:
+     	  Template:   @03_vartemplate@
+     	  STEPS:      vartemplate=newvarconfig
+    	  Config.yml: step03.newvarconfig: /new/path
+     	→ Result: @03_vartemplate@ becomes /new/path
 
 3) **Run the pipeline**
 
