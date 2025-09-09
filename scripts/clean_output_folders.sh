@@ -35,7 +35,7 @@ declare -A PRESERVE
 # You can add more entries (with ',' no spaces needed)
 
 PRESERVE["04_metaphlan_output"]="diversity,merged_abundance_table.txt,*.txt"
-PRESERVED["05_spades_output"]="contigs/filtered"
+PRESERVE["05_spades_output"]="contigs/filtered"
 
 # =============================
 # 2. SCRIPT LOGIC
