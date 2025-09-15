@@ -185,12 +185,12 @@ For host filtering (eg. *Bos taurus*) you need **Bowtie2 index**.
 
 2) **Create the species folder** and **move the FASTA** inside it (run these in the project folder “metacheese”):
 
-    mkdir -p data/gene/Bos_taurus
-    mv /path/to/your/file/GCA_002263795.4_ARS-UCD2.0_genomic.fna data/gene/Bos_taurus/
+    mkdir -p data/gene/Name_host_genome
+    mv /path/to/your/file/<Name_file_host_genome>.fna data/gene/<Name_host_genome>/
     # optional (for clarity): rename the file
-    mv data/gene/Bos_taurus/GCA_002263795.4_ARS-UCD2.0_genomic.fna data/gene/Bos_taurus/genome.fna
+    mv data/gene/<Name_host_genome>/<Name_file_host_genome>.fna data/gene/<Name_host_genome>/genome.fna
 
-   > **Any filename** is fine as long as it’s inside `data/gene/Bos_taurus/` with `.fa/.fna/.fasta`.
+   > **Any filename** is fine as long as it’s inside `data/gene/<Name_host_genome>/` with `.fa/.fna/.fasta`.
 
 3) **Build the index** (run **inside the container**):
 
@@ -198,20 +198,20 @@ For host filtering (eg. *Bos taurus*) you need **Bowtie2 index**.
 
    When prompted, enter:
 
-    Bos_taurus
+    <Name_host_genome>
 
 ### Expected result  
 
-The script creates index files with **prefix** `data/gene/Bos_taurus/Bos_taurus`, as expected by `Config.yml`.
+The script creates index files with **prefix** `data/gene/<Name_host_genome>/<Name_host_genome>`, as expected by `Config.yml`.
 
-    data/gene/Bos_taurus/
+    data/gene/<Name_host_genome>/
     ├── genome.fna                                # (or your .fna/.fa/.fasta)
-    ├── Bos_taurus.1.bt2
-    ├── Bos_taurus.2.bt2
-    ├── Bos_taurus.3.bt2
-    ├── Bos_taurus.4.bt2
-    ├── Bos_taurus.rev.1.bt2
-    └── Bos_taurus.rev.2.bt2
+    ├── <Name_host_genome>.1.bt2
+    ├── <Name_host_genome>.2.bt2
+    ├── <Name_host_genome>.3.bt2
+    ├── <Name_host_genome>.4.bt2
+    ├── <Name_host_genome>.rev.1.bt2
+    └── <Name_host_genome>.rev.2.bt2
 ---
 
 ## Quickstart example
@@ -374,5 +374,6 @@ If the value is empty (`""`), **nothing is preserved** and the entire folder is 
 ## Credits & License
 
 Author(s): Dorin / Davide  
+
 
 
