@@ -25,15 +25,15 @@ function generate_scripts() {
     #                     • YAMLkey = key name inside config.yml (under section stepXX)
     #
     # HOW TO CHANGE NAME OR VALUE:
-    # - If you only want to change the value → edit config.yml
-    # - If you want to rename the placeholder in the template → also change the left part (ph) in STEPS
-    # - If you want to rename the key in config.yml → also change the right part (YAMLkey) in STEPS
+    # - If you only want to change the value ? edit config.yml
+    # - If you want to rename the placeholder in the template ? also change the left part (ph) in STEPS
+    # - If you want to rename the key in config.yml ? also change the right part (YAMLkey) in STEPS
     #
     # Example of renaming:
     #   Template:   @03_vartemplate@
     #   STEPS:      vartemplate=newvarconfig
     #   Config.yml: step03.newvarconfig: /new/path
-    # → Result: @03_vartemplate@ becomes /new/path
+    # ->Result: @03_vartemplate@ becomes /new/path
     declare -A STEPS=(
         [step00_01]="template_00-01.extract_and_adapter.sh      scripts/pipeline/00-01.extract_and_adapter.sh   00-01       dir1=dir1 dir2=dir2 dir3=dir3 dir4=dir4 dir5=dir5 par1=par1 par2=par2 par3=par3 par4=par4 par5=par5 par6=par6"
         [step03]="template_03.bowtie-remove_host.sh             scripts/pipeline/03.bowtie-remove_host.sh       03          var1=dir1 var2=dir2 var3=dir3"
@@ -135,11 +135,15 @@ echo "Choose a mode:"
 echo "1) New execution"
 echo "2) Continue existing execution"
 read -p "Enter 1 or 2: " scelta
-
 while [[ "$scelta" != "1" && "$scelta" != "2" ]]; do
     read -p "Invalid choice. Enter 1 or 2: " scelta
 done
 
+read -p "Do you want to run stepwise(1) or to run the entire pipeline(2)?"
+read -p "Enter 1 or 2: " risp 
+while [[ "$risp" != "1" && "$risp" != "2" ]]; do
+    read -p "Invalid choice. Enter 1 or 2: " risp
+done
 ############################
 # OPTION 1: NEW EXECUTION
 ############################
@@ -180,7 +184,7 @@ if [[ "$scelta" == "1" ]]; then
             echo " Completed $step_script"
             echo "***************************"
             #read -p "Do you want to continue with the next step? (y/n): " risp
-            #[[ "$risp" =~ ^[Nn]$ ]] && { echo "Pipeline stopped on user request."; exit 0; }
+            [[ "$risp" =~ ^[Nn]$ ]] && { echo "Pipeline stopped on user request."; exit 0; }
         else
             echo "Warning: $step_script not found! Skipping."
         fi
@@ -233,7 +237,7 @@ elif [[ "$scelta" == "2" ]]; then
             echo "***************************"
             echo " Completed $step_script"
             echo "***************************"
-            read -p "Do you want to continue with the next step? (y/n): " risp
+            #read -p "Do you want to continue with the next step? (y/n): " risp
             [[ "$risp" =~ ^[Nn]$ ]] && { echo "Pipeline stopped on user request."; exit 0; }
         else
             echo "Warning: $step_script not found! Skipping."
