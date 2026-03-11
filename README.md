@@ -1,4 +1,4 @@
-# metacheese
+# MetaCheese
 Pipeline to analyze cheese samples starting from compressed FASTQ files (`.fq.gz`).  
 The program runs the main steps of a metagenomic analysis and saves results in numbered folders—one for each stage of the process.
 
@@ -374,6 +374,7 @@ If the value is empty (`""`), **nothing is preserved** and the entire folder is 
 ## Credits & License
 
 Author(s): Dorin / Davide  
+
 
 
 
