@@ -1,0 +1,22 @@
+adapterRemoval:
+  minlenght: 50
+  minquality: 30
+  maxns: 10
+  trim5p: 2
+  trim3p: 2
+
+spades:
+  memory: 64
+  
+contigFilter:
+  lenght: 500
+  
+metabat_binning:
+  memory: 1500
+
+checkm:
+  pplacer_threads: 16
+
+metadata:
+  completeness: 50
+  contamination: 10
