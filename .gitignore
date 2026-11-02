@@ -1,0 +1,8 @@
+# Large data produced or downloaded locally - never commit
+input/
+output/
+data/gene/
+scripts/pipeline/
+
+# Local logs
+*.log

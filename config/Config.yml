@@ -1,3 +1,8 @@
+step00:
+  dir1: "../../input/@input_sample@"                   # raw reads (*_1.fq.gz / *_2.fq.gz)
+  dir2: "../../output/@output_folder@/00_fastqc"        # FastQC reports
+  par1: 8                                              # threads (one file per thread)
+
 step00_01:
   dir1: "../../input/@input_sample@"                   # cd command for where the .tar samples are
   dir2: "../../output/@output_folder@/01_AdapterRemoval" # extraction output directory

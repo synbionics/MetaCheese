@@ -56,7 +56,7 @@ RUN wget -qO- https://cloud.r-project.org/bin/linux/ubuntu/marutter_pubkey.asc |
 ENV CONDA_DIR=/opt/conda
 ENV PATH=$CONDA_DIR/bin:$PATH
 
-RUN wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O /tmp/miniconda.sh && \
+RUN wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-py39_25.3.1-1-Linux-x86_64.sh -O /tmp/miniconda.sh && \
     bash /tmp/miniconda.sh -b -p $CONDA_DIR && \
     rm /tmp/miniconda.sh && \
     $CONDA_DIR/bin/conda clean -afy
@@ -160,6 +160,15 @@ RUN conda run -n checkm2env checkm2 database --download --path /main/db/checkm2
 
 # TORMES setup (DB vengono gestiti dal tool interno)
 RUN conda run -n tormes-1.3.0 tormes-setup
+
+# ======================================
+# QUALITY CONTROL OF RAW READS (FastQC, step 00 / diagram Q.1)
+# Own environment so it cannot change the versions pinned in bioenv.
+# Placed after the databases so adding it does not invalidate their layers.
+# ======================================
+
+RUN conda create -y -n qcenv -c conda-forge -c bioconda fastqc=0.12.1 && \
+    conda clean -afy
 
 # ======================================
 # COPIA LE CARTELLE DEL TUO PROGETTO (DOPO i DB, così non li sovrascrivi MAI!)

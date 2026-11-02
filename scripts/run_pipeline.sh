@@ -35,6 +35,7 @@ function generate_scripts() {
     #   Config.yml: step03.newvarconfig: /new/path
     # ->Result: @03_vartemplate@ becomes /new/path
     declare -A STEPS=(
+        [step00]="template_00.fastqc.sh                         scripts/pipeline/00.fastqc.sh                   00          dir1=dir1 dir2=dir2 par1=par1"
         [step00_01]="template_00-01.extract_and_adapter.sh      scripts/pipeline/00-01.extract_and_adapter.sh   00-01       dir1=dir1 dir2=dir2 dir3=dir3 dir4=dir4 dir5=dir5 par1=par1 par2=par2 par3=par3 par4=par4 par5=par5 par6=par6"
         [step03]="template_03.bowtie-remove_host.sh             scripts/pipeline/03.bowtie-remove_host.sh       03          var1=dir1 var2=dir2 var3=dir3"
         [step04]="template_04.metaphlan.sh                      scripts/pipeline/04.metaphlan.sh                04          var2=dir2 var3=dir3 Rscript=rscript"
@@ -52,6 +53,7 @@ function generate_scripts() {
 
     # Separator after prefix (usually _)
     declare -A SEPS=(
+        [step00]="_"
         [step00_01]="_"
         [step03]="_"
         [step04]="_"
@@ -101,6 +103,7 @@ function generate_scripts() {
 # FIXED ORDER OF STEPS TO EXECUTE (modify order here if needed)
 ###############################################################################
 STEPS_ORDERED=(
+    00.fastqc.sh
     00-01.extract_and_adapter.sh
     03.bowtie-remove_host.sh
     04.metaphlan.sh
@@ -126,6 +129,77 @@ CONFIG_TEMPLATE="$PROJECT_ROOT/config/Config.yml"
 
 # Check that yq is available
 command -v yq >/dev/null 2>&1 || { echo "Error: 'yq' not found in PATH." >&2; exit 1; }
+
+###############################################################################
+# NON-INTERACTIVE MODE (used when any option is given on the command line)
+#
+#   bash scripts/run_pipeline.sh --input <input_folder> --name <run_name> \
+#        [--config <Config.yml>] [--from <step>] [--to <step>]
+#
+#   --input   folder under input/ holding <sample>_1.fq.gz / <sample>_2.fq.gz
+#   --name    output folder name under output/ (created if missing, reused if
+#             it exists so a run can be resumed with --from)
+#   --config  config template (default: config/Config.yml); ignored when the
+#             output folder already has a config.yml
+#   --from/--to  first/last step to run, matched as a substring of the script
+#             names in STEPS_ORDERED (e.g. 04b-1, 05, 12-13)
+#
+# Without options the interactive menu below is used, as before.
+###############################################################################
+if [[ $# -gt 0 ]]; then
+    input_sample="" output_folder="" from_step="" to_step=""
+    while [[ $# -gt 0 ]]; do
+        case "$1" in
+            --input)  input_sample="$2"; shift 2 ;;
+            --name)   output_folder="$2"; shift 2 ;;
+            --config) CONFIG_TEMPLATE="$(realpath "$2")"; shift 2 ;;
+            --from)   from_step="$2"; shift 2 ;;
+            --to)     to_step="$2"; shift 2 ;;
+            -h|--help) sed -n '/^# NON-INTERACTIVE MODE/,/^####/p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
+            *) echo "Unknown option: $1 (see --help)" >&2; exit 1 ;;
+        esac
+    done
+    [[ -n "$output_folder" ]] || { echo "Error: --name is required" >&2; exit 1; }
+
+    OUTPUT_DIR="$PROJECT_ROOT/output/$output_folder"
+    CONFIG_FILE="$OUTPUT_DIR/config.yml"
+    if [[ ! -f "$CONFIG_FILE" ]]; then
+        [[ -n "$input_sample" ]] || { echo "Error: --input is required for a new run" >&2; exit 1; }
+        [[ -d "$PROJECT_ROOT/input/$input_sample" ]] || { echo "Error: input/$input_sample not found" >&2; exit 1; }
+        mkdir -p "$OUTPUT_DIR"
+        sed -e "s|@output_folder@|$output_folder|g" -e "s|@input_sample@|$input_sample|g" \
+            "$CONFIG_TEMPLATE" > "$CONFIG_FILE"
+        echo "New run: output/$output_folder (config from $CONFIG_TEMPLATE)"
+    else
+        echo "Resuming run: output/$output_folder (using its config.yml)"
+    fi
+    generate_scripts "$CONFIG_FILE" "$PROJECT_ROOT"
+
+    find_step() {  # print index of the first step whose name contains $1
+        local i
+        for i in "${!STEPS_ORDERED[@]}"; do
+            [[ "${STEPS_ORDERED[$i]}" == *"$1"* ]] && { echo "$i"; return 0; }
+        done
+        echo "Error: no step matches '$1'" >&2; return 1
+    }
+    start=0; end=$(( ${#STEPS_ORDERED[@]} - 1 ))
+    [[ -n "$from_step" ]] && start=$(find_step "$from_step")
+    [[ -n "$to_step" ]] && end=$(find_step "$to_step")
+
+    cd "$PROJECT_ROOT/scripts/pipeline"
+    for (( i=start; i<=end; i++ )); do
+        step_script="${STEPS_ORDERED[$i]}"
+        echo "***************************"
+        echo " [$(date +'%F %T')] Executing $step_script"
+        echo "***************************"
+        SECONDS=0
+        bash "$step_script" || { echo "Error in $step_script, stopping." >&2; exit 1; }
+        echo " [$(date +'%F %T')] Completed $step_script in $((SECONDS / 60)) min"
+        echo "$step_script	$SECONDS" >> "$OUTPUT_DIR/step_times.tsv"
+    done
+    echo "Pipeline completed: output/$output_folder"
+    exit 0
+fi
 
 # Initial menu
 echo "#########################################"

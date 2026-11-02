@@ -18,11 +18,16 @@ METADATA_ALL="@14_var8@"
 [[ -f "$TSV_FILE" ]] || { echo "Error: TSV file $TSV_FILE not found"; exit 1; }
 [[ -d "$SOURCE_DIR" ]] || { echo "Error: SOURCE_DIR $SOURCE_DIR not found"; exit 1; }
 
-echo "Choose the process:"
-echo "1) Filter MAGs by quality and generate metadata only for filtered ones"
-echo "2) Generate metadata for all MAGs in a directory (no filter)"
-echo "3) Run both"
-read -p "Choice (1/2/3): " scelta
+# The choice can be given as first argument or via STEP14_CHOICE (used by the
+# non-interactive runner); otherwise it is asked interactively.
+scelta="${1:-${STEP14_CHOICE:-}}"
+if [[ -z "$scelta" ]]; then
+    echo "Choose the process:"
+    echo "1) Filter MAGs by quality and generate metadata only for filtered ones"
+    echo "2) Generate metadata for all MAGs in a directory (no filter)"
+    echo "3) Run both"
+    read -p "Choice (1/2/3): " scelta
+fi
 
 if [[ "$scelta" != "1" && "$scelta" != "2" && "$scelta" != "3" ]]; then
     echo "Error: invalid choice" >&2
