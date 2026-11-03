@@ -59,12 +59,18 @@ download_one() {
     if [[ -s "$f" ]] && echo "$md5  $f" | md5sum -c --status; then
         echo "OK (already present) $f"; return 0
     fi
-    for attempt in 1 2 3; do
-        # -C - resumes partial downloads
-        if curl -sSfL --retry 5 -C - -o "$f" "$url" && echo "$md5  $f" | md5sum -c --status; then
-            echo "OK $f"; return 0
+    for attempt in 1 2 3 4 5 6; do
+        # -C - resumes a partial download. A dropped connection keeps the
+        # partial file so the next attempt resumes; a complete file with a
+        # wrong checksum is corrupt and is downloaded again from scratch.
+        if curl -sSfL --retry 10 -C - -o "$f" "$url"; then
+            if echo "$md5  $f" | md5sum -c --status; then
+                echo "OK $f"; return 0
+            fi
+            echo "Checksum mismatch for $f, downloading again" >&2; rm -f "$f"
+        else
+            echo "Connection dropped for $f (attempt $attempt), resuming" >&2; sleep 30
         fi
-        echo "Retry $attempt for $f" >&2; rm -f "$f"
     done
     echo "FAILED $f" >&2; return 1
 }

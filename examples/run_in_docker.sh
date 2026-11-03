@@ -58,6 +58,7 @@ docker run --rm \
     -v "$REPO_ROOT/scripts:/main/scripts" \
     -v "$REPO_ROOT/config:/main/config" \
     -v "$REPO_ROOT/data:/main/data" \
+    -v "$REPO_ROOT/docs:/main/docs" \
     -v "$REPO_ROOT/examples:/main/examples" \
     -v "$REPO_ROOT/input:/main/input" \
     -v "$REPO_ROOT/output:/main/output" \

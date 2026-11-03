@@ -100,6 +100,7 @@ for file_L1 in "$input_dir"/*_1.fq.gz "$input_dir"/*_L1.fq.gz; do
       --settings "$output_dir01/${sample_name}.settings" \
       --threads "$threads" \
       --gzip \
+      --gzip-level 1 \
       --minlength @00-01_par2@ \
       --trimqualities \
       --minquality @00-01_par3@ \

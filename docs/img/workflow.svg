@@ -1,0 +1,330 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 1345" width="1100" height="1345">
+<defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#1d2b36"/></marker></defs>
+<rect width="1100" height="1345" fill="#ffffff"/>
+<rect x="20" y="20" width="170" height="140" rx="10" fill="#f4f7fa" stroke="#d5dee6"/>
+<text x="32" y="40" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="bold" text-anchor="start" fill="#1f6aa5" >Legend</text>
+<rect x="32" y="50" width="26" height="14" rx="4" fill="#9fd0ec"/>
+<text x="66" y="62" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="normal" text-anchor="start" fill="#1d2b36" >computational step</text>
+<rect x="32" y="70" width="26" height="14" rx="4" fill="#ffffff" stroke="#4a90b8" stroke-dasharray="4 3"/>
+<text x="66" y="82" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="normal" text-anchor="start" fill="#1d2b36" >planned, not in code</text>
+<rect x="32" y="90" width="26" height="14" fill="#ffd43b" stroke="#b08900"/>
+<text x="66" y="102" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="normal" text-anchor="start" fill="#1d2b36" >artifact (files)</text>
+<rect x="28" y="111" width="34" height="18" rx="9" fill="#1c8fd6"/>
+<text x="45" y="124" font-family="Helvetica, Arial, sans-serif" font-size="10" font-weight="bold" text-anchor="middle" fill="#fff" >X.n</text>
+<rect x="68" y="111" width="34" height="18" rx="9" fill="#e8962e"/>
+<text x="85" y="124" font-family="Helvetica, Arial, sans-serif" font-size="10" font-weight="bold" text-anchor="middle" fill="#fff" >X.n</text>
+<text x="108" y="124" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="normal" text-anchor="start" fill="#1d2b36" >step / artifact ID</text>
+<text x="32" y="148" font-family="Menlo, Consolas, monospace" font-size="10" font-weight="normal" text-anchor="start" fill="#35617d" >monospace = script</text>
+<rect x="250" y="40" width="170" height="62" rx="8" fill="#9fd0ec" stroke="#4a90b8" stroke-width="1.2"/>
+<rect x="237" y="33" width="34" height="18" rx="9" fill="#1c8fd6"/>
+<text x="254" y="46" font-family="Helvetica, Arial, sans-serif" font-size="10" font-weight="bold" text-anchor="middle" fill="#fff" >Q.1</text>
+<text x="335.0" y="59.0" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="bold" text-anchor="middle" fill="#0b3954" >Quality check</text>
+<text x="335.0" y="75.0" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="normal" text-anchor="middle" fill="#0b3954" >(FastQC, MultiQC)</text>
+<text x="335.0" y="91.0" font-family="Menlo, Consolas, monospace" font-size="11" font-weight="normal" text-anchor="middle" fill="#35617d" >00</text>
+<path d="M463,38 h80 v42 q-20.0,-8 -40.0,0 t-40.0,0 z" fill="#ffd43b" stroke="#b08900" stroke-width="1"/>
+<path d="M459,42 h80 v42 q-20.0,-8 -40.0,0 t-40.0,0 z" fill="#ffd43b" stroke="#b08900" stroke-width="1"/>
+<path d="M455,46 h80 v42 q-20.0,-8 -40.0,0 t-40.0,0 z" fill="#ffd43b" stroke="#b08900" stroke-width="1"/>
+<text x="495.0" y="62.0" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="bold" text-anchor="middle" fill="#3d3000" >html</text>
+<text x="495.0" y="76.0" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="bold" text-anchor="middle" fill="#3d3000" >zip</text>
+<rect x="440" y="81" width="34" height="18" rx="9" fill="#e8962e"/>
+<text x="457" y="94" font-family="Helvetica, Arial, sans-serif" font-size="10" font-weight="bold" text-anchor="middle" fill="#fff" >Q.1</text>
+<text x="549" y="62" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" text-anchor="start" fill="#1d2b36" >QC reports</text>
+<text x="549" y="77" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" text-anchor="start" fill="#1d2b36" >+ MultiQC</text>
+<path d="M648,38 h80 v42 q-20.0,-8 -40.0,0 t-40.0,0 z" fill="#ffd43b" stroke="#b08900" stroke-width="1"/>
+<path d="M644,42 h80 v42 q-20.0,-8 -40.0,0 t-40.0,0 z" fill="#ffd43b" stroke="#b08900" stroke-width="1"/>
+<path d="M640,46 h80 v42 q-20.0,-8 -40.0,0 t-40.0,0 z" fill="#ffd43b" stroke="#b08900" stroke-width="1"/>
+<text x="680.0" y="69.0" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="bold" text-anchor="middle" fill="#3d3000" >FASTA</text>
+<rect x="625" y="81" width="34" height="18" rx="9" fill="#e8962e"/>
+<text x="642" y="94" font-family="Helvetica, Arial, sans-serif" font-size="10" font-weight="bold" text-anchor="middle" fill="#fff" >I.2</text>
+<text x="680" y="36" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="bold" text-anchor="middle" fill="#1d2b36" >Host genome</text>
+<rect x="760" y="40" width="170" height="62" rx="8" fill="#9fd0ec" stroke="#4a90b8" stroke-width="1.2"/>
+<rect x="747" y="33" width="34" height="18" rx="9" fill="#1c8fd6"/>
+<text x="764" y="46" font-family="Helvetica, Arial, sans-serif" font-size="10" font-weight="bold" text-anchor="middle" fill="#fff" >I.2</text>
+<text x="845.0" y="59.0" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="bold" text-anchor="middle" fill="#0b3954" >Indexing</text>
+<text x="845.0" y="75.0" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="normal" text-anchor="middle" fill="#0b3954" >(bowtie2-build)</text>
+<text x="845.0" y="91.0" font-family="Menlo, Consolas, monospace" font-size="11" font-weight="normal" text-anchor="middle" fill="#35617d" >build_bowtie2_index.sh</text>
+<path d="M978,38 h80 v42 q-20.0,-8 -40.0,0 t-40.0,0 z" fill="#ffd43b" stroke="#b08900" stroke-width="1"/>
+<path d="M974,42 h80 v42 q-20.0,-8 -40.0,0 t-40.0,0 z" fill="#ffd43b" stroke="#b08900" stroke-width="1"/>
+<path d="M970,46 h80 v42 q-20.0,-8 -40.0,0 t-40.0,0 z" fill="#ffd43b" stroke="#b08900" stroke-width="1"/>
+<text x="1010.0" y="69.0" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="bold" text-anchor="middle" fill="#3d3000" >bt2</text>
+<rect x="955" y="81" width="34" height="18" rx="9" fill="#e8962e"/>
+<text x="972" y="94" font-family="Helvetica, Arial, sans-serif" font-size="10" font-weight="bold" text-anchor="middle" fill="#fff" >I.3</text>
+<text x="1012" y="36" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="bold" text-anchor="middle" fill="#1d2b36" >Bowtie2 index</text>
+<path d="M420,71 L452,71" fill="none" stroke="#1d2b36" stroke-width="1.4" marker-end="url(#ah)"/>
+<path d="M722,71 L757,71" fill="none" stroke="#1d2b36" stroke-width="1.4" marker-end="url(#ah)"/>
+<path d="M930,71 L967,71" fill="none" stroke="#1d2b36" stroke-width="1.4" marker-end="url(#ah)"/>
+<rect x="20" y="182" width="170" height="128" rx="14" fill="#e3eef8"/>
+<text x="34" y="202" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="bold" text-anchor="start" fill="#1f6aa5" >Experimental data</text>
+<path d="M63,220 h90 v48 q-22.5,-8 -45.0,0 t-45.0,0 z" fill="#ffd43b" stroke="#b08900" stroke-width="1"/>
+<path d="M59,224 h90 v48 q-22.5,-8 -45.0,0 t-45.0,0 z" fill="#ffd43b" stroke="#b08900" stroke-width="1"/>
+<path d="M55,228 h90 v48 q-22.5,-8 -45.0,0 t-45.0,0 z" fill="#ffd43b" stroke="#b08900" stroke-width="1"/>
+<text x="100.0" y="247.0" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="bold" text-anchor="middle" fill="#3d3000" >FASTQ</text>
+<text x="100.0" y="261.0" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="bold" text-anchor="middle" fill="#3d3000" >*_1/_2.fq.gz</text>
+<rect x="40" y="269" width="34" height="18" rx="9" fill="#e8962e"/>
+<text x="57" y="282" font-family="Helvetica, Arial, sans-serif" font-size="10" font-weight="bold" text-anchor="middle" fill="#fff" >I.1</text>
+<text x="105" y="300" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="normal" text-anchor="middle" fill="#1d2b36" >paired-end reads</text>
+<rect x="205" y="182" width="875" height="128" rx="14" fill="#e3eef8"/>
+<text x="219" y="202" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="bold" text-anchor="start" fill="#1f6aa5" >Preprocessing</text>
+<rect x="250" y="222" width="190" height="66" rx="8" fill="#9fd0ec" stroke="#4a90b8" stroke-width="1.2"/>
+<rect x="237" y="215" width="34" height="18" rx="9" fill="#1c8fd6"/>
+<text x="254" y="228" font-family="Helvetica, Arial, sans-serif" font-size="10" font-weight="bold" text-anchor="middle" fill="#fff" >P.1</text>
+<text x="345.0" y="243.0" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="bold" text-anchor="middle" fill="#0b3954" >Adapter removal</text>
+<text x="345.0" y="259.0" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="normal" text-anchor="middle" fill="#0b3954" >(AdapterRemoval)</text>
+<text x="345.0" y="275.0" font-family="Menlo, Consolas, monospace" font-size="11" font-weight="normal" text-anchor="middle" fill="#35617d" >00-01</text>
+<path d="M478,220 h80 v46 q-20.0,-8 -40.0,0 t-40.0,0 z" fill="#ffd43b" stroke="#b08900" stroke-width="1"/>
+<path d="M474,224 h80 v46 q-20.0,-8 -40.0,0 t-40.0,0 z" fill="#ffd43b" stroke="#b08900" stroke-width="1"/>
+<path d="M470,228 h80 v46 q-20.0,-8 -40.0,0 t-40.0,0 z" fill="#ffd43b" stroke="#b08900" stroke-width="1"/>
+<text x="510.0" y="253.0" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="bold" text-anchor="middle" fill="#3d3000" >FASTQ</text>
+<rect x="455" y="267" width="34" height="18" rx="9" fill="#e8962e"/>
+<text x="472" y="280" font-family="Helvetica, Arial, sans-serif" font-size="10" font-weight="bold" text-anchor="middle" fill="#fff" >P.1</text>
+<text x="564" y="244" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" text-anchor="start" fill="#1d2b36" >clean</text>
+<text x="564" y="259" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" text-anchor="start" fill="#1d2b36" >reads</text>
+<rect x="620" y="222" width="190" height="66" rx="8" fill="#9fd0ec" stroke="#4a90b8" stroke-width="1.2"/>
+<rect x="607" y="215" width="34" height="18" rx="9" fill="#1c8fd6"/>
+<text x="624" y="228" font-family="Helvetica, Arial, sans-serif" font-size="10" font-weight="bold" text-anchor="middle" fill="#fff" >P.2</text>
+<text x="715.0" y="243.0" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="bold" text-anchor="middle" fill="#0b3954" >Host DNA filtering</text>
+<text x="715.0" y="259.0" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="normal" text-anchor="middle" fill="#0b3954" >(Bowtie2)</text>
+<text x="715.0" y="275.0" font-family="Menlo, Consolas, monospace" font-size="11" font-weight="normal" text-anchor="middle" fill="#35617d" >03</text>
+<path d="M868,220 h80 v46 q-20.0,-8 -40.0,0 t-40.0,0 z" fill="#ffd43b" stroke="#b08900" stroke-width="1"/>
+<path d="M864,224 h80 v46 q-20.0,-8 -40.0,0 t-40.0,0 z" fill="#ffd43b" stroke="#b08900" stroke-width="1"/>
+<path d="M860,228 h80 v46 q-20.0,-8 -40.0,0 t-40.0,0 z" fill="#ffd43b" stroke="#b08900" stroke-width="1"/>
+<text x="900.0" y="253.0" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="bold" text-anchor="middle" fill="#3d3000" >FASTQ</text>
+<rect x="845" y="267" width="34" height="18" rx="9" fill="#e8962e"/>
+<text x="862" y="280" font-family="Helvetica, Arial, sans-serif" font-size="10" font-weight="bold" text-anchor="middle" fill="#fff" >P.2</text>
+<text x="954" y="244" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" text-anchor="start" fill="#1d2b36" >microbial</text>
+<text x="954" y="259" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" text-anchor="start" fill="#1d2b36" >reads</text>
+<path d="M150,256 L247,256" fill="none" stroke="#1d2b36" stroke-width="1.4" marker-end="url(#ah)"/>
+<path d="M105,225 L105,170 L230,170 L230,71 L247,71" fill="none" stroke="#1d2b36" stroke-width="1.4" marker-end="url(#ah)"/>
+<path d="M440,255 L467,255" fill="none" stroke="#1d2b36" stroke-width="1.4" marker-end="url(#ah)"/>
+<path d="M564,255 L617,255" fill="none" stroke="#1d2b36" stroke-width="1.4" marker-end="url(#ah)"/>
+<path d="M1012,98 L1012,140 L715,140 L715,219" fill="none" stroke="#1d2b36" stroke-width="1.4" marker-end="url(#ah)"/>
+<path d="M810,255 L857,255" fill="none" stroke="#1d2b36" stroke-width="1.4" marker-end="url(#ah)"/>
+<rect x="20" y="330" width="440" height="840" rx="14" fill="#e3eef8"/>
+<text x="34" y="350" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="bold" text-anchor="start" fill="#1f6aa5" >Community-level profiling</text>
+<ellipse cx="72" cy="380" rx="38" ry="9" fill="#ffd43b" stroke="#b08900"/>
+<path d="M34,380 v30 a38,9 0 0 0 76,0 v-30" fill="#ffd43b" stroke="#b08900"/>
+<rect x="23" y="363" width="34" height="18" rx="9" fill="#e8962e"/>
+<text x="40" y="376" font-family="Helvetica, Arial, sans-serif" font-size="10" font-weight="bold" text-anchor="middle" fill="#fff" >I.4</text>
+<text x="72" y="438" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="bold" text-anchor="middle" fill="#1d2b36" >MetaPhlAn DB</text>
+<text x="72" y="452" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="normal" text-anchor="middle" fill="#1d2b36" >(vJun23)</text>
+<rect x="150" y="366" width="260" height="62" rx="8" fill="#9fd0ec" stroke="#4a90b8" stroke-width="1.2"/>
+<rect x="137" y="359" width="34" height="18" rx="9" fill="#1c8fd6"/>
+<text x="154" y="372" font-family="Helvetica, Arial, sans-serif" font-size="10" font-weight="bold" text-anchor="middle" fill="#fff" >C.1</text>
+<text x="280.0" y="385.0" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="bold" text-anchor="middle" fill="#0b3954" >Taxonomic profiling</text>
+<text x="280.0" y="401.0" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="normal" text-anchor="middle" fill="#0b3954" >(MetaPhlAn 4.1)</text>
+<text x="280.0" y="417.0" font-family="Menlo, Consolas, monospace" font-size="11" font-weight="normal" text-anchor="middle" fill="#35617d" >04</text>
+<path d="M110,395 L147,395" fill="none" stroke="#1d2b36" stroke-width="1.4" marker-end="url(#ah)"/>
+<path d="M213,450 h100 v48 q-25.0,-8 -50.0,0 t-50.0,0 z" fill="#ffd43b" stroke="#b08900" stroke-width="1"/>
+<path d="M209,454 h100 v48 q-25.0,-8 -50.0,0 t-50.0,0 z" fill="#ffd43b" stroke="#b08900" stroke-width="1"/>
+<path d="M205,458 h100 v48 q-25.0,-8 -50.0,0 t-50.0,0 z" fill="#ffd43b" stroke="#b08900" stroke-width="1"/>
+<text x="255.0" y="477.0" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="bold" text-anchor="middle" fill="#3d3000" >txt</text>
+<text x="255.0" y="491.0" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="bold" text-anchor="middle" fill="#3d3000" >sam.bz2</text>
+<rect x="190" y="499" width="34" height="18" rx="9" fill="#e8962e"/>
+<text x="207" y="512" font-family="Helvetica, Arial, sans-serif" font-size="10" font-weight="bold" text-anchor="middle" fill="#fff" >C.1</text>
+<text x="319" y="474" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" text-anchor="start" fill="#1d2b36" >taxonomic</text>
+<text x="319" y="489" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" text-anchor="start" fill="#1d2b36" >profiles</text>
+<path d="M280,428 L280,455" fill="none" stroke="#1d2b36" stroke-width="1.4" marker-end="url(#ah)"/>
+<rect x="150" y="544" width="260" height="70" rx="8" fill="#9fd0ec" stroke="#4a90b8" stroke-width="1.2"/>
+<rect x="137" y="537" width="34" height="18" rx="9" fill="#1c8fd6"/>
+<text x="154" y="550" font-family="Helvetica, Arial, sans-serif" font-size="10" font-weight="bold" text-anchor="middle" fill="#fff" >C.2</text>
+<text x="280.0" y="567.0" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="bold" text-anchor="middle" fill="#0b3954" >Profile merging,</text>
+<text x="280.0" y="583.0" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="normal" text-anchor="middle" fill="#0b3954" >abundance and diversity</text>
+<text x="280.0" y="599.0" font-family="Menlo, Consolas, monospace" font-size="11" font-weight="normal" text-anchor="middle" fill="#35617d" >04 + calculate_diversity.R</text>
+<path d="M255,514 L255,541" fill="none" stroke="#1d2b36" stroke-width="1.4" marker-end="url(#ah)"/>
+<path d="M118,638 h115 v48 q-28.75,-8 -57.5,0 t-57.5,0 z" fill="#ffd43b" stroke="#b08900" stroke-width="1"/>
+<path d="M114,642 h115 v48 q-28.75,-8 -57.5,0 t-57.5,0 z" fill="#ffd43b" stroke="#b08900" stroke-width="1"/>
+<path d="M110,646 h115 v48 q-28.75,-8 -57.5,0 t-57.5,0 z" fill="#ffd43b" stroke="#b08900" stroke-width="1"/>
+<text x="167.5" y="665.0" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="bold" text-anchor="middle" fill="#3d3000" >merged</text>
+<text x="167.5" y="679.0" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="bold" text-anchor="middle" fill="#3d3000" >abundance</text>
+<rect x="95" y="687" width="34" height="18" rx="9" fill="#e8962e"/>
+<text x="112" y="700" font-family="Helvetica, Arial, sans-serif" font-size="10" font-weight="bold" text-anchor="middle" fill="#fff" >C.2.1</text>
+<path d="M278,638 h115 v48 q-28.75,-8 -57.5,0 t-57.5,0 z" fill="#ffd43b" stroke="#b08900" stroke-width="1"/>
+<path d="M274,642 h115 v48 q-28.75,-8 -57.5,0 t-57.5,0 z" fill="#ffd43b" stroke="#b08900" stroke-width="1"/>
+<path d="M270,646 h115 v48 q-28.75,-8 -57.5,0 t-57.5,0 z" fill="#ffd43b" stroke="#b08900" stroke-width="1"/>
+<text x="327.5" y="665.0" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="bold" text-anchor="middle" fill="#3d3000" >alpha/beta</text>
+<text x="327.5" y="679.0" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="bold" text-anchor="middle" fill="#3d3000" >diversity</text>
+<rect x="255" y="687" width="34" height="18" rx="9" fill="#e8962e"/>
+<text x="272" y="700" font-family="Helvetica, Arial, sans-serif" font-size="10" font-weight="bold" text-anchor="middle" fill="#fff" >C.2.2</text>
+<path d="M210,614 L167,643" fill="none" stroke="#1d2b36" stroke-width="1.4" marker-end="url(#ah)"/>
+<path d="M350,614 L327,643" fill="none" stroke="#1d2b36" stroke-width="1.4" marker-end="url(#ah)"/>
+<rect x="150" y="740" width="260" height="70" rx="8" fill="#9fd0ec" stroke="#4a90b8" stroke-width="1.2"/>
+<rect x="137" y="733" width="34" height="18" rx="9" fill="#1c8fd6"/>
+<text x="154" y="746" font-family="Helvetica, Arial, sans-serif" font-size="10" font-weight="bold" text-anchor="middle" fill="#fff" >C.3</text>
+<text x="280.0" y="763.0" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="bold" text-anchor="middle" fill="#0b3954" >Functional profiling</text>
+<text x="280.0" y="779.0" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="normal" text-anchor="middle" fill="#0b3954" >(HUMAnN 3.9)</text>
+<text x="280.0" y="795.0" font-family="Menlo, Consolas, monospace" font-size="11" font-weight="normal" text-anchor="middle" fill="#35617d" >04b-1</text>
+<path d="M167,702 L167,722 L200,722 L200,737" fill="none" stroke="#1d2b36" stroke-width="1.4" marker-end="url(#ah)"/>
+<path d="M203,832 h110 v48 q-27.5,-8 -55.0,0 t-55.0,0 z" fill="#ffd43b" stroke="#b08900" stroke-width="1"/>
+<path d="M199,836 h110 v48 q-27.5,-8 -55.0,0 t-55.0,0 z" fill="#ffd43b" stroke="#b08900" stroke-width="1"/>
+<path d="M195,840 h110 v48 q-27.5,-8 -55.0,0 t-55.0,0 z" fill="#ffd43b" stroke="#b08900" stroke-width="1"/>
+<text x="250.0" y="859.0" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="bold" text-anchor="middle" fill="#3d3000" >genes</text>
+<text x="250.0" y="873.0" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="bold" text-anchor="middle" fill="#3d3000" >pathways</text>
+<rect x="180" y="881" width="34" height="18" rx="9" fill="#e8962e"/>
+<text x="197" y="894" font-family="Helvetica, Arial, sans-serif" font-size="10" font-weight="bold" text-anchor="middle" fill="#fff" >C.3</text>
+<text x="319" y="856" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" text-anchor="start" fill="#1d2b36" >functional</text>
+<text x="319" y="871" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" text-anchor="start" fill="#1d2b36" >profiles</text>
+<text x="319" y="886" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" text-anchor="start" fill="#1d2b36" >(per sample)</text>
+<path d="M280,810 L280,837" fill="none" stroke="#1d2b36" stroke-width="1.4" marker-end="url(#ah)"/>
+<rect x="150" y="928" width="260" height="70" rx="8" fill="#9fd0ec" stroke="#4a90b8" stroke-width="1.2"/>
+<rect x="137" y="921" width="34" height="18" rx="9" fill="#1c8fd6"/>
+<text x="154" y="934" font-family="Helvetica, Arial, sans-serif" font-size="10" font-weight="bold" text-anchor="middle" fill="#fff" >C.4</text>
+<text x="280.0" y="951.0" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="bold" text-anchor="middle" fill="#0b3954" >Community-level aggregation</text>
+<text x="280.0" y="967.0" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="normal" text-anchor="middle" fill="#0b3954" >(HUMAnN join, renorm, regroup)</text>
+<text x="280.0" y="983.0" font-family="Menlo, Consolas, monospace" font-size="11" font-weight="normal" text-anchor="middle" fill="#35617d" >04b-last</text>
+<path d="M250,896 L250,925" fill="none" stroke="#1d2b36" stroke-width="1.4" marker-end="url(#ah)"/>
+<path d="M213,1022 h100 v48 q-25.0,-8 -50.0,0 t-50.0,0 z" fill="#ffd43b" stroke="#b08900" stroke-width="1"/>
+<path d="M209,1026 h100 v48 q-25.0,-8 -50.0,0 t-50.0,0 z" fill="#ffd43b" stroke="#b08900" stroke-width="1"/>
+<path d="M205,1030 h100 v48 q-25.0,-8 -50.0,0 t-50.0,0 z" fill="#ffd43b" stroke="#b08900" stroke-width="1"/>
+<text x="255.0" y="1049.0" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="bold" text-anchor="middle" fill="#3d3000" >CPM, KO,</text>
+<text x="255.0" y="1063.0" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="bold" text-anchor="middle" fill="#3d3000" >EC, MetaCyc</text>
+<rect x="190" y="1071" width="34" height="18" rx="9" fill="#e8962e"/>
+<text x="207" y="1084" font-family="Helvetica, Arial, sans-serif" font-size="10" font-weight="bold" text-anchor="middle" fill="#fff" >C.4</text>
+<text x="319" y="1046" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" text-anchor="start" fill="#1d2b36" >merged</text>
+<text x="319" y="1061" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" text-anchor="start" fill="#1d2b36" >functional</text>
+<text x="319" y="1076" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" text-anchor="start" fill="#1d2b36" >tables</text>
+<path d="M280,998 L280,1027" fill="none" stroke="#1d2b36" stroke-width="1.4" marker-end="url(#ah)"/>
+<path d="M900,284 L900,320 M280,320 L1060,320" fill="none" stroke="#1d2b36" stroke-width="1.4"/>
+<path d="M280,320 L280,363" fill="none" stroke="#1d2b36" stroke-width="1.4" marker-end="url(#ah)"/>
+<path d="M430,320 L430,775 L413,775" fill="none" stroke="#1d2b36" stroke-width="1.4" marker-end="url(#ah)"/>
+<rect x="475" y="330" width="605" height="840" rx="14" fill="#e3eef8"/>
+<text x="489" y="350" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="bold" text-anchor="start" fill="#1f6aa5" ></text>
+<text x="640" y="350" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="bold" text-anchor="start" fill="#1f6aa5" >Assembly-specific profiling</text>
+<rect x="500" y="372" width="210" height="62" rx="8" fill="#9fd0ec" stroke="#4a90b8" stroke-width="1.2"/>
+<rect x="487" y="365" width="34" height="18" rx="9" fill="#1c8fd6"/>
+<text x="504" y="378" font-family="Helvetica, Arial, sans-serif" font-size="10" font-weight="bold" text-anchor="middle" fill="#fff" >A.1</text>
+<text x="605.0" y="391.0" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="bold" text-anchor="middle" fill="#0b3954" >Contig assembly</text>
+<text x="605.0" y="407.0" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="normal" text-anchor="middle" fill="#0b3954" >(metaSPAdes)</text>
+<text x="605.0" y="423.0" font-family="Menlo, Consolas, monospace" font-size="11" font-weight="normal" text-anchor="middle" fill="#35617d" >05</text>
+<path d="M788,368 h85 v46 q-21.25,-8 -42.5,0 t-42.5,0 z" fill="#ffd43b" stroke="#b08900" stroke-width="1"/>
+<path d="M784,372 h85 v46 q-21.25,-8 -42.5,0 t-42.5,0 z" fill="#ffd43b" stroke="#b08900" stroke-width="1"/>
+<path d="M780,376 h85 v46 q-21.25,-8 -42.5,0 t-42.5,0 z" fill="#ffd43b" stroke="#b08900" stroke-width="1"/>
+<text x="822.5" y="401.0" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="bold" text-anchor="middle" fill="#3d3000" >FASTA</text>
+<rect x="765" y="415" width="34" height="18" rx="9" fill="#e8962e"/>
+<text x="782" y="428" font-family="Helvetica, Arial, sans-serif" font-size="10" font-weight="bold" text-anchor="middle" fill="#fff" >A.1</text>
+<text x="879" y="392" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" text-anchor="start" fill="#1d2b36" >contigs</text>
+<path d="M710,403 L777,403" fill="none" stroke="#1d2b36" stroke-width="1.4" marker-end="url(#ah)"/>
+<path d="M605,320 L605,369" fill="none" stroke="#1d2b36" stroke-width="1.4" marker-end="url(#ah)"/>
+<rect x="500" y="470" width="210" height="62" rx="8" fill="#9fd0ec" stroke="#4a90b8" stroke-width="1.2"/>
+<rect x="487" y="463" width="34" height="18" rx="9" fill="#1c8fd6"/>
+<text x="504" y="476" font-family="Helvetica, Arial, sans-serif" font-size="10" font-weight="bold" text-anchor="middle" fill="#fff" >A.2</text>
+<text x="605.0" y="489.0" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="bold" text-anchor="middle" fill="#0b3954" >Contig filtering</text>
+<text x="605.0" y="505.0" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="normal" text-anchor="middle" fill="#0b3954" >(&gt; 500 bp)</text>
+<text x="605.0" y="521.0" font-family="Menlo, Consolas, monospace" font-size="11" font-weight="normal" text-anchor="middle" fill="#35617d" >06</text>
+<path d="M822,432 L822,455 L690,455 L690,467" fill="none" stroke="#1d2b36" stroke-width="1.4" marker-end="url(#ah)"/>
+<path d="M568,558 h90 v46 q-22.5,-8 -45.0,0 t-45.0,0 z" fill="#ffd43b" stroke="#b08900" stroke-width="1"/>
+<path d="M564,562 h90 v46 q-22.5,-8 -45.0,0 t-45.0,0 z" fill="#ffd43b" stroke="#b08900" stroke-width="1"/>
+<path d="M560,566 h90 v46 q-22.5,-8 -45.0,0 t-45.0,0 z" fill="#ffd43b" stroke="#b08900" stroke-width="1"/>
+<text x="605.0" y="591.0" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="bold" text-anchor="middle" fill="#3d3000" >FASTA</text>
+<rect x="545" y="605" width="34" height="18" rx="9" fill="#e8962e"/>
+<text x="562" y="618" font-family="Helvetica, Arial, sans-serif" font-size="10" font-weight="bold" text-anchor="middle" fill="#fff" >A.2</text>
+<text x="664" y="582" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" text-anchor="start" fill="#1d2b36" >filtered</text>
+<text x="664" y="597" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" text-anchor="start" fill="#1d2b36" >contigs</text>
+<path d="M605,532 L605,563" fill="none" stroke="#1d2b36" stroke-width="1.4" marker-end="url(#ah)"/>
+<rect x="820" y="470" width="210" height="62" rx="8" fill="#ffffff" stroke="#4a90b8" stroke-width="1.2" stroke-dasharray="6 4"/>
+<rect x="807" y="463" width="34" height="18" rx="9" fill="#1c8fd6"/>
+<text x="824" y="476" font-family="Helvetica, Arial, sans-serif" font-size="10" font-weight="bold" text-anchor="middle" fill="#fff" >A.8</text>
+<text x="925.0" y="489.0" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="bold" text-anchor="middle" fill="#0b3954" >Quality check</text>
+<text x="925.0" y="505.0" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="normal" text-anchor="middle" fill="#0b3954" >(QUAST)</text>
+<text x="925.0" y="521.0" font-family="Menlo, Consolas, monospace" font-size="11" font-weight="normal" text-anchor="middle" fill="#35617d" >planned</text>
+<path d="M710,501 L817,501" fill="none" stroke="#1d2b36" stroke-width="1.4" marker-end="url(#ah)" stroke-dasharray="5 4"/>
+<path d="M1008,552 h70 v42 q-17.5,-8 -35.0,0 t-35.0,0 z" fill="#ffffff" stroke="#b08900" stroke-width="1" stroke-dasharray="5 3"/>
+<path d="M1004,556 h70 v42 q-17.5,-8 -35.0,0 t-35.0,0 z" fill="#ffffff" stroke="#b08900" stroke-width="1" stroke-dasharray="5 3"/>
+<path d="M1000,560 h70 v42 q-17.5,-8 -35.0,0 t-35.0,0 z" fill="#ffffff" stroke="#b08900" stroke-width="1" stroke-dasharray="5 3"/>
+<text x="1035.0" y="583.0" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="bold" text-anchor="middle" fill="#3d3000" >reports</text>
+<rect x="985" y="595" width="34" height="18" rx="9" fill="#e8962e"/>
+<text x="1002" y="608" font-family="Helvetica, Arial, sans-serif" font-size="10" font-weight="bold" text-anchor="middle" fill="#fff" >A.8</text>
+<path d="M925,532 L925,585 L997,585" fill="none" stroke="#1d2b36" stroke-width="1.4" marker-end="url(#ah)" stroke-dasharray="5 4"/>
+<rect x="820" y="640" width="210" height="70" rx="8" fill="#9fd0ec" stroke="#4a90b8" stroke-width="1.2"/>
+<rect x="807" y="633" width="34" height="18" rx="9" fill="#1c8fd6"/>
+<text x="824" y="646" font-family="Helvetica, Arial, sans-serif" font-size="10" font-weight="bold" text-anchor="middle" fill="#fff" >A.3</text>
+<text x="925.0" y="663.0" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="bold" text-anchor="middle" fill="#0b3954" >Coverage depth</text>
+<text x="925.0" y="679.0" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="normal" text-anchor="middle" fill="#0b3954" >(Bowtie2 + samtools)</text>
+<text x="925.0" y="695.0" font-family="Menlo, Consolas, monospace" font-size="11" font-weight="normal" text-anchor="middle" fill="#35617d" >07, 08-09</text>
+<path d="M1060,320 L1060,625 L1030,625 L1030,637" fill="none" stroke="#1d2b36" stroke-width="1.4" marker-end="url(#ah)"/>
+<path d="M650,612 L760,612 L760,675 L817,675" fill="none" stroke="#1d2b36" stroke-width="1.4" marker-end="url(#ah)"/>
+<path d="M878,734 h95 v48 q-23.75,-8 -47.5,0 t-47.5,0 z" fill="#ffd43b" stroke="#b08900" stroke-width="1"/>
+<path d="M874,738 h95 v48 q-23.75,-8 -47.5,0 t-47.5,0 z" fill="#ffd43b" stroke="#b08900" stroke-width="1"/>
+<path d="M870,742 h95 v48 q-23.75,-8 -47.5,0 t-47.5,0 z" fill="#ffd43b" stroke="#b08900" stroke-width="1"/>
+<text x="917.5" y="761.0" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="bold" text-anchor="middle" fill="#3d3000" >bam</text>
+<text x="917.5" y="775.0" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="bold" text-anchor="middle" fill="#3d3000" >depth.txt</text>
+<rect x="855" y="783" width="34" height="18" rx="9" fill="#e8962e"/>
+<text x="872" y="796" font-family="Helvetica, Arial, sans-serif" font-size="10" font-weight="bold" text-anchor="middle" fill="#fff" >A.3</text>
+<text x="979" y="758" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" text-anchor="start" fill="#1d2b36" >coverage</text>
+<path d="M925,710 L925,739" fill="none" stroke="#1d2b36" stroke-width="1.4" marker-end="url(#ah)"/>
+<rect x="500" y="690" width="210" height="62" rx="8" fill="#9fd0ec" stroke="#4a90b8" stroke-width="1.2"/>
+<rect x="487" y="683" width="34" height="18" rx="9" fill="#1c8fd6"/>
+<text x="504" y="696" font-family="Helvetica, Arial, sans-serif" font-size="10" font-weight="bold" text-anchor="middle" fill="#fff" >A.4</text>
+<text x="605.0" y="709.0" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="bold" text-anchor="middle" fill="#0b3954" >Binning</text>
+<text x="605.0" y="725.0" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="normal" text-anchor="middle" fill="#0b3954" >(MetaBAT2)</text>
+<text x="605.0" y="741.0" font-family="Menlo, Consolas, monospace" font-size="11" font-weight="normal" text-anchor="middle" fill="#35617d" >10-11</text>
+<path d="M580,620 L580,687" fill="none" stroke="#1d2b36" stroke-width="1.4" marker-end="url(#ah)"/>
+<path d="M870,775 L740,775 L740,721 L713,721" fill="none" stroke="#1d2b36" stroke-width="1.4" marker-end="url(#ah)"/>
+<path d="M563,777 h95 v46 q-23.75,-8 -47.5,0 t-47.5,0 z" fill="#ffd43b" stroke="#b08900" stroke-width="1"/>
+<path d="M559,781 h95 v46 q-23.75,-8 -47.5,0 t-47.5,0 z" fill="#ffd43b" stroke="#b08900" stroke-width="1"/>
+<path d="M555,785 h95 v46 q-23.75,-8 -47.5,0 t-47.5,0 z" fill="#ffd43b" stroke="#b08900" stroke-width="1"/>
+<text x="602.5" y="810.0" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="bold" text-anchor="middle" fill="#3d3000" >FASTA</text>
+<rect x="540" y="824" width="34" height="18" rx="9" fill="#e8962e"/>
+<text x="557" y="837" font-family="Helvetica, Arial, sans-serif" font-size="10" font-weight="bold" text-anchor="middle" fill="#fff" >A.4</text>
+<text x="664" y="801" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" text-anchor="start" fill="#1d2b36" >MAGs</text>
+<path d="M605,752 L605,782" fill="none" stroke="#1d2b36" stroke-width="1.4" marker-end="url(#ah)"/>
+<rect x="820" y="860" width="210" height="62" rx="8" fill="#9fd0ec" stroke="#4a90b8" stroke-width="1.2"/>
+<rect x="807" y="853" width="34" height="18" rx="9" fill="#1c8fd6"/>
+<text x="824" y="866" font-family="Helvetica, Arial, sans-serif" font-size="10" font-weight="bold" text-anchor="middle" fill="#fff" >A.5</text>
+<text x="925.0" y="879.0" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="bold" text-anchor="middle" fill="#0b3954" >Quality check</text>
+<text x="925.0" y="895.0" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="normal" text-anchor="middle" fill="#0b3954" >(CheckM2)</text>
+<text x="925.0" y="911.0" font-family="Menlo, Consolas, monospace" font-size="11" font-weight="normal" text-anchor="middle" fill="#35617d" >12-13</text>
+<path d="M650,828 L790,828 L790,891 L817,891" fill="none" stroke="#1d2b36" stroke-width="1.4" marker-end="url(#ah)"/>
+<path d="M883,947 h85 v46 q-21.25,-8 -42.5,0 t-42.5,0 z" fill="#ffd43b" stroke="#b08900" stroke-width="1"/>
+<path d="M879,951 h85 v46 q-21.25,-8 -42.5,0 t-42.5,0 z" fill="#ffd43b" stroke="#b08900" stroke-width="1"/>
+<path d="M875,955 h85 v46 q-21.25,-8 -42.5,0 t-42.5,0 z" fill="#ffd43b" stroke="#b08900" stroke-width="1"/>
+<text x="917.5" y="980.0" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="bold" text-anchor="middle" fill="#3d3000" >tsv</text>
+<rect x="860" y="994" width="34" height="18" rx="9" fill="#e8962e"/>
+<text x="877" y="1007" font-family="Helvetica, Arial, sans-serif" font-size="10" font-weight="bold" text-anchor="middle" fill="#fff" >A.5</text>
+<text x="974" y="971" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" text-anchor="start" fill="#1d2b36" >completeness,</text>
+<text x="974" y="986" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" text-anchor="start" fill="#1d2b36" >contamination</text>
+<path d="M925,922 L925,952" fill="none" stroke="#1d2b36" stroke-width="1.4" marker-end="url(#ah)"/>
+<rect x="500" y="950" width="210" height="62" rx="8" fill="#9fd0ec" stroke="#4a90b8" stroke-width="1.2"/>
+<rect x="487" y="943" width="34" height="18" rx="9" fill="#1c8fd6"/>
+<text x="504" y="956" font-family="Helvetica, Arial, sans-serif" font-size="10" font-weight="bold" text-anchor="middle" fill="#fff" >A.6</text>
+<text x="605.0" y="969.0" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="bold" text-anchor="middle" fill="#0b3954" >MAG filtering and</text>
+<text x="605.0" y="985.0" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="normal" text-anchor="middle" fill="#0b3954" >metadata preparation</text>
+<text x="605.0" y="1001.0" font-family="Menlo, Consolas, monospace" font-size="11" font-weight="normal" text-anchor="middle" fill="#35617d" >14</text>
+<path d="M605,839 L605,947" fill="none" stroke="#1d2b36" stroke-width="1.4" marker-end="url(#ah)"/>
+<path d="M872,982 L713,982" fill="none" stroke="#1d2b36" stroke-width="1.4" marker-end="url(#ah)"/>
+<rect x="500" y="1050" width="210" height="62" rx="8" fill="#9fd0ec" stroke="#4a90b8" stroke-width="1.2"/>
+<rect x="487" y="1043" width="34" height="18" rx="9" fill="#1c8fd6"/>
+<text x="504" y="1056" font-family="Helvetica, Arial, sans-serif" font-size="10" font-weight="bold" text-anchor="middle" fill="#fff" >A.7</text>
+<text x="605.0" y="1069.0" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="bold" text-anchor="middle" fill="#0b3954" >MAG annotation</text>
+<text x="605.0" y="1085.0" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="normal" text-anchor="middle" fill="#0b3954" >(TORMES)</text>
+<text x="605.0" y="1101.0" font-family="Menlo, Consolas, monospace" font-size="11" font-weight="normal" text-anchor="middle" fill="#35617d" >15</text>
+<path d="M605,1012 L605,1047" fill="none" stroke="#1d2b36" stroke-width="1.4" marker-end="url(#ah)"/>
+<path d="M788,1048 h90 v46 q-22.5,-8 -45.0,0 t-45.0,0 z" fill="#ffd43b" stroke="#b08900" stroke-width="1"/>
+<path d="M784,1052 h90 v46 q-22.5,-8 -45.0,0 t-45.0,0 z" fill="#ffd43b" stroke="#b08900" stroke-width="1"/>
+<path d="M780,1056 h90 v46 q-22.5,-8 -45.0,0 t-45.0,0 z" fill="#ffd43b" stroke="#b08900" stroke-width="1"/>
+<text x="825.0" y="1074.0" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="bold" text-anchor="middle" fill="#3d3000" >GFF</text>
+<text x="825.0" y="1088.0" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="bold" text-anchor="middle" fill="#3d3000" >html</text>
+<rect x="765" y="1095" width="34" height="18" rx="9" fill="#e8962e"/>
+<text x="782" y="1108" font-family="Helvetica, Arial, sans-serif" font-size="10" font-weight="bold" text-anchor="middle" fill="#fff" >A.7</text>
+<text x="884" y="1072" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" text-anchor="start" fill="#1d2b36" >annotated MAGs,</text>
+<text x="884" y="1087" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" text-anchor="start" fill="#1d2b36" >annotation reports</text>
+<path d="M710,1081 L777,1081" fill="none" stroke="#1d2b36" stroke-width="1.4" marker-end="url(#ah)"/>
+<rect x="420" y="1196" width="260" height="66" rx="8" fill="#9fd0ec" stroke="#4a90b8" stroke-width="1.2"/>
+<rect x="407" y="1189" width="34" height="18" rx="9" fill="#1c8fd6"/>
+<text x="424" y="1202" font-family="Helvetica, Arial, sans-serif" font-size="10" font-weight="bold" text-anchor="middle" fill="#fff" >R.1</text>
+<text x="550.0" y="1217.0" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="bold" text-anchor="middle" fill="#0b3954" >Integrated report</text>
+<text x="550.0" y="1233.0" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="normal" text-anchor="middle" fill="#0b3954" >(both branches)</text>
+<text x="550.0" y="1249.0" font-family="Menlo, Consolas, monospace" font-size="11" font-weight="normal" text-anchor="middle" fill="#35617d" >16</text>
+<path d="M255,1088 L255,1229 L417,1229" fill="none" stroke="#1d2b36" stroke-width="1.4" marker-end="url(#ah)"/>
+<path d="M825,1112 L825,1180 L600,1180 L600,1193" fill="none" stroke="#1d2b36" stroke-width="1.4" marker-end="url(#ah)"/>
+<path d="M753,1194 h85 v46 q-21.25,-8 -42.5,0 t-42.5,0 z" fill="#ffd43b" stroke="#b08900" stroke-width="1"/>
+<path d="M749,1198 h85 v46 q-21.25,-8 -42.5,0 t-42.5,0 z" fill="#ffd43b" stroke="#b08900" stroke-width="1"/>
+<path d="M745,1202 h85 v46 q-21.25,-8 -42.5,0 t-42.5,0 z" fill="#ffd43b" stroke="#b08900" stroke-width="1"/>
+<text x="787.5" y="1227.0" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="bold" text-anchor="middle" fill="#3d3000" >HTML</text>
+<rect x="730" y="1241" width="34" height="18" rx="9" fill="#e8962e"/>
+<text x="747" y="1254" font-family="Helvetica, Arial, sans-serif" font-size="10" font-weight="bold" text-anchor="middle" fill="#fff" >R.1</text>
+<text x="844" y="1218" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" text-anchor="start" fill="#1d2b36" >interactive</text>
+<text x="844" y="1233" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="normal" text-anchor="start" fill="#1d2b36" >report</text>
+<path d="M680,1229 L742,1229" fill="none" stroke="#1d2b36" stroke-width="1.4" marker-end="url(#ah)"/>
+<rect x="20" y="1290" width="1060" height="40" rx="8" fill="#fbe3d6"/>
+<text x="550" y="1315" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="bold" text-anchor="middle" fill="#7a3b1d" >Downstream analyses</text>
+</svg>

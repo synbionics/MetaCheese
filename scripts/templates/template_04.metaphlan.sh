@@ -36,7 +36,7 @@ for file1 in "$sample_folder"/*.fq.1.gz; do
         --input_type fastq \
         --bowtie2db "$DEFAULT_DB_FOLDER" \
         --index mpa_vJun23_CHOCOPhlAnSGB_202307 \
-        --nproc 4 \
+        --nproc @04_par1@ \
         --bowtie2out "$output_folder/${nome_campione}.bowtie2.bz2" \
         -s "$output_folder/${nome_campione}.sam.bz2" \
         -o "$output_folder/${nome_campione}.txt"

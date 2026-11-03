@@ -20,24 +20,25 @@ step00_01:
   par5: 2                                               # trim5p
   par6: 2                                               # trim3p
 
-step02:
-  reference_genome: "../../data/gene/Bos_taurus/GCA_002263795.4_ARS-UCD2.0_genomic.fna Bos_taurus"
-
 step03:
   dir1: "../../output/@output_folder@/01_AdapterRemoval" # input directory
   dir2: "../../output/@output_folder@/03_bowtie2_output" # output directory
   dir3: "../../data/gene/Bos_taurus/Bos_taurus"          # database
+  par1: 16                                                # threads (Bowtie2 host removal)
 
 step04:
   #dir1: "../../data/metaphlan_database"                 # Metaphlan DB
   dir2: "../../output/@output_folder@/03_bowtie2_output" # input fastq folder
   dir3: "../../output/@output_folder@/04_metaphlan_output" # metaphlan output
   rscript: "../../data/calculate_diversity.R"            # → Rscript for diversity analysis
+  par1: 16                                                # threads (MetaPhlAn)
   
 step04b_1:
   dir1: "../../output/@output_folder@/04_metaphlan_output" # metaphlan output
   dir2: "../../output/@output_folder@/03_bowtie2_output"   # input fastq folder
   dir3: "../../output/@output_folder@/04b_humann_output"   # humann output
+  par1: 16                                                 # HUMAnN threads
+  par2: 2                                                 # DIAMOND --block-size (2 = default; higher = faster, ~6 GB RAM per unit)
 
 step04b_2:
   dir1: "../../output/@output_folder@/04_metaphlan_output" # metaphlan output
@@ -69,6 +70,7 @@ step08_09:
   dir1: "../../output/@output_folder@/03_bowtie2_output" # input fastq files
   dir2: "../../output/@output_folder@/07_Bowtie_Index"   # Bowtie2 index input
   dir3: "../../output/@output_folder@/08_mapping_coverage" # BAM + log output
+  par1: 16                                                # threads (Bowtie2 mapping + samtools sort)
 
 step10_11:
   dir1: "../../output/@output_folder@/08_mapping_coverage"              # output from step 08-09
@@ -102,3 +104,6 @@ step15:
   var2: "14_MAGs_high_quality/my-metadata2.txt"         # input metadata
   par1: "15_tormes_MAGs/"                               # output
   par2: 16                                              # threads
+
+step16:
+  dir1: "../../output/@output_folder@"                      # run folder (report goes to <run>/report/)

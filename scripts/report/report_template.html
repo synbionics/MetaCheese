@@ -1,0 +1,1013 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<!--__FRAGMENT_START__-->
+<title>MetaCheese report __TITLE__</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Source+Sans+3:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: run notebook. A sticky rail of workflow step IDs on the left, one
+   section per step on the right: explanation, chart, table view. */
+:root {
+  --bg: #f4f6f3;          /* page plane, faint whey-green bias */
+  --surface: #fcfcfb;     /* chart / card surface */
+  --ink: #141a17;
+  --ink-2: #4e5752;
+  --muted: #858b84;
+  --line: #dde2db;
+  --axis: #c3c7bd;
+  --accent: #1c5cab;      /* workflow blue, links and selection */
+  --accent-wash: #e3edf9;
+  --s1: #2a78d6; --s2: #eb6834; --s3: #1baf7a; --s4: #eda100;
+  --s5: #e87ba4; --s6: #008300; --s7: #6250d6; --s8: #e34948;
+  --other: #b9bdb5;
+  --good: #0ca30c; --warning: #fab219; --serious: #ec835a; --critical: #d03b3b;
+  --seq-0: #f1f6fd; --seq-1: #cde2fb; --seq-2: #9ec5f4; --seq-3: #6da7ec; --seq-4: #3987e5; --seq-5: #256abf; --seq-6: #184f95; --seq-7: #0d366b;
+  --font-display: "Bricolage Grotesque", "Avenir Next", "Segoe UI", system-ui, sans-serif;
+  --font-body: "Source Sans 3", "Source Sans Pro", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, Menlo, Consolas, monospace;
+  --step-0: 0.8125rem; --step-1: 1rem; --step-2: 1.25rem; --step-3: 1.6rem; --step-4: 2.3rem;
+  --radius: 10px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f1110; --surface: #1a1a19; --ink: #eef0ec; --ink-2: #c3c6bd; --muted: #8b9089;
+    --line: #2c2e2b; --axis: #3a3d39; --accent: #6da7ec; --accent-wash: #1b2a3d;
+    --s1: #3987e5; --s2: #d95926; --s3: #199e70; --s4: #c98500; --s5: #d55181; --s6: #008300; --s7: #9085e9; --s8: #e66767;
+    --other: #5b5f58;
+    --seq-0: #1d2633; --seq-1: #183459; --seq-2: #184f95; --seq-3: #1c5cab; --seq-4: #2a78d6; --seq-5: #5598e7; --seq-6: #86b6ef; --seq-7: #cde2fb;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0f1110; --surface: #1a1a19; --ink: #eef0ec; --ink-2: #c3c6bd; --muted: #8b9089;
+  --line: #2c2e2b; --axis: #3a3d39; --accent: #6da7ec; --accent-wash: #1b2a3d;
+  --s1: #3987e5; --s2: #d95926; --s3: #199e70; --s4: #c98500; --s5: #d55181; --s6: #008300; --s7: #9085e9; --s8: #e66767;
+  --other: #5b5f58;
+  --seq-0: #1d2633; --seq-1: #183459; --seq-2: #184f95; --seq-3: #1c5cab; --seq-4: #2a78d6; --seq-5: #5598e7; --seq-6: #86b6ef; --seq-7: #cde2fb;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0; background: var(--bg); color: var(--ink);
+  font: 400 1rem/1.55 var(--font-body);
+}
+a { color: var(--accent); }
+a:focus-visible, button:focus-visible, select:focus-visible, summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.page {
+  display: grid; grid-template-columns: 210px minmax(0, 1fr); gap: 40px;
+  max-width: 1260px; margin: 0 auto;
+  padding-block: 32px 80px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+/* ---------- rail */
+.rail { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 24px); align-self: start; }
+.rail .brand { font: 700 var(--step-2)/1.1 var(--font-display); letter-spacing: -0.01em; margin-bottom: 18px; }
+.rail .brand small { display: block; font: 500 var(--step-0)/1.4 var(--font-mono); color: var(--muted); letter-spacing: 0; margin-top: 4px; }
+.rail ol { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
+.rail a {
+  display: grid; grid-template-columns: 44px 1fr; align-items: baseline; gap: 6px;
+  padding: 5px 8px; border-radius: 6px; color: var(--ink-2); text-decoration: none; font-size: 0.9rem;
+}
+.rail a:hover { background: var(--accent-wash); color: var(--ink); }
+.rail a.off { color: var(--muted); }
+.rail .rid { font: 500 0.72rem var(--font-mono); color: var(--accent); }
+.rail a.off .rid { color: var(--muted); }
+.rail .phase { font: 600 0.7rem var(--font-body); text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin: 14px 8px 4px; }
+/* ---------- header */
+header.top { display: grid; gap: 14px; margin-bottom: 28px; }
+.eyebrow { font: 500 var(--step-0) var(--font-mono); color: var(--muted); letter-spacing: 0.02em; }
+h1 { font: 700 var(--step-4)/1.05 var(--font-display); letter-spacing: -0.02em; margin: 0; text-wrap: balance; }
+.lede { max-width: 68ch; color: var(--ink-2); margin: 0; }
+.tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-top: 8px; }
+.tile { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 14px 16px; display: grid; gap: 2px; min-width: 0; }
+.tile .label { font-size: var(--step-0); color: var(--ink-2); }
+.tile .value { font: 600 1.7rem/1.15 var(--font-body); }
+.tile .note { font-size: 0.78rem; color: var(--muted); }
+/* ---------- sections */
+section.step { padding-top: 34px; margin-top: 34px; border-top: 1px solid var(--line); scroll-margin-top: 16px; min-width: 0; }
+.step-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 10px 14px; }
+.sid { font: 500 0.8rem var(--font-mono); color: #fff; background: var(--accent); border-radius: 999px; padding: 2px 9px; }
+:root[data-theme="dark"] .sid { color: #0f1110; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .sid { color: #0f1110; } }
+h2 { font: 700 var(--step-3)/1.15 var(--font-display); letter-spacing: -0.01em; margin: 0; text-wrap: balance; }
+.tool { font: 400 var(--step-0) var(--font-mono); color: var(--muted); }
+.explain { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px 28px; margin: 14px 0 18px; }
+.explain > div { min-width: 0; }
+.explain h3 { font: 600 0.72rem var(--font-body); text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin: 0 0 4px; }
+.explain p { margin: 0; color: var(--ink-2); max-width: 65ch; }
+.findings { background: var(--accent-wash); border-radius: var(--radius); padding: 12px 16px; margin: 0 0 16px; }
+.findings p { margin: 0; }
+.findings p + p { margin-top: 6px; }
+.missing { color: var(--muted); font-style: italic; margin: 8px 0; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 16px; min-width: 0; }
+.card + .card { margin-top: 14px; }
+.controls { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; margin-bottom: 10px; font-size: 0.9rem; color: var(--ink-2); }
+.controls label { display: inline-flex; gap: 6px; align-items: center; }
+select, button.seg {
+  font: inherit; color: var(--ink); background: var(--surface); border: 1px solid var(--axis);
+  border-radius: 6px; padding: 4px 8px;
+}
+.segs { display: inline-flex; border: 1px solid var(--axis); border-radius: 7px; overflow: hidden; }
+.segs button { font: inherit; font-size: 0.88rem; background: transparent; color: var(--ink-2); border: 0; padding: 4px 10px; cursor: pointer; }
+.segs button + button { border-left: 1px solid var(--axis); }
+.segs button[aria-pressed="true"] { background: var(--accent); color: var(--surface); }
+.chart { width: 100%; min-width: 0; position: relative; }
+.chart svg { display: block; width: 100%; height: auto; overflow: visible; }
+.chart text { fill: var(--ink-2); font: 12px var(--font-body); }
+.chart .tick text { fill: var(--muted); font: 11px var(--font-mono); }
+.chart .grid line { stroke: var(--line); stroke-width: 1; }
+.chart .baseline { stroke: var(--axis); stroke-width: 1; }
+.chart .hit { cursor: default; }
+.chart .hit:hover > .mark, .chart .hit:focus > .mark { filter: brightness(1.12); }
+.legend { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 0.85rem; color: var(--ink-2); margin-top: 10px; }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.legend i { width: 12px; height: 12px; border-radius: 3px; display: inline-block; flex: none; }
+.legend i.dot { border-radius: 50%; }
+details.table { margin-top: 12px; }
+details.table summary { cursor: pointer; color: var(--accent); font-size: 0.9rem; }
+.tablewrap { overflow-x: auto; margin-top: 8px; max-height: 460px; overflow-y: auto; border: 1px solid var(--line); border-radius: 8px; }
+table { border-collapse: collapse; width: 100%; font-size: 0.86rem; }
+th, td { padding: 5px 10px; text-align: left; border-bottom: 1px solid var(--line); white-space: nowrap; }
+th { position: sticky; top: 0; background: var(--surface); font-weight: 600; color: var(--ink-2); z-index: 1; }
+td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; font-family: var(--font-mono); font-size: 0.8rem; }
+td.wrap { white-space: normal; min-width: 220px; }
+.pill { display: inline-flex; align-items: center; gap: 5px; font-size: 0.78rem; padding: 1px 8px; border-radius: 999px; border: 1px solid var(--line); color: var(--ink-2); white-space: nowrap; }
+.pill::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--muted); }
+.pill.ok::before { background: var(--good); }
+.pill.warn::before { background: var(--warning); }
+.pill.bad::before { background: var(--critical); }
+.qc-grid td.cell { text-align: center; font-weight: 700; font-size: 0.8rem; padding: 4px 6px; }
+.qc-grid td.PASS { background: color-mix(in srgb, var(--good) 22%, transparent); }
+.qc-grid td.WARN { background: color-mix(in srgb, var(--warning) 35%, transparent); }
+.qc-grid td.FAIL { background: color-mix(in srgb, var(--critical) 28%, transparent); }
+.qc-grid th.rot { white-space: normal; min-width: 72px; font-size: 0.74rem; line-height: 1.2; vertical-align: bottom; }
+.workflow { overflow-x: auto; }
+.workflow svg { width: 100%; min-width: 640px; height: auto; display: block; border-radius: 8px; }
+pre.config { font: 0.78rem/1.5 var(--font-mono); background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 12px; overflow: auto; max-height: 420px; margin: 8px 0 0; }
+.two { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 14px; }
+.two > * { min-width: 0; }
+.two .card + .card { margin-top: 0; }
+#tip {
+  position: fixed; pointer-events: none; z-index: 50; background: var(--surface); color: var(--ink);
+  border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; font-size: 0.82rem;
+  box-shadow: 0 6px 24px rgba(0,0,0,0.14); max-width: 300px; display: none;
+}
+#tip b { font-size: 0.95rem; font-variant-numeric: tabular-nums; }
+#tip .k { display: inline-block; width: 12px; height: 3px; border-radius: 2px; margin-right: 6px; vertical-align: middle; }
+#tip .sub { color: var(--ink-2); }
+footer { margin-top: 56px; color: var(--muted); font-size: 0.85rem; }
+@media (max-width: 860px) {
+  .page { grid-template-columns: minmax(0, 1fr); gap: 8px; padding-block: 16px 60px; }
+  .rail { position: static; }
+  .rail ol { display: flex; overflow-x: auto; gap: 4px; padding-bottom: 6px; }
+  .rail .phase { display: none; }
+  .rail a { grid-template-columns: auto; white-space: nowrap; background: var(--surface); border: 1px solid var(--line); }
+  .rail a .rname { display: none; }
+  h1 { font-size: 1.8rem; }
+}
+@media (prefers-reduced-motion: no-preference) { .segs button, .rail a { transition: background 120ms, color 120ms; } }
+@media print { .rail { display: none; } .page { grid-template-columns: 1fr; } details.table { display: none; } }
+</style>
+<!--__FRAGMENT_END__-->
+</head>
+<body>
+<!--__FRAGMENT_START__-->
+<div class="page">
+  <nav class="rail" aria-label="Pipeline steps">
+    <div class="brand">MetaCheese<small id="rail-run"></small></div>
+    <ol id="rail"></ol>
+  </nav>
+  <main id="main">
+    <header class="top">
+      <div class="eyebrow" id="eyebrow"></div>
+      <h1 id="title"></h1>
+      <p class="lede" id="lede"></p>
+      <div class="tiles" id="tiles"></div>
+    </header>
+    <section class="step" id="overview">
+      <div class="step-head"><span class="sid">run</span><h2>Workflow and run time</h2></div>
+      <div class="explain">
+        <div><h3>What happened</h3><p>Raw reads are cleaned (P.1) and stripped of host DNA (P.2). The microbial reads then follow two branches: community-level profiling (C.1 to C.4) describes the whole community, assembly-specific profiling (A.1 to A.7) reconstructs genomes (MAGs). The last section (R.1) joins the two branches.</p></div>
+        <div><h3>How to read it</h3><p>Each section below matches one box of the diagram, with the same ID. Steps without results are marked "not run". The table gives the wall-clock time of every pipeline script.</p></div>
+      </div>
+      <div class="card workflow" aria-label="Workflow diagram"><!--__WORKFLOW__--></div>
+      <div class="card"><div class="chart" id="chart-times"></div><details class="table"><summary>Show table</summary><div class="tablewrap" id="table-steps"></div></details></div>
+    </section>
+    <div id="sections"></div>
+    <section class="step" id="methods">
+      <div class="step-head"><span class="sid">info</span><h2>Software and configuration</h2></div>
+      <div class="explain"><div><h3>Reproducing this run</h3><p>All tools run from the <code>metacheese</code> Docker image. The configuration below is the exact file used by this run (<code>config.yml</code> in the run folder); paths are relative to <code>scripts/pipeline/</code> inside the container.</p></div></div>
+      <div class="card"><div class="tablewrap" id="table-tools"></div></div>
+      <details class="table"><summary>Show config.yml</summary><pre class="config" id="config"></pre></details>
+    </section>
+    <footer id="footer"></footer>
+  </main>
+</div>
+<div id="tip" role="tooltip"></div>
+<script>
+const DATA = /*__DATA__*/null;
+(function () {
+"use strict";
+const $ = (s, r = document) => r.querySelector(s);
+const NS = "http://www.w3.org/2000/svg";
+const css = (v) => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+const SERIES = ["--s1", "--s2", "--s3", "--s4", "--s5", "--s6", "--s7", "--s8"];
+const fmt = (x, d = 0) => x == null || isNaN(x) ? "–" : Number(x).toLocaleString("en-US", { maximumFractionDigits: d, minimumFractionDigits: d });
+const compact = (x) => x == null ? "–" : Math.abs(x) >= 1e9 ? fmt(x / 1e9, 2) + " G" : Math.abs(x) >= 1e6 ? fmt(x / 1e6, 1) + " M" : Math.abs(x) >= 1e4 ? fmt(x / 1e3, 0) + " k" : fmt(x, 0);
+const pct = (x, d = 1) => x == null || isNaN(x) ? "–" : fmt(x, d) + "%";
+const dur = (s) => s == null ? "–" : s < 90 ? Math.round(s) + " s" : s < 5400 ? Math.round(s / 60) + " min" : (s / 3600).toFixed(1) + " h";
+
+function h(tag, attrs = {}, parent, text) {
+  const e = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs)) { if (v != null) e.setAttribute(k, v); }
+  if (text != null) e.textContent = text;
+  if (parent) parent.appendChild(e);
+  return e;
+}
+function s(tag, attrs = {}, parent, text) {
+  const e = document.createElementNS(NS, tag);
+  for (const [k, v] of Object.entries(attrs)) { if (v != null) e.setAttribute(k, v); }
+  if (text != null) e.textContent = text;
+  if (parent) parent.appendChild(e);
+  return e;
+}
+function niceTicks(max, n = 5) {
+  if (!(max > 0)) return [0, 1];
+  const raw = max / n, mag = Math.pow(10, Math.floor(Math.log10(raw)));
+  const step = [1, 2, 2.5, 5, 10].map(m => m * mag).find(st => st >= raw);
+  const out = []; for (let v = 0; v <= max + step * 0.001; v += step) out.push(+v.toFixed(10));
+  if (out[out.length - 1] < max) out.push(+(out[out.length - 1] + step).toFixed(10));
+  return out;
+}
+// ------------------------------------------------------------- tooltip
+const tip = $("#tip");
+function showTip(ev, rows) {
+  tip.replaceChildren();
+  rows.forEach((r, i) => {
+    const line = h("div", { class: i ? "sub" : "" }, tip);
+    if (r.color) { const k = h("span", { class: "k" }, line); k.style.background = r.color; }
+    if (r.value != null) { h("b", {}, line, r.value); line.appendChild(document.createTextNode(" ")); }
+    line.appendChild(document.createTextNode(r.label || ""));
+  });
+  tip.style.display = "block";
+  moveTip(ev);
+}
+function moveTip(ev) {
+  let x, y;
+  if (ev.clientX != null && ev.type !== "focus") { x = ev.clientX; y = ev.clientY; }
+  else { const b = ev.target.getBoundingClientRect(); x = b.left + b.width / 2; y = b.top; }
+  const w = tip.offsetWidth, ht = tip.offsetHeight;
+  tip.style.left = Math.min(Math.max(8, x + 14), window.innerWidth - w - 8) + "px";
+  tip.style.top = (y + ht + 24 > window.innerHeight ? y - ht - 12 : y + 16) + "px";
+}
+function hideTip() { tip.style.display = "none"; }
+function hover(g, rowsFn) {
+  g.setAttribute("tabindex", "0");
+  g.classList.add("hit");
+  g.addEventListener("pointerenter", (e) => showTip(e, rowsFn()));
+  g.addEventListener("pointermove", moveTip);
+  g.addEventListener("pointerleave", hideTip);
+  g.addEventListener("focus", (e) => showTip(e, rowsFn()));
+  g.addEventListener("blur", hideTip);
+}
+// ------------------------------------------------------------- tables
+function table(container, head, rows, numCols = []) {
+  container.replaceChildren();
+  const t = h("table", {}, container);
+  const tr = h("tr", {}, h("thead", {}, t));
+  head.forEach((c, i) => h("th", { class: numCols.includes(i) ? "num" : null, scope: "col" }, tr, c));
+  const tb = h("tbody", {}, t);
+  rows.forEach(r => {
+    const row = h("tr", {}, tb);
+    r.forEach((c, i) => {
+      if (c instanceof Node) { h("td", {}, row).appendChild(c); }
+      else h("td", { class: numCols.includes(i) ? "num" : null }, row, c == null ? "–" : String(c));
+    });
+  });
+  return t;
+}
+function pill(text, kind) { const p = h("span", { class: "pill " + (kind || "") }); p.textContent = text; return p; }
+function segs(container, options, value, onChange, label) {
+  const wrap = h("span", { class: "segs", role: "group", "aria-label": label || "" }, container);
+  const btns = options.map(([v, l]) => {
+    const b = h("button", { type: "button", "aria-pressed": String(v === value) }, wrap, l);
+    b.addEventListener("click", () => { btns.forEach(x => x.setAttribute("aria-pressed", String(x === b))); onChange(v); });
+    return b;
+  });
+  return wrap;
+}
+function legend(container, items, dot) {
+  const l = h("div", { class: "legend" }, container);
+  items.forEach(([name, color]) => { const sp = h("span", {}, l); const i = h("i", { class: dot ? "dot" : "" }, sp); i.style.background = color; sp.appendChild(document.createTextNode(name)); });
+  return l;
+}
+// ------------------------------------------------------------- data prep
+const D = DATA;
+const samples = D.samples.map(x => x.sample);
+const groupOf = Object.fromEntries(D.samples.map(x => [x.sample, x.group || "all samples"]));
+const groups = [...new Set(samples.map(x => groupOf[x]))];
+const groupColor = (g) => css(SERIES[Math.min(groups.indexOf(g), 2)] || "--other");
+const groupLabel = (g) => g === "PDO" ? "PDO" : g === "NONPDO" ? "non-PDO" : g;
+const ordered = [...samples].sort((a, b) => groups.indexOf(groupOf[a]) - groups.indexOf(groupOf[b]));
+
+const renderers = [];
+let resizeTimer;
+window.addEventListener("resize", () => { clearTimeout(resizeTimer); resizeTimer = setTimeout(() => renderers.forEach(f => f()), 150); });
+const mqDark = window.matchMedia("(prefers-color-scheme: dark)");
+mqDark.addEventListener && mqDark.addEventListener("change", () => renderers.forEach(f => f()));
+new MutationObserver(() => renderers.forEach(f => f())).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+function chartWidth(el) { return Math.max(300, el.clientWidth || 600); }
+
+// ------------------------------------------------------------- generic charts
+/** Horizontal segmented 100% (or absolute) bars. rows: [{label, sub, parts:[{name,value,color}]}] */
+function hbars(el, rows, opts = {}) {
+  const draw = () => {
+    el.replaceChildren();
+    const W = chartWidth(el), labelW = opts.labelW || Math.min(150, W * 0.32), barH = 20, gap = 10, top = 6, bottom = 26;
+    const right = opts.right || 16;
+    const H = top + rows.length * (barH + gap) + bottom;
+    const svg = s("svg", { viewBox: `0 0 ${W} ${H}`, role: "img", "aria-label": opts.aria || "" }, el);
+    const max = opts.max || Math.max(...rows.map(r => r.parts.reduce((a, p) => a + p.value, 0)), 1e-9);
+    const ticks = opts.ticks || niceTicks(max, W < 500 ? 3 : 5);
+    const tmax = ticks[ticks.length - 1];
+    const x = (v) => labelW + (W - labelW - right) * v / tmax;
+    const gg = s("g", { class: "grid" }, svg);
+    ticks.forEach(t => {
+      s("line", { x1: x(t), x2: x(t), y1: top - 2, y2: H - bottom + 2 }, gg);
+      const tt = s("g", { class: "tick" }, svg);
+      s("text", { x: x(t), y: H - 8, "text-anchor": "middle" }, tt, opts.tickFmt ? opts.tickFmt(t) : compact(t));
+    });
+    rows.forEach((r, i) => {
+      const y = top + i * (barH + gap);
+      if (r.dot) s("circle", { cx: 6, cy: y + barH / 2, r: 4.5, fill: r.dot }, svg);
+      s("text", { x: r.dot ? 16 : 0, y: y + barH / 2 + 4 }, svg, r.label);
+      let acc = 0;
+      const parts = r.parts.filter(p => p.value > 0);
+      parts.forEach((p, j) => {
+        const x0 = x(acc), x1 = x(acc + p.value);
+        acc += p.value;
+        const g = s("g", {}, svg);
+        const wpx = Math.max(0, x1 - x0 - (j < parts.length - 1 ? 2 : 0));
+        const last = j === parts.length - 1;
+        const rad = last ? Math.min(4, wpx) : 0;
+        const path = `M${x0},${y} h${wpx - rad} ${rad ? `q${rad},0 ${rad},${rad} v${barH - 2 * rad} q0,${rad} ${-rad},${rad}` : `v${barH}`} h${-(wpx - rad)} z`;
+        s("path", { d: path, fill: p.color, class: "mark" }, g);
+        s("rect", { x: x0, y: y - gap / 2, width: Math.max(wpx, 2), height: barH + gap, fill: "transparent" }, g);
+        hover(g, () => [{ value: opts.valueFmt ? opts.valueFmt(p.value, p) : fmt(p.value, 1), label: p.name, color: p.color }, { label: r.label + (r.sub ? " · " + r.sub : "") }]);
+        if (opts.inside && wpx > 46) {
+          const txt = opts.inside(p.value, p);
+          if (txt) s("text", { x: x0 + 6, y: y + barH / 2 + 4, fill: p.ink || "#fff", style: `fill:${p.ink || "#fff"};font-size:11px;font-weight:600`, "pointer-events": "none" }, g, txt);
+        }
+      });
+      if (opts.tip) s("text", { x: x(acc) + 6, y: y + barH / 2 + 4, style: "font-family:var(--font-mono);font-size:11px" }, svg, opts.tip(acc, r));
+    });
+    s("line", { class: "baseline", x1: labelW, x2: labelW, y1: top - 2, y2: H - bottom + 2 }, svg);
+  };
+  draw();
+}
+
+/** Scatter. points: [{x,y,label,color,rows}] */
+function scatter(el, points, opts) {
+  const draw = () => {
+    el.replaceChildren();
+    const W = chartWidth(el), H = opts.height || Math.min(420, Math.max(300, W * 0.62));
+    const m = { l: 52, r: 18, t: 14, b: 44 };
+    const svg = s("svg", { viewBox: `0 0 ${W} ${H}`, role: "img", "aria-label": opts.aria || "" }, el);
+    const xs = points.map(p => p.x), ys = points.map(p => p.y);
+    let [x0, x1] = opts.xDomain || [Math.min(...xs), Math.max(...xs)];
+    let [y0, y1] = opts.yDomain || [Math.min(...ys), Math.max(...ys)];
+    if (!opts.xDomain) { const px = (x1 - x0 || 1) * 0.12; x0 -= px; x1 += px; }
+    if (!opts.yDomain) { const py = (y1 - y0 || 1) * 0.12; y0 -= py; y1 += py; }
+    const X = v => m.l + (W - m.l - m.r) * (v - x0) / (x1 - x0);
+    const Y = v => H - m.b - (H - m.t - m.b) * (v - y0) / (y1 - y0);
+    if (opts.background) opts.background(svg, X, Y, { W, H, m, x0, x1, y0, y1 });
+    const gg = s("g", { class: "grid" }, svg);
+    const tk = (a, b, n) => { const st = niceTicks(b - a, n)[1] || 1; const out = []; for (let v = Math.ceil(a / st) * st; v <= b + 1e-9; v += st) out.push(+v.toFixed(8)); return out; };
+    tk(x0, x1, W < 500 ? 4 : 6).forEach(t => { s("line", { x1: X(t), x2: X(t), y1: m.t, y2: H - m.b }, gg); s("text", { x: X(t), y: H - m.b + 16, "text-anchor": "middle" }, s("g", { class: "tick" }, svg), opts.xFmt ? opts.xFmt(t) : fmt(t, Math.abs(t) < 1 && t !== 0 ? 2 : 0)); });
+    tk(y0, y1, 5).forEach(t => { s("line", { x1: m.l, x2: W - m.r, y1: Y(t), y2: Y(t) }, gg); s("text", { x: m.l - 8, y: Y(t) + 4, "text-anchor": "end" }, s("g", { class: "tick" }, svg), opts.yFmt ? opts.yFmt(t) : fmt(t, Math.abs(t) < 1 && t !== 0 ? 2 : 0)); });
+    s("text", { x: (m.l + W - m.r) / 2, y: H - 6, "text-anchor": "middle" }, svg, opts.xLabel);
+    s("text", { x: 14, y: (m.t + H - m.b) / 2, "text-anchor": "middle", transform: `rotate(-90 14 ${(m.t + H - m.b) / 2})` }, svg, opts.yLabel);
+    const labelAll = points.length <= (opts.labelMax ?? 12);
+    const placed = points.map(p => ({ x0: X(p.x) - 7, x1: X(p.x) + 7, y0: Y(p.y) - 7, y1: Y(p.y) + 7 }));
+    const overlaps = (b) => placed.some(o => b.x0 < o.x1 && b.x1 > o.x0 && b.y0 < o.y1 && b.y1 > o.y0);
+    points.forEach(p => {
+      const g = s("g", {}, svg);
+      s("circle", { cx: X(p.x), cy: Y(p.y), r: 12, fill: "transparent" }, g);
+      s("circle", { cx: X(p.x), cy: Y(p.y), r: 5.5, fill: p.color, stroke: css("--surface"), "stroke-width": 2, class: "mark" }, g);
+      if (labelAll && p.label) {
+        // try right, left, above, below; skip the label if every spot collides
+        const w = p.label.length * 6.2 + 4, cx = X(p.x), cy = Y(p.y);
+        const spots = [[cx + 9, cy + 4, "start"], [cx - 9, cy + 4, "end"], [cx, cy - 11, "middle"], [cx, cy + 19, "middle"]];
+        for (const [tx, ty, anchor] of spots) {
+          const x0 = anchor === "start" ? tx : anchor === "end" ? tx - w : tx - w / 2;
+          const b = { x0, x1: x0 + w, y0: ty - 11, y1: ty + 3 };
+          if (b.x0 < m.l || b.x1 > W - m.r || b.y0 < m.t || b.y1 > H - m.b || overlaps(b)) continue;
+          placed.push(b);
+          s("text", { x: tx, y: ty, "text-anchor": anchor, style: "font-size:11px" }, g, p.label);
+          break;
+        }
+      }
+      hover(g, () => p.rows);
+    });
+  };
+  draw();
+}
+
+/** Heatmap rows x cols with sequential ramp. */
+function heatmap(el, rowNames, colNames, values, opts) {
+  const draw = () => {
+    el.replaceChildren();
+    const W = chartWidth(el);
+    const labelW = Math.min(W * 0.45, opts.labelW || 300);
+    const cellH = 18, top = 70;
+    const cw = Math.max(16, Math.min(56, (W - labelW - 10) / colNames.length));
+    const H = top + rowNames.length * (cellH + 2) + 10;
+    const svg = s("svg", { viewBox: `0 0 ${W} ${H}`, role: "img", "aria-label": opts.aria || "" }, el);
+    const ramp = ["--seq-0", "--seq-1", "--seq-2", "--seq-3", "--seq-4", "--seq-5", "--seq-6", "--seq-7"].map(css);
+    const tv = values.map(r => r.map(v => opts.transform ? opts.transform(v) : v));
+    const max = Math.max(...tv.flat(), 1e-9);
+    colNames.forEach((c, j) => {
+      const cx = labelW + j * cw + cw / 2;
+      s("text", { x: cx, y: top - 8, transform: `rotate(-50 ${cx} ${top - 8})`, style: "font-size:11px" }, svg, c);
+    });
+    rowNames.forEach((r, i) => {
+      const y = top + i * (cellH + 2);
+      const maxChars = Math.floor((labelW - 10) / 6.2);
+      s("text", { x: 0, y: y + cellH - 5, style: "font-size:11.5px" }, svg, r.length > maxChars ? r.slice(0, maxChars - 1) + "…" : r);
+      colNames.forEach((c, j) => {
+        const v = values[i][j], t = tv[i][j];
+        const k = Math.min(7, Math.floor((t / max) * 7.999));
+        const g = s("g", {}, svg);
+        s("rect", { x: labelW + j * cw + 1, y, width: cw - 2, height: cellH, rx: 3, fill: ramp[k], class: "mark" }, g);
+        hover(g, () => [{ value: opts.valueFmt(v), label: opts.unit || "" }, { label: r }, { label: c }]);
+      });
+    });
+  };
+  draw();
+}
+/** Draw now and again on resize / theme change. */
+function live(fn) { renderers.push(fn); fn(); }
+
+// ------------------------------------------------------------- page skeleton helpers
+const sectionsEl = $("#sections");
+const RAIL = [];
+function section(id, sid, title, tool, explain, phase) {
+  const sec = h("section", { class: "step", id }, sectionsEl);
+  const head = h("div", { class: "step-head" }, sec);
+  h("span", { class: "sid" }, head, sid);
+  h("h2", {}, head, title);
+  if (tool) h("span", { class: "tool" }, head, tool);
+  const ex = h("div", { class: "explain" }, sec);
+  explain.forEach(([t, p]) => { const d = h("div", {}, ex); h("h3", {}, d, t); h("p", {}, d, p); });
+  RAIL.push({ id, sid, title, phase, sec });
+  return sec;
+}
+function findings(sec, lines) {
+  const f = h("div", { class: "findings" }, sec);
+  lines.filter(Boolean).forEach(l => h("p", {}, f, l));
+}
+function missing(sec, text) { h("p", { class: "missing" }, sec, text || "This step has no results in this run folder (not run yet, or it failed)."); RAIL[RAIL.length - 1].off = true; }
+function card(sec) { return h("div", { class: "card" }, sec); }
+function tableView(parent, head, rows, num) {
+  const d = h("details", { class: "table" }, parent);
+  h("summary", {}, d, "Show table");
+  table(h("div", { class: "tablewrap" }, d), head, rows, num);
+}
+const median = (a) => { const b = a.filter(x => x != null).sort((x, y) => x - y); return b.length ? (b.length % 2 ? b[(b.length - 1) / 2] : (b[b.length / 2 - 1] + b[b.length / 2]) / 2) : null; };
+
+// ============================================================= header
+$("#title").textContent = "Run " + D.title;
+$("#rail-run").textContent = D.run;
+$("#eyebrow").textContent = `MetaCheese run report · generated ${D.generated}`;
+const groupCounts = groups.map(g => `${samples.filter(x => groupOf[x] === g).length} ${groupLabel(g)}`).join(", ");
+$("#lede").textContent = `${samples.length} samples (${groupCounts}) processed with the MetaCheese pipeline. Each section explains one workflow step and shows its results for this run.` + (D.samplesheet ? ` Sample groups from ${D.samplesheet}.` : "");
+
+const host = D.host || {}, trim = D.trimming || {};
+const microbialPct = samples.map(x => host[x] && trim[x] && host[x].not_concordant != null ? 100 * host[x].not_concordant / trim[x].pairs : null);
+const totalPairs = samples.reduce((a, x) => a + ((trim[x] || {}).pairs || 0), 0);
+const species = D.metaphlan && D.metaphlan.profiles.species ? D.metaphlan.profiles.species.filter(t => t.values.some(v => v > 0)).length : null;
+const passed = (D.mags || []).filter(m => m.passed).length;
+const tilesEl = $("#tiles");
+[["Samples", samples.length, groupCounts],
+ ["Read pairs sequenced", totalPairs ? compact(totalPairs) : "–", "input to trimming, all samples"],
+ ["Microbial read pairs", pct(median(microbialPct), 0), "median per sample, after trimming and host removal"],
+ ["Species detected", species ?? "–", "MetaPhlAn, all samples together"],
+ ["MAGs", (D.mags || []).length ? `${passed} / ${(D.mags || []).length}` : "–", "passing the quality filter / all bins"],
+].forEach(([l, v, n]) => { const t = h("div", { class: "tile" }, tilesEl); h("span", { class: "label" }, t, l); h("span", { class: "value" }, t, String(v)); h("span", { class: "note" }, t, n); });
+
+// ============================================================= run times
+(function () {
+  const steps = D.steps;
+  const ran = steps.filter(x => x.seconds != null);
+  if (ran.length) {
+    live(() => hbars($("#chart-times"), ran.map(x => ({ label: `${x.id}  ${x.script.split(".")[0]}`, sub: x.name, parts: [{ name: x.name, value: x.seconds / 60, color: css("--s1") }] })),
+      { aria: "Minutes per pipeline step", tickFmt: t => fmt(t, 0) + " min", valueFmt: v => dur(v * 60), tip: v => dur(v * 60), right: 70, labelW: 130 }));
+  } else $("#chart-times").textContent = "No step times recorded (step_times.tsv missing).";
+  table($("#table-steps"), ["ID", "Script", "Step", "Status", "Time", "Output folder"],
+    steps.map(x => [x.id, x.script + ".sh", x.name, pill(x.present ? "done" : "not run", x.present ? "ok" : ""), dur(x.seconds), x.folder]), [4]);
+  const total = ran.reduce((a, x) => a + x.seconds, 0);
+  if (total) h("p", { class: "tool" }, $("#overview"), `Total run time of the recorded steps: ${dur(total)}.`);
+})();
+
+// ============================================================= Q.1 FastQC
+(function () {
+  const sec = section("q1", "Q.1", "Quality of the raw reads", "FastQC 0.12.1",
+    [["What this step does", "FastQC reads each raw FASTQ file and runs a set of standard checks: base quality along the read, GC content, duplication, adapter content and others. It changes nothing; it tells you whether the sequencing run is usable before you spend hours on the analysis."],
+     ["How to read it", "Each check is PASS, WARN or FAIL against thresholds designed for genomic DNA of a single organism. In metagenomes some warnings are expected: GC content and sequence duplication often 'fail' because many species with different GC are mixed. Look first at per-base quality and adapter content."]], "pre");
+  const fq = D.fastqc || [];
+  if (!fq.length) return missing(sec);
+  const mods = fq[0].modules.map(m => m.module);
+  const fails = {}; fq.forEach(f => f.modules.forEach(m => { if (m.status !== "PASS") fails[m.module] = (fails[m.module] || 0) + 1; }));
+  const lowQ = fq.filter(f => f.quality.length && Math.min(...f.quality.map(q => q[1])) < 20).map(f => f.file);
+  findings(sec, [
+    `${fq.length} FASTQ files, ${compact(fq.reduce((a, f) => a + f.total, 0))} reads in total, read length ${[...new Set(fq.map(f => f.length))].join(", ")} bp, GC ${fmt(Math.min(...fq.map(f => f.gc)))}–${fmt(Math.max(...fq.map(f => f.gc)))}%.`,
+    Object.keys(fails).length ? `Checks not passed in at least one file: ${Object.entries(fails).map(([m, n]) => `${m} (${n} files)`).join("; ")}.` : "All checks passed in all files.",
+    lowQ.length ? `Mean quality drops below Q20 somewhere along the read in: ${lowQ.join(", ")}.` : "Mean base quality stays above Q20 along the whole read in every file.",
+  ]);
+  // status grid
+  const c1 = card(sec);
+  h("div", { class: "controls" }, c1, "Status of each FastQC check per file");
+  const tw = h("div", { class: "tablewrap" }, c1);
+  const t = h("table", { class: "qc-grid" }, tw);
+  const tr = h("tr", {}, h("thead", {}, t));
+  h("th", {}, tr, "File");
+  mods.forEach(m => h("th", { class: "rot", scope: "col" }, tr, m));
+  const tb = h("tbody", {}, t);
+  const icon = { PASS: "✓", WARN: "!", FAIL: "✕" };
+  fq.forEach(f => {
+    const r = h("tr", {}, tb);
+    h("td", {}, r, f.file);
+    f.modules.forEach(m => h("td", { class: "cell " + m.status, title: `${m.module}: ${m.status}` }, r, `${icon[m.status] || ""} ${m.status}`));
+  });
+  // quality profile
+  const c2 = card(sec);
+  const ctr = h("div", { class: "controls" }, c2);
+  const lab = h("label", { for: "fq-file" }, ctr, "Highlight file ");
+  const sel = h("select", { id: "fq-file" }, lab);
+  fq.forEach((f, i) => h("option", { value: i }, sel, f.file));
+  const chart = h("div", { class: "chart" }, c2);
+  let cur = 0;
+  const draw = () => {
+    chart.replaceChildren();
+    const W = chartWidth(chart), H = 300, m = { l: 44, r: 14, t: 10, b: 40 };
+    const svg = s("svg", { viewBox: `0 0 ${W} ${H}`, role: "img", "aria-label": "Mean base quality along the read" }, chart);
+    const n = Math.max(...fq.map(f => f.quality.length));
+    const X = i => m.l + (W - m.l - m.r) * i / Math.max(1, n - 1);
+    const Y = q => H - m.b - (H - m.t - m.b) * q / 42;
+    [[28, 42, "--good"], [20, 28, "--warning"], [0, 20, "--critical"]].forEach(([a, b, c]) => s("rect", { x: m.l, y: Y(b), width: W - m.l - m.r, height: Y(a) - Y(b), fill: css(c), opacity: 0.08 }, svg));
+    const gg = s("g", { class: "grid" }, svg);
+    [0, 10, 20, 30, 40].forEach(q => { s("line", { x1: m.l, x2: W - m.r, y1: Y(q), y2: Y(q) }, gg); s("text", { x: m.l - 8, y: Y(q) + 4, "text-anchor": "end" }, s("g", { class: "tick" }, svg), q); });
+    const labs = fq[0].quality.map(q => q[0]);
+    const every = Math.ceil(labs.length / (W < 500 ? 5 : 10));
+    labs.forEach((l, i) => { if (i % every === 0) s("text", { x: X(i), y: H - m.b + 16, "text-anchor": "middle" }, s("g", { class: "tick" }, svg), l); });
+    s("text", { x: (m.l + W - m.r) / 2, y: H - 6, "text-anchor": "middle" }, svg, "Position in read (bp)");
+    s("text", { x: 12, y: (H - m.b + m.t) / 2, "text-anchor": "middle", transform: `rotate(-90 12 ${(H - m.b + m.t) / 2})` }, svg, "Mean Phred quality");
+    const line = (f, color, w) => s("path", { d: f.quality.map((q, i) => `${i ? "L" : "M"}${X(i)},${Y(q[1])}`).join(""), fill: "none", stroke: color, "stroke-width": w, "stroke-linejoin": "round", "stroke-linecap": "round" }, svg);
+    fq.forEach((f, i) => { if (i !== cur) line(f, css("--other"), 1.2); });
+    line(fq[cur], css("--s1"), 2);
+    // crosshair
+    const cross = s("line", { y1: m.t, y2: H - m.b, stroke: css("--axis"), "stroke-width": 1, visibility: "hidden" }, svg);
+    const dot = s("circle", { r: 4.5, fill: css("--s1"), stroke: css("--surface"), "stroke-width": 2, visibility: "hidden" }, svg);
+    const ov = s("rect", { x: m.l, y: m.t, width: W - m.l - m.r, height: H - m.t - m.b, fill: "transparent" }, svg);
+    ov.addEventListener("pointermove", (e) => {
+      const b = svg.getBoundingClientRect(), px = (e.clientX - b.left) * W / b.width;
+      const i = Math.max(0, Math.min(n - 1, Math.round((px - m.l) / (W - m.l - m.r) * (n - 1))));
+      const q = fq[cur].quality[i]; if (!q) return;
+      cross.setAttribute("x1", X(i)); cross.setAttribute("x2", X(i)); cross.setAttribute("visibility", "visible");
+      dot.setAttribute("cx", X(i)); dot.setAttribute("cy", Y(q[1])); dot.setAttribute("visibility", "visible");
+      const vals = fq.map(f => f.quality[i] ? f.quality[i][1] : null).filter(v => v != null);
+      showTip(e, [{ value: "Q" + fmt(q[1], 1), label: fq[cur].file, color: css("--s1") }, { label: `position ${q[0]} bp · all files Q${fmt(Math.min(...vals), 1)}–${fmt(Math.max(...vals), 1)}` }]);
+    });
+    ov.addEventListener("pointerleave", () => { hideTip(); cross.setAttribute("visibility", "hidden"); dot.setAttribute("visibility", "hidden"); });
+  };
+  sel.addEventListener("change", () => { cur = +sel.value; draw(); });
+  renderers.push(draw); draw();
+  legend(c2, [["highlighted file", css("--s1")], ["other files", css("--other")]]);
+  tableView(c2, ["File", "Reads", "Length (bp)", "GC %", "Min. mean quality"], fq.map(f => [f.file, fmt(f.total), f.length, fmt(f.gc), f.quality.length ? fmt(Math.min(...f.quality.map(q => q[1])), 1) : "–"]), [1, 3, 4]);
+})();
+
+// ============================================================= P.1 + P.2
+(function () {
+  const sec = section("p1", "P.1", "Adapter and quality trimming", "AdapterRemoval 2.3.3",
+    [["What this step does", "Removes sequencing adapters (read-through into the adapter when the DNA fragment is shorter than the read), trims low-quality bases (Phred ≤ 30) and Ns from the read ends, cuts 2 bases from each end, and discards reads shorter than 50 bp. Only pairs where both mates survive go on."],
+     ["How to read it", "Expect a few percent of pairs to be lost. A large loss points to short fragments (adapters everywhere) or a poor run. 'Average retained length' shows how much trimming shortened the reads."]], "pre");
+  const tr = D.trimming || {};
+  if (!Object.keys(tr).length) return missing(sec);
+  const rows = ordered.filter(x => tr[x]);
+  const keptPairs = (x) => (host[x] || {}).pairs_in;
+  findings(sec, [
+    `${compact(rows.reduce((a, x) => a + tr[x].pairs, 0))} read pairs in; reads with adapters: ${pct(median(rows.map(x => 100 * tr[x].adapters / (2 * tr[x].pairs))))} (median); average retained length ${fmt(median(rows.map(x => tr[x].avg_length)), 0)} bp.`,
+    rows.some(x => keptPairs(x)) ? `Pairs kept after trimming: ${pct(median(rows.map(x => keptPairs(x) ? 100 * keptPairs(x) / tr[x].pairs : null)), 2)} (median).` : null,
+  ]);
+  tableView(sec, ["Sample", "Group", "Read pairs in", "Reads with adapters", "Discarded reads", "Singletons", "Pairs kept", "Avg. retained length (bp)"],
+    rows.map(x => [x, groupLabel(groupOf[x]), fmt(tr[x].pairs), fmt(tr[x].adapters), fmt(tr[x].discarded), fmt(tr[x].singletons), keptPairs(x) ? fmt(keptPairs(x)) : "–", fmt(tr[x].avg_length, 1)]), [2, 3, 4, 5, 6, 7]);
+
+  const sec2 = section("p2", "P.2", "Host DNA removal", "Bowtie2 2.3.3.1 · Bos taurus ARS-UCD2.0",
+    [["What this step does", "Aligns every read pair to the host genome (cow, the milk's source) and keeps only pairs that do not align as a proper pair. Host DNA carries no information about the microbes and would slow down every later step."],
+     ["How to read it", "Each bar is one sample's read pairs, split into those lost at trimming, those removed as host, and the microbial pairs used downstream. Cheese is usually low in host DNA (a few percent); a high host fraction leaves fewer microbial reads and weaker profiles."]], "pre");
+  const hs = ordered.filter(x => host[x] && tr[x]);
+  if (!hs.length) return missing(sec2);
+  const parts = (x) => {
+    const total = tr[x].pairs, kept = host[x].pairs_in, micro = host[x].not_concordant;
+    return [{ name: "microbial", value: 100 * micro / total, color: css("--s1"), ink: "#fff" },
+            { name: "host (cow)", value: 100 * (kept - micro) / total, color: css("--s2"), ink: "#fff" },
+            { name: "removed at trimming", value: 100 * (total - kept) / total, color: css("--other"), ink: css("--ink") }];
+  };
+  const hostPct = hs.map(x => 100 * (host[x].pairs_in - host[x].not_concordant) / host[x].pairs_in);
+  const maxI = hostPct.indexOf(Math.max(...hostPct));
+  findings(sec2, [`Host DNA: ${pct(Math.min(...hostPct))} to ${pct(Math.max(...hostPct))} of the trimmed pairs (highest in ${hs[maxI]}). Microbial pairs per sample: ${compact(Math.min(...hs.map(x => host[x].not_concordant)))} to ${compact(Math.max(...hs.map(x => host[x].not_concordant)))}.`]);
+  const c = card(sec2);
+  const ch = h("div", { class: "chart" }, c);
+  live(() => hbars(ch, hs.map(x => ({ label: x, sub: groupLabel(groupOf[x]), dot: groupColor(groupOf[x]), parts: parts(x) })),
+    { aria: "Fate of read pairs per sample", max: 100, ticks: [0, 25, 50, 75, 100], tickFmt: t => t + "%", valueFmt: v => pct(v, 2), inside: (v, p) => p.name === "microbial" ? pct(v, 0) : null }));
+  legend(c, [["microbial", css("--s1")], ["host (cow)", css("--s2")], ["removed at trimming", css("--other")]]);
+  legend(c, groups.map(g => [groupLabel(g), groupColor(g)]), true);
+  tableView(c, ["Sample", "Pairs after trimming", "Host pairs", "Host %", "Microbial pairs", "Overall alignment rate"],
+    hs.map(x => [x, fmt(host[x].pairs_in), fmt(host[x].pairs_in - host[x].not_concordant), pct(100 * (host[x].pairs_in - host[x].not_concordant) / host[x].pairs_in, 2), fmt(host[x].not_concordant), pct(host[x].overall_rate, 2)]), [1, 2, 3, 4, 5]);
+})();
+
+// ============================================================= C.1 taxonomy
+(function () {
+  const sec = section("c1", "C.1", "Who is there: taxonomic profiles", "MetaPhlAn 4.1.0 · mpa_vJun23",
+    [["What this step does", "MetaPhlAn maps the microbial reads to about 5 million clade-specific marker genes and estimates the relative abundance of each taxon, from phylum down to species-level genome bins (SGBs). Abundances in a sample add up to 100% at every rank."],
+     ["How to read it", "Each bar is one sample. The 8 most abundant taxa across all samples keep their colour at every rank you pick; everything else is 'Other'. Cheese communities are usually dominated by a few lactic acid bacteria (starter cultures such as Lactobacillus, Streptococcus, Lactococcus)."]], "com");
+  const mp = D.metaphlan;
+  if (!mp) return missing(sec);
+  const cols = mp.samples;
+  const sp = mp.profiles.species || [];
+  const top = (rank) => {
+    const list = (mp.profiles[rank] || []).map(t => ({ ...t, mean: t.values.reduce((a, b) => a + b, 0) / t.values.length }));
+    return list.sort((a, b) => b.mean - a.mean);
+  };
+  const domSp = ordered.map(x => { const j = cols.indexOf(x); const best = sp.reduce((b, t) => (t.values[j] > (b ? b.values[j] : -1) ? t : b), null); return best ? `${x}: ${best.taxon} (${pct(best.values[j], 0)})` : null; });
+  findings(sec, [
+    `Dominant species per sample: ${domSp.filter(Boolean).join("; ")}.`,
+    Object.keys(mp.reads).length ? `Reads processed by MetaPhlAn per sample: ${compact(Math.min(...Object.values(mp.reads)))} to ${compact(Math.max(...Object.values(mp.reads)))}.` : null,
+  ]);
+  const c = card(sec);
+  const ctr = h("div", { class: "controls" }, c);
+  ctr.appendChild(document.createTextNode("Rank "));
+  const chart = h("div", { class: "chart" }, c);
+  const leg = h("div", {}, c);
+  const tbl = h("div", {}, c);
+  let rank = mp.profiles.genus ? "genus" : Object.keys(mp.profiles)[0];
+  const renderRank = () => {
+    const list = top(rank);
+    const head = list.slice(0, 8), rest = list.slice(8);
+    const colorOf = (i) => css(SERIES[i]);
+    const inkOf = (i) => [3].includes(i) ? "#0b0b0b" : "#fff";
+    chart.replaceChildren(); leg.replaceChildren(); tbl.replaceChildren();
+    hbars(chart, ordered.filter(x => cols.includes(x)).map(x => {
+      const j = cols.indexOf(x);
+      const parts = head.map((t, i) => ({ name: t.taxon, value: t.values[j], color: colorOf(i), ink: inkOf(i) }));
+      const other = Math.max(0, 100 - parts.reduce((a, p) => a + p.value, 0));
+      parts.push({ name: "Other", value: other, color: css("--other"), ink: css("--ink") });
+      return { label: x, sub: groupLabel(groupOf[x]), dot: groupColor(groupOf[x]), parts };
+    }), { aria: `Relative abundance by ${rank}`, max: 100, ticks: [0, 25, 50, 75, 100], tickFmt: t => t + "%", valueFmt: v => pct(v, 2), inside: (v) => v >= 8 ? pct(v, 0) : null });
+    legend(leg, head.map((t, i) => [t.taxon, colorOf(i)]).concat(rest.length ? [["Other (" + rest.length + " taxa)", css("--other")]] : []));
+    const d = h("details", { class: "table" }, tbl); h("summary", {}, d, `Show table (${list.length} taxa at ${rank} level)`);
+    table(h("div", { class: "tablewrap" }, d), ["Taxon", "Lineage", ...cols, "Mean %"], list.map(t => [t.taxon, t.lineage, ...t.values.map(v => v ? fmt(v, 3) : "0"), fmt(t.mean, 3)]), cols.map((_, i) => i + 2).concat([cols.length + 2]));
+  };
+  const ranks = ["phylum", "class", "order", "family", "genus", "species"].filter(r => mp.profiles[r]);
+  segs(ctr, ranks.map(r => [r, r]), rank, (r) => { rank = r; renderRank(); }, "Taxonomic rank");
+  live(renderRank);
+  legend(c, groups.map(g => [groupLabel(g), groupColor(g)]), true);
+})();
+
+// ============================================================= C.2 diversity
+(function () {
+  const sec = section("c2", "C.2", "Diversity within and between samples", "calculate_diversity.R (vegan, rbiom)",
+    [["What this step does", "Alpha diversity summarises each sample on its own: how many species (richness), and how evenly abundance is spread (Shannon, Gini-Simpson). Beta diversity compares every pair of samples: Bray-Curtis uses abundances, Jaccard only presence/absence (0 = identical, 1 = nothing shared)."],
+     ["How to read it", "On the left, each dot is a sample, grouped by cheese type. On the right, the PCoA places samples so that distances on the plot approximate the beta-diversity distances: samples close together have similar communities. The axis titles say how much of the variation each axis shows."]], "com");
+  const dv = D.diversity;
+  if (!dv || (!Object.keys(dv.alpha).length && !Object.keys(dv.beta).length)) return missing(sec);
+  const two = h("div", { class: "two" }, sec);
+  // alpha
+  const ca = h("div", { class: "card" }, two);
+  const ctrA = h("div", { class: "controls" }, ca);
+  const chA = h("div", { class: "chart" }, ca);
+  let metric = Object.keys(dv.alpha).includes("shannon") ? "shannon" : Object.keys(dv.alpha)[0];
+  const drawA = () => {
+    chA.replaceChildren();
+    const a = dv.alpha[metric]; if (!a) return;
+    const W = chartWidth(chA), H = 320, m = { l: 48, r: 16, t: 14, b: 40 };
+    const svg = s("svg", { viewBox: `0 0 ${W} ${H}`, role: "img", "aria-label": a.label + " per group" }, chA);
+    const vals = Object.values(a.values).filter(v => v != null);
+    const ticks = niceTicks(Math.max(...vals), 5); const tmax = ticks[ticks.length - 1];
+    const Y = v => H - m.b - (H - m.t - m.b) * v / tmax;
+    const bw = (W - m.l - m.r) / groups.length;
+    const gg = s("g", { class: "grid" }, svg);
+    ticks.forEach(t => { s("line", { x1: m.l, x2: W - m.r, y1: Y(t), y2: Y(t) }, gg); s("text", { x: m.l - 8, y: Y(t) + 4, "text-anchor": "end" }, s("g", { class: "tick" }, svg), fmt(t, tmax < 3 ? 1 : 0)); });
+    s("text", { x: 12, y: (H - m.b + m.t) / 2, "text-anchor": "middle", transform: `rotate(-90 12 ${(H - m.b + m.t) / 2})` }, svg, a.label);
+    groups.forEach((g, gi) => {
+      const cx = m.l + bw * gi + bw / 2;
+      s("text", { x: cx, y: H - m.b + 18, "text-anchor": "middle" }, svg, groupLabel(g));
+      const members = ordered.filter(x => groupOf[x] === g && a.values[x] != null);
+      const mean = members.reduce((acc, x) => acc + a.values[x], 0) / (members.length || 1);
+      s("line", { x1: cx - bw * 0.22, x2: cx + bw * 0.22, y1: Y(mean), y2: Y(mean), stroke: css("--ink-2"), "stroke-width": 2, "stroke-linecap": "round" }, svg);
+      members.forEach((x, k) => {
+        const jitter = (k - (members.length - 1) / 2) * Math.min(14, bw * 0.5 / Math.max(1, members.length));
+        const gr = s("g", {}, svg);
+        s("circle", { cx: cx + jitter, cy: Y(a.values[x]), r: 12, fill: "transparent" }, gr);
+        s("circle", { cx: cx + jitter, cy: Y(a.values[x]), r: 5.5, fill: groupColor(g), stroke: css("--surface"), "stroke-width": 2, class: "mark" }, gr);
+        hover(gr, () => [{ value: fmt(a.values[x], 3), label: a.label, color: groupColor(g) }, { label: `${x} · ${groupLabel(g)}` }]);
+      });
+    });
+  };
+  if (Object.keys(dv.alpha).length) {
+    const lab = h("label", { for: "alpha-metric" }, ctrA, "Alpha diversity ");
+    const sel = h("select", { id: "alpha-metric" }, lab);
+    Object.entries(dv.alpha).forEach(([k, v]) => h("option", { value: k, selected: k === metric ? "" : null }, sel, v.label));
+    sel.addEventListener("change", () => { metric = sel.value; drawA(); });
+    renderers.push(drawA); drawA();
+    h("div", { class: "tool" }, ca, "Horizontal line: group mean.");
+    tableView(ca, ["Sample", "Group", ...Object.values(dv.alpha).map(v => v.label)], ordered.map(x => [x, groupLabel(groupOf[x]), ...Object.values(dv.alpha).map(v => fmt(v.values[x], 3))]), Object.keys(dv.alpha).map((_, i) => i + 2));
+  }
+  // beta
+  const cb = h("div", { class: "card" }, two);
+  const ctrB = h("div", { class: "controls" }, cb);
+  const chB = h("div", { class: "chart" }, cb);
+  const tbB = h("div", {}, cb);
+  let bm = dv.beta["bray-curtis"] ? "bray-curtis" : Object.keys(dv.beta)[0];
+  const drawB = () => {
+    const b = dv.beta[bm]; if (!b || !b.pcoa) { chB.textContent = "Not enough samples for a PCoA."; return; }
+    const pts = b.samples.map((x, i) => ({ x: b.pcoa.coords[i][0], y: b.pcoa.coords[i][1], label: x, color: groupColor(groupOf[x]),
+      rows: [{ value: x, label: groupLabel(groupOf[x]), color: groupColor(groupOf[x]) }, { label: `PCoA 1 ${fmt(b.pcoa.coords[i][0], 3)} · PCoA 2 ${fmt(b.pcoa.coords[i][1], 3)}` }] }));
+    scatter(chB, pts, { aria: `PCoA of ${b.label} distances`, xLabel: `PCoA 1 (${fmt(b.pcoa.explained[0], 0)}%)`, yLabel: `PCoA 2 (${fmt(b.pcoa.explained[1], 0)}%)`, height: 320 });
+    tbB.replaceChildren();
+    const d = h("details", { class: "table" }, tbB); h("summary", {}, d, `Show ${b.label} distance matrix`);
+    table(h("div", { class: "tablewrap" }, d), ["", ...b.samples], b.samples.map((x, i) => [x, ...b.matrix[i].map(v => fmt(v, 3))]), b.samples.map((_, i) => i + 1));
+  };
+  if (Object.keys(dv.beta).length) {
+    segs(ctrB, Object.entries(dv.beta).map(([k, v]) => [k, v.label]), bm, (k) => { bm = k; drawB(); }, "Beta diversity metric");
+    renderers.push(drawB); drawB();
+  }
+  legend(sec, groups.map(g => [groupLabel(g), groupColor(g)]), true);
+  // findings
+  const bc = dv.beta["bray-curtis"];
+  if (bc) {
+    const within = [], between = [];
+    bc.samples.forEach((a, i) => bc.samples.forEach((b2, j) => { if (j > i) (groupOf[a] === groupOf[b2] ? within : between).push(bc.matrix[i][j]); }));
+    const avg = (a) => a.reduce((x, y) => x + y, 0) / (a.length || 1);
+    const sh = dv.alpha.shannon;
+    findings(sec, [
+      groups.length > 1 ? `Mean Bray-Curtis distance: ${fmt(avg(within), 2)} between samples of the same group, ${fmt(avg(between), 2)} between groups.` : null,
+      sh ? groups.map(g => { const v = ordered.filter(x => groupOf[x] === g).map(x => sh.values[x]); return `Shannon in ${groupLabel(g)}: ${fmt(Math.min(...v), 2)}–${fmt(Math.max(...v), 2)}`; }).join("; ") + "." : null,
+      samples.length < 10 ? "With this few samples, treat group differences as descriptive; there is no statistical test here." : null,
+    ]);
+    sec.insertBefore(sec.lastChild, two);
+  }
+})();
+
+// ============================================================= C.3 HUMAnN (per sample, step 04b-1)
+(function () {
+  const sec = section("c3", "C.3", "What they can do: functional profiles", "HUMAnN 3.9 · UniRef90 · MetaCyc",
+    [["What this step does", "For each sample, HUMAnN maps the reads to the pangenomes of the species MetaPhlAn found (fast nucleotide search), then translates the remaining reads and searches them against UniRef90 proteins (DIAMOND). Hits are counted as UniRef90 gene families, which are then assembled into MetaCyc metabolic pathways. Only read 1 of each pair is used."],
+     ["How to read it", "'Unmapped' is the share of reads that matched no known gene; in food metagenomes it is often 15–60%. 'Unintegrated' is the share of gene-family abundance that does not complete any known pathway, normally the large majority. More gene families and pathways mean a more diverse functional repertoire (or deeper sequencing)."]], "com");
+  const hu = D.humann;
+  const st = hu ? hu.stats || {} : {};
+  const xs = ordered.filter(x => st[x]);
+  if (!xs.length) return missing(sec);
+  const rng = (k, f) => { const v = xs.map(x => st[x][k]).filter(v => v != null); return v.length ? `${f(Math.min(...v))}–${f(Math.max(...v))}` : "–"; };
+  findings(sec, [
+    `${xs.length} of ${samples.length} samples profiled.` + (xs.length < samples.length ? ` Missing: ${samples.filter(x => !st[x]).join(", ")}.` : ""),
+    `Per sample: ${rng("genefamilies", v => fmt(v))} gene families and ${rng("pathways", v => fmt(v))} MetaCyc pathways; ${rng("unmapped", v => pct(v, 0))} of the reads unmapped.`,
+  ]);
+  const c = card(sec);
+  const ch = h("div", { class: "chart" }, c);
+  live(() => hbars(ch, xs.map(x => ({ label: x, sub: groupLabel(groupOf[x]), dot: groupColor(groupOf[x]), parts: [
+      { name: "mapped to gene families", value: 100 - (st[x].unmapped || 0), color: css("--s1"), ink: "#fff" },
+      { name: "unmapped", value: st[x].unmapped || 0, color: css("--other"), ink: css("--ink") }] })),
+    { aria: "Share of reads mapped to gene families", max: 100, ticks: [0, 25, 50, 75, 100], tickFmt: t => t + "%", valueFmt: v => pct(v, 1), inside: v => v >= 8 ? pct(v, 0) : null }));
+  legend(c, [["mapped to gene families", css("--s1")], ["unmapped", css("--other")]]);
+  tableView(c, ["Sample", "Gene families", "Unmapped %", "Pathways", "Unintegrated %"],
+    xs.map(x => [x, fmt(st[x].genefamilies), fmt(st[x].unmapped, 1), fmt(st[x].pathways), fmt(st[x].unintegrated, 1)]), [1, 2, 3, 4]);
+})();
+
+// ============================================================= C.4 community-level aggregation (step 04b-last)
+(function () {
+  const sec = section("c4", "C.4", "Community-level aggregation", "HUMAnN utilities · join, renorm, regroup",
+    [["What this step does", "The per-sample HUMAnN tables are joined into one table per output, normalised to copies per million (CPM) so samples of different depth can be compared, and gene families are regrouped into KEGG orthologs (KO), enzymes (EC) and MetaCyc reactions. Each table exists stratified (per contributing species) and unstratified (community totals). Files: 04b_humann_output/merged_tables/."],
+     ["How to read it", "The heatmap shows the most abundant features across samples, darker = more abundant (log scale). The bars below show which species carry the pathways of each sample: the stratified pathway abundance split by species."]], "com");
+  const hu = D.humann;
+  if (!hu || !Object.keys(hu.tables).length) {
+    if (hu && hu.per_sample.length) return missing(sec, `Per-sample HUMAnN tables exist for ${hu.per_sample.length} samples, but the merged tables (step 04b-last) are missing.`);
+    return missing(sec);
+  }
+  const gf = hu.tables.genefamilies;
+  const ct = hu.contrib;
+  findings(sec, [
+    Object.entries(hu.tables).filter(([k]) => k !== "genefamilies").map(([k, t]) => `${fmt(t.total)} ${t.label}`).join(", ") + " in the merged tables." + (gf ? ` ${fmt(gf.total)} UniRef90 gene families.` : ""),
+    ct && ct.species.length ? `Main contributor to the pathways, averaged over samples: ${ct.species[0].taxon} (${pct(ct.species[0].values.reduce((a, b) => a + b, 0) / ct.species[0].values.length, 0)}).` : null,
+  ]);
+  const c = card(sec);
+  const ctr = h("div", { class: "controls" }, c);
+  const chart = h("div", { class: "chart" }, c);
+  const tbl = h("div", {}, c);
+  const keys = Object.keys(hu.tables).filter(k => k !== "genefamilies");
+  let key = keys.includes("pathways") ? "pathways" : keys[0];
+  const nTop = 25;
+  const draw = () => {
+    const t = hu.tables[key];
+    const feats = t.features.slice(0, nTop);
+    heatmap(chart, feats.map(f => f.name === f.id ? f.id : `${f.name} (${f.id})`), t.samples, feats.map(f => f.values),
+      { aria: `Top ${t.label}`, transform: v => Math.log10(1 + v), valueFmt: v => fmt(v, 1), unit: "CPM", labelW: 340 });
+    tbl.replaceChildren();
+    const d = h("details", { class: "table" }, tbl); h("summary", {}, d, `Show table (top ${t.features.length} ${t.label}, CPM)`);
+    table(h("div", { class: "tablewrap" }, d), ["ID", "Name", ...t.samples], t.features.map(f => [f.id, f.name, ...f.values.map(v => fmt(v, 1))]), t.samples.map((_, i) => i + 2));
+  };
+  if (keys.length) {
+    segs(ctr, keys.map(k => [k, hu.tables[k].label]), key, (k) => { key = k; draw(); }, "Feature type");
+    renderers.push(draw); draw();
+    const ramp = h("div", { class: "legend" }, c);
+    ramp.appendChild(document.createTextNode("low"));
+    ["--seq-0", "--seq-1", "--seq-2", "--seq-3", "--seq-4", "--seq-5", "--seq-6", "--seq-7"].forEach(v => { const i = h("i", {}, ramp); i.style.background = css(v); i.style.marginRight = "-12px"; });
+    ramp.appendChild(document.createTextNode("     high (log10 CPM)"));
+  }
+  if (ct && ct.species.length) {
+    const c2 = card(sec);
+    h("h3", {}, c2, "Which species carry the pathways");
+    const head = ct.species.slice(0, 8);
+    const ch2 = h("div", { class: "chart" }, c2);
+    live(() => hbars(ch2, ordered.filter(x => ct.samples.includes(x)).map(x => {
+      const j = ct.samples.indexOf(x);
+      const parts = head.map((t, i) => ({ name: t.taxon, value: t.values[j], color: css(SERIES[i]), ink: i === 3 ? "#0b0b0b" : "#fff" }));
+      parts.push({ name: "Other", value: Math.max(0, 100 - parts.reduce((a, p) => a + p.value, 0)), color: css("--other"), ink: css("--ink") });
+      return { label: x, sub: groupLabel(groupOf[x]), dot: groupColor(groupOf[x]), parts };
+    }), { aria: "Share of pathway abundance by species", max: 100, ticks: [0, 25, 50, 75, 100], tickFmt: t => t + "%", valueFmt: v => pct(v, 1), inside: v => v >= 8 ? pct(v, 0) : null }));
+    legend(c2, head.map((t, i) => [t.taxon, css(SERIES[i])]).concat(ct.total > head.length ? [[`Other (${ct.total - head.length} taxa)`, css("--other")]] : []));
+  }
+})();
+
+// ============================================================= A.1 + A.2 assembly
+(function () {
+  const sec = section("a1", "A.1–A.2", "Assembly and contig filtering", "metaSPAdes 3.13.0 · contigs > 500 bp",
+    [["What this step does", "metaSPAdes assembles each sample's microbial reads into contigs: longer stretches of genome reconstructed from overlapping reads. Contigs of 500 bp or less are then dropped, because they are too short to bin reliably."],
+     ["How to read it", "N50 is the contig length such that half of the assembled bases are in contigs at least that long: higher means a more contiguous assembly. Low-diversity, deeply sequenced communities (typical of cheese) assemble well; with only 5 million read pairs per sample, expect fragmented assemblies for the less abundant species."]], "asm");
+  const as = D.assembly || {};
+  const xs = ordered.filter(x => as[x]);
+  if (!xs.length) return missing(sec);
+  findings(sec, [`Filtered assemblies: ${compact(Math.min(...xs.map(x => as[x].total_bp)))}–${compact(Math.max(...xs.map(x => as[x].total_bp)))} bp in ${fmt(Math.min(...xs.map(x => as[x].contigs)))}–${fmt(Math.max(...xs.map(x => as[x].contigs)))} contigs; N50 ${fmt(Math.min(...xs.map(x => as[x].n50)))}–${fmt(Math.max(...xs.map(x => as[x].n50)))} bp; longest contig ${compact(Math.max(...xs.map(x => as[x].longest)))} bp.`]);
+  const c = card(sec);
+  const ctr = h("div", { class: "controls" }, c);
+  const chart = h("div", { class: "chart" }, c);
+  const metrics = { n50: ["N50 (bp)", v => fmt(v) + " bp"], total_bp: ["Assembly size (bp)", v => compact(v) + "bp"], contigs: ["Contigs > 500 bp", v => fmt(v)], longest: ["Longest contig (bp)", v => compact(v) + "bp"] };
+  let mk = "n50";
+  const draw = () => {
+    hbars(chart, xs.map(x => ({ label: x, sub: groupLabel(groupOf[x]), dot: groupColor(groupOf[x]), parts: [{ name: metrics[mk][0], value: as[x][mk], color: css("--s1") }] })),
+      { aria: metrics[mk][0], valueFmt: metrics[mk][1], tip: v => metrics[mk][1](v), right: 80 });
+  };
+  segs(ctr, Object.entries(metrics).map(([k, v]) => [k, v[0]]), mk, (k) => { mk = k; draw(); }, "Assembly metric");
+  renderers.push(draw); draw();
+  tableView(c, ["Sample", "Contigs (all)", "Size (all)", "Contigs > 500 bp", "Size > 500 bp", "N50", "Longest"],
+    xs.map(x => [x, fmt(as[x].raw_contigs), fmt(as[x].raw_bp), fmt(as[x].contigs), fmt(as[x].total_bp), fmt(as[x].n50), fmt(as[x].longest)]), [1, 2, 3, 4, 5, 6]);
+})();
+
+// ============================================================= A.3 coverage
+(function () {
+  const sec = section("a3", "A.3", "Read mapping and contig coverage", "Bowtie2 · samtools 1.6",
+    [["What this step does", "Each sample's reads are mapped back to its own contigs to measure how deeply every contig is covered. Contigs from the same genome share a similar coverage, which is what the binning step uses."],
+     ["How to read it", "The mapping rate is the share of reads that align to the sample's own assembly. A high rate means the assembly represents most of the sequenced community."]], "asm");
+  const mp = D.mapping || {};
+  const xs = ordered.filter(x => mp[x] != null);
+  if (!xs.length) return missing(sec);
+  findings(sec, [`Reads mapping back to their own assembly: ${pct(Math.min(...xs.map(x => mp[x])))} to ${pct(Math.max(...xs.map(x => mp[x])))}.`]);
+  const c = card(sec);
+  const chA3 = h("div", { class: "chart" }, c);
+  live(() => hbars(chA3, xs.map(x => ({ label: x, dot: groupColor(groupOf[x]), parts: [{ name: "reads mapped to own contigs", value: mp[x], color: css("--s1") }] })),
+    { max: 100, ticks: [0, 25, 50, 75, 100], tickFmt: t => t + "%", valueFmt: v => pct(v), tip: v => pct(v), right: 60 }));
+  tableView(c, ["Sample", "Overall alignment rate"], xs.map(x => [x, pct(mp[x], 2)]), [1]);
+})();
+
+// ============================================================= A.4-A.6 MAGs
+(function () {
+  const sec = section("a4", "A.4–A.6", "Genomes from the metagenome (MAGs)", "MetaBAT2 2.17 · CheckM2 1.0.2",
+    [["What this step does", "MetaBAT2 groups contigs into bins (draft genomes, MAGs) using their coverage and sequence composition. CheckM2 estimates for each bin how complete it is and how much contamination (DNA from other organisms) it carries. Bins with completeness above 50% and contamination below 10% are kept for annotation."],
+     ["How to read it", "Each dot is a MAG. Right and low is good. The shaded areas follow the MIMAG standard: high quality (≥ 90% complete, < 5% contaminated), medium quality (≥ 50%, < 10%). With 5 million read pairs per sample only the dominant species reach enough coverage to give good bins."]], "asm");
+  const mags = D.mags || [];
+  if (!mags.length) return missing(sec);
+  const tier = (m) => m.completeness == null ? "unknown" : m.completeness >= 90 && m.contamination < 5 ? "high" : m.completeness >= 50 && m.contamination < 10 ? "medium" : "low";
+  const tierColor = { high: "--good", medium: "--warning", low: "--critical", unknown: "--other" };
+  const tierLabel = { high: "high quality", medium: "medium quality", low: "low quality", unknown: "not assessed" };
+  const counts = {}; mags.forEach(m => { counts[tier(m)] = (counts[tier(m)] || 0) + 1; });
+  findings(sec, [
+    `${mags.length} bins from ${new Set(mags.map(m => m.sample)).size} samples: ${["high", "medium", "low", "unknown"].filter(t => counts[t]).map(t => `${counts[t]} ${tierLabel[t]}`).join(", ")}.`,
+    `${mags.filter(m => m.passed).length} MAGs passed the filter of step A.6 and went on to annotation.`,
+  ]);
+  const c = card(sec);
+  const assessed = mags.filter(m => m.completeness != null);
+  if (assessed.length) {
+    const chM = h("div", { class: "chart" }, c);
+    live(() => scatter(chM, assessed.map(m => ({ x: m.completeness, y: m.contamination, color: css(tierColor[tier(m)]), label: null,
+      rows: [{ value: m.name, label: "", color: css(tierColor[tier(m)]) }, { label: `completeness ${pct(m.completeness)} · contamination ${pct(m.contamination)}` }, { label: `${compact(m.size)}bp · N50 ${fmt(m.n50)} · ${tierLabel[tier(m)]}${m.passed ? " · kept" : ""}` }] })),
+      { aria: "MAG completeness versus contamination", xDomain: [0, 100], yDomain: [0, Math.max(15, ...assessed.map(m => m.contamination)) * 1.05], xLabel: "Completeness (%)", yLabel: "Contamination (%)", labelMax: 0,
+        background: (svg, X, Y) => {
+          s("rect", { x: X(50), y: Y(10), width: X(100) - X(50), height: Y(0) - Y(10), fill: css("--warning"), opacity: 0.12 }, svg);
+          s("rect", { x: X(90), y: Y(5), width: X(100) - X(90), height: Y(0) - Y(5), fill: css("--good"), opacity: 0.16 }, svg);
+          s("text", { x: X(52), y: Y(10) + 14, style: "font-size:11px" }, svg, "medium");
+          s("text", { x: X(91), y: Y(5) + 14, style: "font-size:11px" }, svg, "high");
+        } }));
+    legend(c, ["high", "medium", "low"].map(t => [`${tierLabel[t]} (${counts[t] || 0})`, css(tierColor[t])]), true);
+  }
+  tableView(c, ["MAG", "Sample", "Completeness %", "Contamination %", "Size (bp)", "Contig N50", "GC %", "Quality", "Kept"],
+    [...mags].sort((a, b) => (b.completeness || 0) - (a.completeness || 0)).map(m => [m.name, m.sample, fmt(m.completeness, 1), fmt(m.contamination, 2), fmt(m.size), fmt(m.n50), fmt(m.gc, 1), pill(tierLabel[tier(m)], tier(m) === "high" ? "ok" : tier(m) === "medium" ? "warn" : "bad"), m.passed ? "yes" : ""]), [2, 3, 4, 5, 6]);
+})();
+
+// ============================================================= A.7 TORMES
+(function () {
+  const sec = section("a7", "A.7", "MAG annotation", "TORMES 1.3.0",
+    [["What this step does", "TORMES annotates each kept MAG: genes (Prokka), taxonomy, MLST, antimicrobial resistance and virulence genes, plasmids. It writes an HTML report per run."],
+     ["How to read it", "Open the TORMES report from the run folder (links below work when this report is opened from output/<run>/report/)."]], "asm");
+  const t = D.tormes;
+  if (!t || !t.reports.length) return missing(sec, (D.mags || []).length && !(D.mags || []).some(m => m.passed) ? "No MAG passed the quality filter, so TORMES was not run." : null);
+  const c = card(sec);
+  const ul = h("ul", {}, c);
+  t.reports.forEach(r => { const li = h("li", {}, ul); h("a", { href: "../" + r, target: "_blank", rel: "noopener" }, li, r); });
+})();
+
+// ============================================================= R.1 joint: both branches
+(function () {
+  const sec = section("r1", "R.1", "Both branches together", "make_report.py",
+    [["What this step does", "Joins the community-level profiles (C.1–C.4), built from all reads, with the genomes reconstructed by the assembly branch (A.1–A.7). For every sample it measures how much of the microbial community the MAGs capture, and checks each MAG against the abundance MetaPhlAn gives to the same organism."],
+     ["How to read it", "The bars split each sample's microbial reads by where they end up: in kept MAGs, in other (lower-quality) bins, in contigs that were not binned, or not assembled at all. A large 'kept MAGs' share means the genomes describe most of the community. In the MAG table, a MAG of a species that MetaPhlAn also finds abundant confirms both branches; a MAG with no MetaPhlAn match may be an organism missing from the marker database."]], "joint");
+  const ig = D.integration || { fate: {}, mags: [] };
+  const mp = D.metaphlan, hu = D.humann || {}, dv = D.diversity, as = D.assembly || {}, mpg = D.mapping || {};
+  const host = D.host || {};
+  const nSpecies = (x) => { if (!mp || !mp.profiles.species) return null; const j = mp.samples.indexOf(x); return j < 0 ? null : mp.profiles.species.filter(t => t.values[j] > 0).length; };
+  const shannon = (x) => dv && dv.alpha.shannon ? dv.alpha.shannon.values[x] : null;
+  const magsOf = (x) => (D.mags || []).filter(m => m.sample === x);
+  const fate = ig.fate || {};
+  const fx = ordered.filter(x => fate[x]);
+  const hasCom = mp || Object.keys(hu.stats || {}).length, hasAsm = Object.keys(as).length || (D.mags || []).length;
+  if (!hasCom && !hasAsm) return missing(sec);
+  findings(sec, [
+    !hasAsm ? "The assembly branch has no results yet: only the community-level columns are filled." : null,
+    !hasCom ? "The community-level branch has no results yet: only the assembly columns are filled." : null,
+    fx.length ? `Share of the microbial reads captured by kept MAGs: ${fx.map(x => `${x} ${pct(fate[x].kept, 1)}`).join(", ")}.` : null,
+    ig.mags.some(m => m.passed && (m.mpa_species != null || m.mpa_genus != null)) ? `${ig.mags.filter(m => m.passed && (m.mpa_species != null || m.mpa_genus != null)).length} of ${ig.mags.filter(m => m.passed).length} kept MAGs match a species or genus detected by MetaPhlAn in the same sample.` : null,
+  ]);
+  // per-sample summary across both branches
+  const c = card(sec);
+  h("h3", {}, c, "Per-sample summary");
+  table(h("div", { class: "tablewrap" }, c),
+    ["Sample", "Group", "Microbial read pairs (P.2)", "Species (C.1)", "Shannon (C.2)", "Pathways (C.3)", "Contig N50 (A.2)", "Reads on contigs % (A.3)", "Bins (A.4)", "Kept MAGs (A.6)", "Reads in kept MAGs %"],
+    ordered.map(x => [x, groupLabel(groupOf[x]),
+      host[x] && host[x].not_concordant != null ? fmt(host[x].not_concordant) : null,
+      nSpecies(x), shannon(x) != null ? fmt(shannon(x), 2) : null,
+      hu.stats && hu.stats[x] ? fmt(hu.stats[x].pathways) : null,
+      as[x] ? fmt(as[x].n50) : null, mpg[x] != null ? fmt(mpg[x], 1) : null,
+      magsOf(x).length || (hasAsm ? 0 : null), magsOf(x).filter(m => m.passed).length || (hasAsm ? 0 : null),
+      fate[x] ? fmt(fate[x].kept, 1) : null]),
+    [2, 3, 4, 5, 6, 7, 8, 9, 10]);
+  // where the microbial reads end up
+  if (fx.length) {
+    const c2 = card(sec);
+    h("h3", {}, c2, "Where the microbial reads end up");
+    const ch = h("div", { class: "chart" }, c2);
+    const cats = [["kept", "in kept MAGs", "--good", "#fff"], ["other_bins", "in other bins", "--s4", "#0b0b0b"], ["unbinned", "in unbinned contigs", "--s1", "#fff"], ["not_assembled", "not assembled", "--other", null]];
+    live(() => hbars(ch, fx.map(x => ({ label: x, sub: groupLabel(groupOf[x]), dot: groupColor(groupOf[x]),
+      parts: cats.filter(([k]) => fate[x][k] != null).map(([k, n, col, ink]) => ({ name: n, value: fate[x][k], color: css(col), ink: ink || css("--ink") })) })),
+      { aria: "Fate of the microbial reads", max: 100, ticks: [0, 25, 50, 75, 100], tickFmt: t => t + "%", valueFmt: v => pct(v, 1), inside: v => v >= 8 ? pct(v, 0) : null }));
+    legend(c2, cats.map(([, n, col]) => [n, css(col)]));
+  }
+  // MAGs against the community profile
+  const km = ig.mags.filter(m => m.passed || m.share != null).sort((a, b) => (b.passed - a.passed) || ((b.share || 0) - (a.share || 0)));
+  if (km.length) {
+    const c3 = card(sec);
+    h("h3", {}, c3, "MAGs against the community profile");
+    if (!ig.taxonomy) h("p", { class: "tool" }, c3, "No TORMES taxonomy in this run (A.7 not run), so MAGs cannot be named and matched to MetaPhlAn species yet.");
+    const t = h("div", { class: "tablewrap" }, c3);
+    table(t, ["MAG", "Sample", "Kept", "Completeness %", "Contamination %", "Reads in MAG %", "Species (A.7, Kraken2)", "MetaPhlAn species % (C.1)", "MetaPhlAn genus % (C.1)"],
+      km.slice(0, 60).map(m => [m.name, m.sample, m.passed ? "yes" : "", fmt(m.completeness, 1), fmt(m.contamination, 2), m.share != null ? fmt(m.share, 2) : null,
+        m.species || m.genus || null, m.mpa_species != null ? fmt(m.mpa_species, 2) : null, m.mpa_genus != null ? fmt(m.mpa_genus, 2) : null]), [3, 4, 5, 7, 8]);
+  }
+})();
+
+// ============================================================= tools + config + rail
+table($("#table-tools"), ["Step", "Tool", "Version"], D.tools.map(x => [x.id, x.tool, x.version]));
+$("#config").textContent = D.config || "(config.yml not found)";
+$("#footer").textContent = `Generated by scripts/report/make_report.py from output/${D.run}. MetaCheese, Synbionics group.`;
+
+const rail = $("#rail");
+const phases = { pre: "Preprocessing", com: "Community-level", asm: "Assembly-specific", joint: "Both branches" };
+let lastPhase = null;
+const railItem = (href, sid, name, off) => { const li = h("li", {}, rail); const a = h("a", { href, class: off ? "off" : null }, li); h("span", { class: "rid" }, a, sid); h("span", { class: "rname" }, a, name); };
+railItem("#overview", "run", "Workflow");
+RAIL.forEach(r => {
+  if (r.phase !== lastPhase) { h("li", { class: "phase", "aria-hidden": "true" }, rail, phases[r.phase]); lastPhase = r.phase; }
+  railItem("#" + r.id, r.sid, r.title.split(":")[0], r.off);
+});
+railItem("#methods", "info", "Software");
+// second pass once the grid has its final widths
+requestAnimationFrame(() => renderers.forEach(f => f()));
+})();
+</script>
+<!--__FRAGMENT_END__-->
+</body>
+</html>

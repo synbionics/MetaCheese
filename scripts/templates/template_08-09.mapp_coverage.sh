@@ -35,11 +35,11 @@ for fq1 in "$FASTQ_DIR"/*.fq.1.gz; do
     bowtie2 -x "$index_base" \
         -1 "$fq1" -2 "$fq2" \
         -q --no-unal --very-sensitive-local \
-        -p 4 2> "${OUTPUT_DIR}/${file_name}_bowtie2.log" | \
+        -p @08-09_par1@ 2> "${OUTPUT_DIR}/${file_name}_bowtie2.log" | \
         samtools view -bS -o "$bam_file" - 
 
     # Sort
-    samtools sort "$bam_file" -o "$sorted_bam"
+    samtools sort -@ @08-09_par1@ "$bam_file" -o "$sorted_bam"
 
     # Index
     samtools index "$sorted_bam"

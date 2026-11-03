@@ -18,7 +18,7 @@ for file in "$input_folder"/*.fasta; do
     base_name=$(basename "$file" .fasta)
     echo "Indexing $base_name"
 
-    if ! bowtie2-build "$file" "$output_folder/${base_name}_index_base" -p @07_par1@; then
+    if ! bowtie2-build --threads @07_par1@ "$file" "$output_folder/${base_name}_index_base"; then
         echo "ERROR: bowtie2-build failed for $file" >&2
         exit 1
     fi

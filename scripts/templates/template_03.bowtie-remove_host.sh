@@ -19,17 +19,18 @@ for file_L1 in "$sample_directory"/*cleaned_L1.fq.gz; do
 
   echo "[$(date)] Starting mapping for $sample_name"
 
+  # Only the read pairs that do not align to the host are kept (--un-conc-gz);
+  # the alignments themselves are not needed, so they go to /dev/null. The
+  # alignment summary (host fraction) is kept in <sample>.bowtie2.log.
   if ! bowtie2 \
     -x "$meta_database" \
     -1 "$file_L1" -2 "$file_L2" \
     --un-conc-gz "$output_dir/${sample_name}.unmapped.fq.gz" \
-    -p 32 \
-    -S "$output_dir/${sample_name}.sam"; then
+    -p @03_par1@ \
+    -S /dev/null 2> >(tee "$output_dir/${sample_name}.bowtie2.log" >&2); then
       echo "Error: bowtie2 failed for $sample_name" >&2
       exit 1
   fi
-
-  rm -f "$output_dir/${sample_name}.sam"
 done
 
 echo "[$(date)] Mapping completed successfully."

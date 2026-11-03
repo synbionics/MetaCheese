@@ -171,6 +171,26 @@ RUN conda create -y -n qcenv -c conda-forge -c bioconda fastqc=0.12.1 && \
     conda clean -afy
 
 # ======================================
+# HUMAnN utility mapping files (step 04b-last / diagram C.3)
+# The default install only maps UniRef90 -> MetaCyc reactions. The full set
+# adds UniRef90 -> KEGG Orthology, EC, GO, Pfam and eggNOG, needed to regroup
+# gene families into KOs/ECs. --update-config makes HUMAnN find them.
+# ======================================
+
+RUN mkdir -p /main/db/humann/utility_mapping && \
+    conda run -n humannenv humann_databases --download utility_mapping full \
+        /main/db/humann/utility_mapping --update-config yes
+
+# ======================================
+# MultiQC (step 00 / diagram Q.1): merges the per-file FastQC reports into
+# one page. Own environment, and its own layer placed after the databases so
+# adding it does not invalidate them.
+# ======================================
+
+RUN conda create -y -n multiqcenv -c conda-forge -c bioconda multiqc=1.25.1 && \
+    conda clean -afy
+
+# ======================================
 # COPIA LE CARTELLE DEL TUO PROGETTO (DOPO i DB, così non li sovrascrivi MAI!)
 # ======================================
 

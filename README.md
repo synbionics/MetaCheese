@@ -1,380 +1,274 @@
 # MetaCheese
-Pipeline to analyze cheese samples starting from compressed FASTQ files (`.fq.gz`).  
-The program runs the main steps of a metagenomic analysis and saves results in numbered folders—one for each stage of the process.
+
+MetaCheese is a containerised pipeline for shotgun metagenomics of cheese, and
+of any other sample where host DNA has to be removed first. From paired-end
+FASTQ files it produces taxonomic and functional profiles of the community,
+diversity measures, metagenome-assembled genomes (MAGs) and one interactive
+HTML report of the whole run.
+
+- **One Docker image** holds every tool and database: nothing to install
+  besides Docker.
+- **Plain Bash steps** generated from templates and one YAML config: easy to
+  read, rerun or resume from any step.
+- **Reproducible runs**: each run writes numbered result folders together with
+  the exact config it used, its log and the time spent in each step.
+
+![MetaCheese workflow](docs/img/workflow.svg)
 
 ---
 
-## Workflow
+## Quick start
 
-![Workflow overview](docs/img/workflow.png)
+The fastest way to see MetaCheese work end to end is the small example:
+6 cheeses from the public BioProject
+[PRJNA1198075](https://www.ebi.ac.uk/ena/browser/view/PRJNA1198075), 5 million
+read pairs each, on a 16-core / 64 GB machine.
 
+```bash
+# 1. Get the code and build the image (several hours the first time, ~120 GB)
+git clone https://github.com/synbionics/MetaCheese.git
+cd MetaCheese
+docker build -t metacheese .
 
----
+# 2. Download the host genome (Bos taurus ARS-UCD2.0); its index is built on the first run
+mkdir -p data/gene/Bos_taurus
+curl -L https://ftp.ncbi.nlm.nih.gov/genomes/all/GCA/002/263/795/GCA_002263795.4_ARS-UCD2.0/GCA_002263795.4_ARS-UCD2.0_genomic.fna.gz \
+    | gunzip > data/gene/Bos_taurus/GCA_002263795.4_ARS-UCD2.0_genomic.fna
 
-## Main features
-The pipeline automatically executes these steps, in order:
+# 3. Download the 6 example samples (first 5M read pairs of each, ~3.5 GB)
+bash examples/small_PRJNA1198075/prepare_input.sh
 
-- ### Pre-processing 🟠
-    **1. Extraction and adapter trimming**  
-         *Tool: AdapterRemoval*  
-         Extracts FASTQ files from archives (if present), then removes adapter and low-quality sequences, producing “clean” reads.
-      
-     **2. Host genome filtering**  
-         *Tool: Bowtie2*  
-         Aligns reads to the host species genome (e.g., *Bos taurus*) and discards mapped reads, keeping only microbial sequences.
+# 4. Run the whole pipeline
+bash examples/small_PRJNA1198075/run_example.sh
+```
 
-- ### A) Microbiome profiling 🔴
-     **3. Taxonomic profiling**  
-        *Tool: MetaPhlAn*  
-        Estimates the sample’s taxonomic composition, reporting detected species and relative abundance.
-  
-     **4. Functional profiling**  
-        *Tool: HUMAnN*  
-        Analyzes the biological/metabolic functions potentially present in the microbiome.
-
-- ### B) Assembly and binning 🔵
-     **5. Metagenome assembly**  
-        *Tool: SPAdes*  
-        Reconstructs contiguous sequences (contigs) by assembling reads.
-  
-     **6. Contig filtering**  
-        *Tool: custom scripts*  
-        Selects contigs above length/coverage thresholds.
-    
-     **7. Index creation for binning**  
-        *Tool: Bowtie2*  
-        Builds indices for contig binning.
-    
-     **8. Read mapping and coverage calculation**  
-        *Tool: Bowtie2 + custom scripts*  
-        Maps reads back and computes coverage for each contig.
-    
-     **9. Metagenomic binning**  
-        *Tool: MetaBAT2*  
-        Groups contigs into MAGs (Metagenome-Assembled Genomes).
-    
-     **10. MAG quality assessment**  
-         *Tool: CheckM, CheckM2*  
-         Evaluates completeness and contamination of MAGs.
-    
-     **11. Filtering and annotation of high-quality MAGs**  
-         *Tool: custom scripts + TORMES*  
-         Selects the best MAGs and annotates them (genes, pathways, resistance, etc.).
-    
-     **12. Final analysis and reporting**  
-         *Tool: custom scripts, R*  
-         Produces summary tables and plots.
+Step 3 streams the reads from ENA and stops after the first 5 million pairs
+of each file, so the full dataset (125 GB) is never downloaded. The run
+takes <!-- QUICKSTART_RUNTIME --> and ends with the report in
+`output/example_small/report/report.html`. Details are in the
+[small example README](examples/small_PRJNA1198075/README.md).
 
 ---
 
-## Project structure
+## What it does
 
-    metacheese/
-    ├── config/                   # Global configuration files
-    │   └── Config.yml            # Main pipeline parameters
-    │
-    ├── data/                     # Support data and references
-    │   ├── calculate_diversity.R # Diversity analysis in R
-    │   └── gene/                 # Reference genomes (e.g., Bos taurus)
-    │
-    ├── docs/                     # Technical docs and figures
-    │
-    ├── input/                    # Input data organized by sample
-    │   ├── campione_prova1/      # Example/test
-    │   └── PDO/                  # Real dataset
-    │       ├── D_PR_01A_L2_1.fq.gz
-    │       └── ...
-    │
-    ├── output/                   # Output organized by run (date + code)
-    │   ├── 20250728_PDMIDR/
-    │   │   ├── 01_AdapterRemoval/
-    │   │   ├── 03_bowtie2_output/
-    │   │   └── config.yml
-    │   └── ...
-    │
-    ├── scripts/                  # Pipeline scripts and templates
-    │   ├── run_pipeline.sh       # Master script
-    │   ├── pipeline/             # Individual step scripts
-    │   ├── templates/            # Script templates
-    │   └── utils/                # Utilities (e.g., build_bowtie2_index.sh, delete.sh)
-    │
-    ├── Dockerfile                # Reproducible Docker environment
-    ├── docker-compose.yml        # Advanced setup (volumes, container)
-    └── README.md                 # This file
+After a quality check, adapter trimming and host DNA removal, the reads follow
+two branches:
+
+- **community-level profiling**: which organisms are present (MetaPhlAn),
+  what they can do (HUMAnN), and how samples differ (alpha/beta diversity);
+- **assembly-specific profiling**: assembly (metaSPAdes), binning into MAGs
+  (MetaBAT2), MAG quality (CheckM2) and annotation of the good MAGs (TORMES).
+
+A final joint step (R.1) brings the two branches together in one interactive
+report: how much of each community the MAGs capture, and whether the MAGs
+match the species the community profiles found.
+
+Step IDs (blue in the figure) and artifact IDs (orange) are used throughout
+the docs, the scripts and the report. The script column is the pipeline step
+name (`scripts/templates/template_<script>*.sh`), also used with `--from`/`--to`.
+
+| ID | Step | Tool (version in the image) | Script | Output folder |
+|----|------|-----------------------------|--------|---------------|
+| Q.1 | Quality check of raw reads | FastQC 0.12.1, MultiQC 1.25.1 | `00` | `00_fastqc/` |
+| I.2 | Host genome index (once per host) | Bowtie2 2.3.3.1 | `scripts/build_bowtie2_index.sh` | `data/gene/<Host>/` |
+| P.1 | Adapter and quality trimming | AdapterRemoval 2.3.3 | `00-01` | `01_AdapterRemoval/` |
+| P.2 | Host DNA removal | Bowtie2 2.3.3.1 | `03` | `03_bowtie2_output/` |
+| C.1 | Taxonomic profiling | MetaPhlAn 4.1.0, db `mpa_vJun23_CHOCOPhlAnSGB_202307` | `04` | `04_metaphlan_output/` |
+| C.2 | Merged abundances, alpha/beta diversity | MetaPhlAn utils, R 4.3 | `04` | `04_metaphlan_output/diversity/` |
+| C.3 | Functional profiling (per sample) | HUMAnN 3.9 (ChocoPhlAn v201901_v31, UniRef90) | `04b-1` | `04b_humann_output/` |
+| C.4 | Community-level aggregation of the functional profiles | HUMAnN 3.9 utilities | `04b-last` | `04b_humann_output/merged_tables/` |
+| A.1 | Metagenome assembly (per sample) | metaSPAdes 3.13.0 | `05` | `05_spades_output/` |
+| A.2 | Contig filtering (> 500 bp) | awk | `06` | `05_spades_output/contigs/filtered/` |
+| A.3 | Read mapping and contig coverage | Bowtie2, samtools 1.6 | `07`, `08-09` | `07_Bowtie_Index/`, `08_mapping_coverage/` |
+| A.4 | Binning into MAGs | MetaBAT2 2.17 | `10-11` | `10_metabat_depth/`, `11_metabat_MAG/` |
+| A.5 | MAG completeness and contamination | CheckM2 1.0.2 | `12-13` | `13_checkm2/` |
+| A.6 | MAG filtering and metadata | awk | `14` | `14_MAGs_high_quality/` |
+| A.7 | MAG annotation | TORMES 1.3.0 | `15` | `15_tormes_MAGs/` |
+| R.1 | Integrated report of both branches | Python 3 (`scripts/report/make_report.py`) | `16` | `report/` |
+| A.8 | Assembly quality check | QUAST | *planned* | – |
+
+Inputs, outputs, config keys and known issues of every step are in
+[`docs/steps.md`](docs/steps.md).
 
 ---
 
 ## Requirements
 
-- **Docker** (recommended version ≥ 20.10)  
-- **docker-compose** (for container and volume management)  
-- Recommended resources: **≥ 64 GB RAM** and multi-core CPU (some steps are heavy).
-
-No extra tools required: **everything is already included in the container**.
-
----
-
-## Docker installation
-
-### Linux (Ubuntu/Debian)
-    sudo apt-get update
-    sudo apt-get install -y docker.io docker-compose
-    sudo systemctl enable docker --now
-
-### Windows/Mac
-Download *Docker Desktop* and follow the official instructions.
-
-### Verify installation
-    docker --version
-    docker compose version
-    docker run hello-world
-
-If you see “Hello from Docker!”, the installation is OK.
+- Linux with **Docker** ≥ 20.10 (Docker Desktop on macOS/Windows works, with
+  slower disk access).
+- **Disk**: about **120 GB for the image** (the MetaPhlAn, HUMAnN, CheckM2 and
+  TORMES databases are inside it), plus 3-5 times the size of your compressed
+  FASTQ files for the results.
+- **CPU / RAM**: 16 cores and 64 GB RAM for the small example. On full
+  datasets metaSPAdes needs the most memory: plan for 128 GB RAM or more and
+  32+ cores.
 
 ---
 
-## Environment setup
+## Running on your own data
 
-1) Go to the project folder (cloned or copied locally):
-    
-        cd metacheese
+### 1. Host genome
 
-2) Build the Docker image:
-    
-        docker build -t metacheese .
+Put the host genome FASTA in `data/gene/<Host>/` (see Quick start, step 2, for
+*Bos taurus*). For another host, use another folder name, set `step03.dir3` in
+the config to `../../data/gene/<Host>/<Host>` and run with
+`HOST_SPECIES=<Host>`. The Bowtie2 index is built the first time (about 40 min
+with 16 threads for *Bos taurus*).
 
-3) Check the image exists:
-    
-        docker images
+### 2. Input files
 
-4) Recommended start with docker-compose (volumes already mapped):
-    
-        docker compose up -d
-        docker ps                  # Running containers
-        docker exec -it metacheese-container bash
+Create one folder under `input/` per dataset, with one pair of gzipped FASTQ
+files per sample:
 
-   - Local folders remain synced with the container.
-   - You can monitor progress directly under `output/`.
+```
+input/my_dataset/
+├── sampleA_1.fq.gz   sampleA_2.fq.gz
+└── sampleB_1.fq.gz   sampleB_2.fq.gz
+```
 
-5) (Alternative) Manual container start:
+`_L1`/`_L2` instead of `_1`/`_2` also works. Sample names must not contain
+dots. Files from ENA/SRA (`SRRxxxx_1.fastq.gz`) must be renamed; the
+`prepare_input.sh` scripts in [`examples/`](examples/) show how.
 
-        docker run -it --rm           -v $PWD/scripts:/main/scripts           -v $PWD/config:/main/config           -v $PWD/data:/main/data          -v $PWD/input:/main/input           -v $PWD/output:/main/output           metacheese /bin/bash
+### 3. Config
 
-6) Quick management
+Copy `config/Config.yml` and adapt threads and memory to your machine (the
+defaults fit 16 cores / 64 GB). The keys you are most likely to change:
 
-   - Stop the container:
+| Key | Meaning | Default |
+|-----|---------|---------|
+| `step*.par1` | threads of each step | 8-16 |
+| `step05.par2` | metaSPAdes memory limit (GB), keep below the machine RAM | 56 |
+| `step04b_1.par2` | DIAMOND block size for HUMAnN, higher is faster (~6 GB RAM per unit) | 2 |
+| `step14.var5`, `var6` | MAGs kept: completeness above, contamination below (%) | 50, 10 |
 
-         docker stop metacheese-container
+All keys and how they reach the scripts: [`docs/configuration.md`](docs/configuration.md).
 
-   - List containers/images and remove:
+### 4. Run
 
-         docker ps -a
-         docker images
-         docker rm metacheese-container
-         docker rmi metacheese:latest
+```bash
+bash examples/run_in_docker.sh --input my_dataset --name my_run --config config/Config.yml
+```
 
----
+This starts the container with the right folders mounted, builds the host
+index if missing, runs every step and gives the output files back to your user.
 
-## Host genome preparation (Bowtie2 index)
+- `--from <step>` / `--to <step>` run part of the pipeline; `<step>` is a
+  script name from the table above (`04b-1`, `05`, `12-13`, ...).
+- **Resume** an interrupted run with the same `--name` and `--from` the step
+  that stopped. The run reuses its saved `output/<name>/config.yml`, and
+  HUMAnN skips samples that are already finished.
+- The log is `output/<name>/run_<timestamp>.log`; the time of each step is in
+  `output/<name>/step_times.tsv`.
+- Environment variables: `HOST_SPECIES` (default `Bos_taurus`),
+  `INDEX_THREADS`, `IMAGE` (default `metacheese`), `STEP14_CHOICE` (see A.6 in
+  [`docs/steps.md`](docs/steps.md)).
 
-For host filtering (eg. *Bos taurus*) you need **Bowtie2 index**.
-
-### Steps
-
-1) **Download the genome** (genomic FASTA, `.fna/.fa/.fasta`) from NCBI/Ensembl to your machine.
-
-2) **Create the species folder** and **move the FASTA** inside it (run these in the project folder “metacheese”):
-
-    mkdir -p data/gene/Name_host_genome
-    mv /path/to/your/file/<Name_file_host_genome>.fna data/gene/<Name_host_genome>/
-    # optional (for clarity): rename the file
-    mv data/gene/<Name_host_genome>/<Name_file_host_genome>.fna data/gene/<Name_host_genome>/genome.fna
-
-   > **Any filename** is fine as long as it’s inside `data/gene/<Name_host_genome>/` with `.fa/.fna/.fasta`.
-
-3) **Build the index** (run **inside the container**):
-
-    bash scripts/build_bowtie2_index.sh
-
-   When prompted, enter:
-
-    <Name_host_genome>
-
-### Expected result  
-
-The script creates index files with **prefix** `data/gene/<Name_host_genome>/<Name_host_genome>`, as expected by `Config.yml`.
-
-    data/gene/<Name_host_genome>/
-    ├── genome.fna                                # (or your .fna/.fa/.fasta)
-    ├── <Name_host_genome>.1.bt2
-    ├── <Name_host_genome>.2.bt2
-    ├── <Name_host_genome>.3.bt2
-    ├── <Name_host_genome>.4.bt2
-    ├── <Name_host_genome>.rev.1.bt2
-    └── <Name_host_genome>.rev.2.bt2
----
-
-## Quickstart example
-
-1) **Prepare input data**  
-   Create a folder under `input/` (e.g., `input/PDO/`) and place the `*.fq.gz` files to analyze.
-
-2) **(Optional) Configure resources**  
-   Edit `config/Config.yml` to set threads/RAM and other step parameters.
-     FORMAT OF STEP DEFINITIONS: [stepXX]="<TEMPLATE_FILE> <OUTPUT_FILE> <PREFIX> <ph1=YAMLkey1> <ph2=YAMLkey2> ..."
-    	- TEMPLATE_FILE  = name of the template script (inside scripts/templates/)
-     	- OUTPUT_FILE    = path where the generated script will be written
-    	- PREFIX         = prefix used in placeholders (usually the step number, e.g. 03 or 00-01)
-     	- ph=YAMLkey     = mapping between:
-                        	• ph  = placeholder name used in the template (@<PREFIX>_<ph>@)
-                         	• YAMLkey = key name inside config.yml (under section stepXX)
-    
-     HOW TO CHANGE NAME OR VALUE:
-     	- If you only want to change the value → edit config.yml
-     	- If you want to rename the placeholder in the template → also change the left part (ph) in STEPS
-     	- If you want to rename the key in config.yml → also change the right part (YAMLkey) in STEPS
-    
-     Example of renaming:
-     	  Template:   @03_vartemplate@
-     	  STEPS:      vartemplate=newvarconfig
-    	  Config.yml: step03.newvarconfig: /new/path
-     	→ Result: @03_vartemplate@ becomes /new/path
-
-3) **Run the pipeline**
-
-        bash scripts/run_pipeline.sh
-
-   - Choose `1` (new run)  
-   - Enter the **input folder name** (e.g.,s. `PDO`)  
-   - Enter a **descriptive code** (e.g., `PDMIDR`)  
-   - This will create `output/<date>_<code>` (e.g., `output/20250728_PDMIDR`).
-
-4) **During the run**  
-   Steps are executed in order and results are saved in subfolders under `output/<date>_<code>/`.
-
-5) **Resume an existing run**
-
-        bash scripts/run_pipeline.sh
-
-   - Choose `2` (continue run)  
-   - Enter the full output folder name (e.g., `20250728_PDMIDR`)  
-   - Specify the step to restart from (e.g., `05` or `04b-last`).
+Other ways to start the pipeline (interactive menu, your own container) are
+in [`docs/configuration.md`](docs/configuration.md#other-ways-to-run).
 
 ---
 
-## Outputs and results
+## Results
 
-After each run, you’ll find a new folder under `output/` named `data_codice` (e.g., 20250728_PDMIDR).
-Each phase has its own subfolder containing the files produced by that step.
+Start from two pages:
 
-Typical structure:
+- **`report/report.html`**: the final report. One self-contained file (no
+  internet needed, can be sent by e-mail) that explains each step and shows
+  its results (read quality and trimming, host removal, taxonomic and
+  functional profiles, diversity, assemblies, MAGs, run times), then joins the
+  two branches: share of each sample captured by the MAGs, and MAGs matched
+  to the species found by MetaPhlAn.
+- **`00_fastqc/multiqc_report.html`**: the quality of the raw reads, all
+  samples on one page.
 
-    output/20250728_PDMIDR/
-    ├── 01_AdapterRemoval/       # Adapter-trimmed/cleaned reads
-    ├── 03_bowtie2_output/       # Microbial reads + mapping summary
-    ├── 04_metaphlan_output/     # Taxonomic abundance tables
-    ├── 04b_humann_output/       # Functional profiling (HUMAnN)
-    ├── 05_spades_output/        # Assembled contigs (.fasta)
-    ├── 06_contig_filter/        # Contigs filtered by quality/length
-    ├── 07_Bowtie_Index/         # Bowtie2 indices for binning
-    ├── 08_mapping_coverage/     # Contig coverage
-    ├── 10_metabat_depth/        # Depth for binning
-    ├── 11_metabat_MAG/          # MAGs (FASTA)
-    ├── 12_checkm/               # Quality reports (CheckM)
-    ├── 13_checkm2/              # Quality reports (CheckM2)
-    ├── 14_MAGs_high_quality/    # Selected MAGs + metadata
-    ├── 15_tormes_MAGs/          # Final annotations (TORMES)
-    └── config.yml               # Parameters used for the run
+<!-- REPORT_SCREENSHOT -->
 
-> Tip: ensure each folder contains up-to-date files; empty folders may indicate errors in previous steps.
+All files of a run:
 
----
+```
+output/<run>/
+├── config.yml               resolved config used by this run
+├── run_<timestamp>.log      full log of the run
+├── step_times.tsv           seconds spent in each step
+├── 00_fastqc/               Q.1  multiqc_report.html + FastQC html/zip per FASTQ file (R1 and R2)
+├── 01_AdapterRemoval/       P.1  <s>_cleaned_L1/L2.fq.gz, <s>.settings (trimming stats)
+├── 03_bowtie2_output/       P.2  <s>.unmapped.fq.1/2.gz (microbial reads), <s>.bowtie2.log
+├── 04_metaphlan_output/     C.1  <s>.unmapped.txt profiles, merged_abundance_table.txt
+│   └── diversity/           C.2  alpha (richness, shannon, simpson, gini) and beta (bray-curtis, jaccard, clr)
+├── 04b_humann_output/       C.3  <s>.unmapped.fq_genefamilies/pathabundance/pathcoverage.tsv
+│   └── merged_tables/       C.4  joined + CPM tables, KO / EC / MetaCyc reaction tables
+├── 05_spades_output/        A.1  one metaSPAdes folder per sample
+│   └── contigs/filtered/    A.2  <s>.fasta_sort.fasta (contigs > 500 bp)
+├── 07_Bowtie_Index/         A.3  Bowtie2 index of each sample's contigs
+├── 08_mapping_coverage/     A.3  sorted BAM, idxstats, mapping logs
+├── 10_metabat_depth/        A.3  <s>.depth.txt
+├── 11_metabat_MAG/          A.4  bins <s>.<n>.fa
+├── 13_checkm2/              A.5  quality_report.tsv
+├── 14_MAGs_high_quality/    A.6  MAGs passing the filter + TORMES metadata
+├── 15_tormes_MAGs/          A.7  TORMES annotation and report
+└── report/                  R.1  report.html (both branches)
+```
 
-## Selective output cleanup
-
-To free space or rerun specific steps without deleting everything, use:
-
-    bash scripts/clean_output_folders.sh
-
-**What it does:** 
-asks which `output/<data_codice>` folder to clean and, for each defined subfolder, deletes contents while **preserving** any files/subfolders listed.
-
-### Configuration (at the top of the script)
-
-- `TO_DELETE`: list of subfolders to process (relative to `output/<data_codice>/`).
-Comment out those you don’t want to touch.
-
-- `PRESERVE`: map (associative array) of exceptions to keep for each folder.
-Comma-separated values; supports **wildcards** and **subfolders**:
-  - Preconfigured example:
-    - `PRESERVE["04_metaphlan_output"]="diversity,merged_abundance_table.txt,*.txt"`
-    - `PRESERVE["05_spades_output"]="contigs/filtered"`
-
-If the value is empty (`""`), **nothing is preserved** and the entire folder is removed.
-
-### Typical example
-
-1. Run the script:
-    
-        bash scripts/clean_output_folders.sh
-
-2. Choose the output folder (e.g., `20250728_PDMIDR`) and confirm.  
-   The script will delete contents of the folders listed in `TO_DELETE`, keeping whatever is defined in `PRESERVE`.
-
-> **Warning:** deletions are **permanent**. Back up results you need to keep.
+`scripts/clean_output_folders.sh` deletes the bulky intermediate files of a
+run (the folders and files to keep are listed at the top of the script).
 
 ---
 
-## Essential troubleshooting
+## Examples
 
-- **Docker won’t start / permissions**  
-  Add your user to the docker group and restart the session::  
-      sudo usermod -aG docker $USER
+Both use the public dataset PRJNA1198075 (Grana-type hard cheeses, PDO Grana
+Padano and non-PDO).
 
-- **`yq` not found**  
-  It’s already installed inside the container. If you run `run_pipeline.sh` outside the container, you may not have it in your PATH.
+| Example | Data | Machine | Instructions |
+|---------|------|---------|--------------|
+| [`small_PRJNA1198075`](examples/small_PRJNA1198075/) | 6 cheeses (3 PDO, 3 non-PDO), first 5M read pairs each | 16 cores, 64 GB RAM | [README](examples/small_PRJNA1198075/README.md) |
+| [`PRJNA1198075`](examples/PRJNA1198075/) | all 28 cheeses (13 PDO, 15 non-PDO), 30-85M read pairs each | ≥ 32 cores, ≥ 128 GB RAM | [README](examples/PRJNA1198075/README.md) |
 
-- **Insufficient resources (RAM/CPU)**  
-  Reduce dataset size or increase resources. Some steps (SPAdes, MetaBAT) are particularly heavy.
+---
 
-- **Missing Bowtie2 index**  
-  Run first:  
-      bash scripts/build_bowtie2_index.sh
+## Known limitations
+
+- **HUMAnN uses only read 1** of each pair. HUMAnN ignores pairing anyway;
+  concatenating both mates is the usual alternative.
+- **Binning uses single-sample coverage**: each sample's contigs are binned
+  with the depth from that sample only. Multi-sample coverage would give
+  better bins.
+- **No UniFrac**: there is no phylogenetic tree for the MetaPhlAn vJun23
+  database.
+- **Step 14 moves** (does not copy) the MAGs that pass the filter out of
+  `11_metabat_MAG/`, and stops the pipeline if none passes, so TORMES does not
+  run. With shallow data, as in the small example, few or no MAGs may pass.
+- **CheckM (v1)** is installed but only CheckM2 is run.
+
+Problems and fixes: [`docs/troubleshooting.md`](docs/troubleshooting.md).
 
 ---
 
 ## Citation
 
-**AdapterRemoval v2**
-   Schubert, Lindgreen, and Orlando (2016). AdapterRemoval v2: rapid adapter trimming, identification, and read merging. BMC Research Notes, 12;9(1):88 <http://bmcresnotes.biomedcentral.com/articles/10.1186/s13104-016-1900-2>
+If you use MetaCheese, please cite the MetaCheese manuscript (in preparation)
+and the tools it runs:
 
-**MetaPhlAn**
-   https://doi.org/10.1038/s41587-023-01688-w
-   Aitor Blanco-Miguez, Francesco Beghini, Fabio Cumbo, Lauren J. McIver, Kelsey N. Thompson, Moreno Zolfo, Paolo Manghi, Leonard Dubois, Kun D. Huang, Andrew Maltez Thomas, Gianmarco Piccinno, Elisa Piperni, Michal Punčochář, Mireia Valles-Colomer, Adrian Tett, Francesca Giordano, Richard Davies, Jonathan Wolf, Sarah E. Berry, Tim D. Spector, Eric A. Franzosa, Edoardo Pasolli, Francesco Asnicar, Curtis Huttenhower, Nicola Segata. Nature Biotechnology (2023)
+- **FastQC**: Andrews S. (2010). FastQC: a quality control tool for high throughput sequence data. https://www.bioinformatics.babraham.ac.uk/projects/fastqc/
+- **MultiQC**: Ewels et al. (2016). *Bioinformatics* 32(19):3047-3048. https://doi.org/10.1093/bioinformatics/btw354
+- **AdapterRemoval v2**: Schubert, Lindgreen and Orlando (2016). *BMC Research Notes* 9:88. https://doi.org/10.1186/s13104-016-1900-2
+- **Bowtie2**: Langmead and Salzberg (2012). *Nature Methods* 9:357-359. https://doi.org/10.1038/nmeth.1923
+- **MetaPhlAn 4**: Blanco-Míguez et al. (2023). *Nature Biotechnology* 41:1633-1644. https://doi.org/10.1038/s41587-023-01688-w
+- **HUMAnN 3**: Beghini et al. (2021). *eLife* 10:e65088. https://doi.org/10.7554/eLife.65088
+- **metaSPAdes**: Nurk et al. (2017). *Genome Research* 27:824-834. https://doi.org/10.1101/gr.213959.116; Prjibelski et al. (2020). *Current Protocols in Bioinformatics* 70:e102. https://doi.org/10.1002/cpbi.102
+- **SAMtools**: Danecek et al. (2021). *GigaScience* 10(2):giab008. https://doi.org/10.1093/gigascience/giab008
+- **MetaBAT 2**: Kang et al. (2019). *PeerJ* 7:e7359. https://doi.org/10.7717/peerj.7359
+- **CheckM2**: Chklovski et al. (2023). *Nature Methods* 20:1203-1212. https://doi.org/10.1038/s41592-023-01940-w
+- **TORMES**: Quijada et al. (2019). *Bioinformatics* 35(21):4207-4212. https://doi.org/10.1093/bioinformatics/btz220
 
-**HUMAnN**
-   Francesco Beghini1 ,Lauren J McIver2 ,Aitor Blanco-Mìguez1 ,Leonard Dubois1 ,Francesco Asnicar1 ,Sagun Maharjan2,3 ,Ana Mailyan2,3 ,Andrew Maltez Thomas1 ,Paolo Manghi1 ,Mireia Valles-Colomer1 ,George Weingart2,3 ,Yancong Zhang2,3 ,Moreno Zolfo1 ,Curtis Huttenhower2,3 ,Eric A Franzosa2,3 ,Nicola Segata1,4
-   https://doi.org/10.7554/eLife.65088
+## License
 
-   1 Department CIBIO, University of Trento, Italy
-   2 Harvard T. H. Chan School of Public Health, Boston, MA, USA
-   3 The Broad Institute of MIT and Harvard, Cambridge, MA, USA
-   4 IEO, European Institute of Oncology IRCCS, Milan, Italy
+MetaCheese is released under the [MIT License](LICENSE). The tools and
+databases inside the Docker image keep their own licenses.
 
-**SPAdes**
-   https://currentprotocols.onlinelibrary.wiley.com/doi/abs/10.1002/cpbi.102
+## Credits
 
-**SAMtools**
-   Petr Danecek, James K Bonfield, Jennifer Liddle, John Marshall, Valeriu Ohan, Martin O Pollard, Andrew Whitwham, Thomas Keane, Shane A McCarthy, Robert M Davies, Heng Li
-   GigaScience, Volume 10, Issue 2, February 2021, giab008, https://doi.org/10.1093/gigascience/giab008*
-
-**Tormes**
-   Narciso M. Quijada, David Rodríguez-Lázaro, Jose María Eiros e Marta Hernández (2019). TORMES: an automated pipeline for whole bacterial genome analysis. Bioinformatica , 35(21), 4207–4212, https://doi.org/10.1093/bioinformatics/btz220
-
-## Credits & License
-
-Author(s): Dorin / Davide  
-
-
-
-
+Pipeline development: Dorin Nicorean (Bash version), Davide Perazzoli
+(Nextflow version, branch `Nextflow`), Vincenzo Bonnici. Synbionics group.

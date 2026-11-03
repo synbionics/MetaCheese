@@ -1,0 +1,9 @@
+# Keep the build context small. Host genomes, Bowtie2 indexes, inputs and
+# results are mounted at run time (see docker-compose.yml / examples/run_in_docker.sh),
+# never baked into the image.
+.git
+input/
+output/
+data/gene/
+scripts/pipeline/
+*.log

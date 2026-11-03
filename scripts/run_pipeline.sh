@@ -37,18 +37,19 @@ function generate_scripts() {
     declare -A STEPS=(
         [step00]="template_00.fastqc.sh                         scripts/pipeline/00.fastqc.sh                   00          dir1=dir1 dir2=dir2 par1=par1"
         [step00_01]="template_00-01.extract_and_adapter.sh      scripts/pipeline/00-01.extract_and_adapter.sh   00-01       dir1=dir1 dir2=dir2 dir3=dir3 dir4=dir4 dir5=dir5 par1=par1 par2=par2 par3=par3 par4=par4 par5=par5 par6=par6"
-        [step03]="template_03.bowtie-remove_host.sh             scripts/pipeline/03.bowtie-remove_host.sh       03          var1=dir1 var2=dir2 var3=dir3"
-        [step04]="template_04.metaphlan.sh                      scripts/pipeline/04.metaphlan.sh                04          var2=dir2 var3=dir3 Rscript=rscript"
-        [step04b_1]="template_04b-1.humann_job_array.sh         scripts/pipeline/04b-1.humann_job_array.sh      04b_1       var1=dir1 var2=dir2 var3=dir3"
+        [step03]="template_03.bowtie-remove_host.sh             scripts/pipeline/03.bowtie-remove_host.sh       03          var1=dir1 var2=dir2 var3=dir3 par1=par1"
+        [step04]="template_04.metaphlan.sh                      scripts/pipeline/04.metaphlan.sh                04          var2=dir2 var3=dir3 Rscript=rscript par1=par1"
+        [step04b_1]="template_04b-1.humann_job_array.sh         scripts/pipeline/04b-1.humann_job_array.sh      04b_1       var1=dir1 var2=dir2 var3=dir3 par1=par1 par2=par2"
         [step04b_last]="template_04b-last.humann_join_tables.sh scripts/pipeline/04b-last.humann_join_tables.sh 04b_last    dir1=dir1 dir2=dir2"
         [step05]="template_05.spades.assembly.sh                scripts/pipeline/05.spades.assembly.sh          05          var1=var1 var2=var2 par1=par1 par2=par2"
         [step06]="template_06.contig_filter.sh                  scripts/pipeline/06.contig_filter.sh            06          var1=var1 var2=var2 var3=var3 filter1=filter1"
         [step07]="template_07.bowtie-MAG_database.sh            scripts/pipeline/07.bowtie-MAG_database.sh      07          var1=dir1 var2=dir2 par1=par1"
-        [step08_09]="template_08-09.mapp_coverage.sh            scripts/pipeline/08-09.mapp_coverage.sh         08-09       var1=dir1 var2=dir2 var3=dir3"
-        [step10_11]="template_10-11-11b.metabat.sh              scripts/pipeline/10-11-11b.metabat.sh           10-11       var1=dir1 var2=dir2 var3=dir3 var4=dir4 var5=var5 par1=par1 par2=par2"
+        [step08_09]="template_08-09.mapp_coverage.sh            scripts/pipeline/08-09.mapp_coverage.sh         08-09       var1=dir1 var2=dir2 var3=dir3 par1=par1"
+        [step10_11]="template_10-11-11b.metabat.sh              scripts/pipeline/10-11-11b.metabat.sh           10-11       var1=dir1 var2=dir2 var3=dir3 var4=dir4 var5=dir5 par1=par1 par2=par2"
         [step12_13]="template_12-13.checkm.sh                   scripts/pipeline/12-13.checkm.sh                12-13       var1=var1 var2=var2 var3=var3 par1=par1 par2=par2 par3=par3"
         [step14]="template_14.filter-metadata.sh                scripts/pipeline/14.filter-metadata.sh          14          var1=var1 var2=var2 var3=var3 var4=var4 var5=var5 var6=var6 var7=var7 var8=var8"
         [step15]="template_15.tormes_MAG.sh                     scripts/pipeline/15.tormes_MAG.sh               15          var1=var1 var2=var2 par1=par1 par2=par2"
+        [step16]="template_16.report.sh                         scripts/pipeline/16.report.sh                   16          dir1=dir1"
     )
 
     # Separator after prefix (usually _)
@@ -67,6 +68,7 @@ function generate_scripts() {
         [step12_13]="_"
         [step14]="_"
         [step15]="_"
+        [step16]="_"
     )
 
     # Loop through all steps
@@ -92,6 +94,11 @@ function generate_scripts() {
             ph="${pair%%=*}"
             yaml_key="${pair#*=}"
             value=$(yq eval -r ".${STEP_KEY}.${yaml_key}" "$CONFIG_FILE")
+            if [[ "$value" == "null" ]]; then
+                echo "ERROR: key '${STEP_KEY}.${yaml_key}' missing in $CONFIG_FILE" >&2
+                echo "       (a run folder created with an older config? copy the key from the config template)" >&2
+                exit 1
+            fi
             sed -i "s|@$PREFIX$SEP$ph@|$value|g" "$OUTPUT_PATH"
         done
 
@@ -117,6 +124,7 @@ STEPS_ORDERED=(
     12-13.checkm.sh
     14.filter-metadata.sh
     15.tormes_MAG.sh
+    16.report.sh
 )
 
 ###############################################################################
@@ -193,7 +201,15 @@ if [[ $# -gt 0 ]]; then
         echo " [$(date +'%F %T')] Executing $step_script"
         echo "***************************"
         SECONDS=0
-        bash "$step_script" || { echo "Error in $step_script, stopping." >&2; exit 1; }
+        if ! bash "$step_script"; then
+            echo "Error in $step_script, stopping." >&2
+            # Still write the report for the steps that did run
+            if [[ "$step_script" != 16.report.sh && -f 16.report.sh ]]; then
+                echo "Writing the report of the completed steps..." >&2
+                bash 16.report.sh || true
+            fi
+            exit 1
+        fi
         echo " [$(date +'%F %T')] Completed $step_script in $((SECONDS / 60)) min"
         echo "$step_script	$SECONDS" >> "$OUTPUT_DIR/step_times.tsv"
     done
