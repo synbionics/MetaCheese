@@ -84,13 +84,13 @@ name (`scripts/templates/template_<script>*.sh`), also used with `--from`/`--to`
 | C.4 | Community-level aggregation of the functional profiles | HUMAnN 3.9 utilities | `04b-last` | `04b_humann_output/merged_tables/` |
 | A.1 | Metagenome assembly (per sample) | metaSPAdes 3.13.0 | `05` | `05_spades_output/` |
 | A.2 | Contig filtering (> 500 bp) | awk | `06` | `05_spades_output/contigs/filtered/` |
+| A.8 | Assembly quality (all samples side by side) | QUAST 5.3.0 | `06b` | `06b_quast/` |
 | A.3 | Read mapping to the contigs | Bowtie2, samtools 1.6 | `07`, `08-09` | `07_Bowtie_Index/`, `08_mapping_coverage/` |
 | A.4 | Contig coverage and binning into MAGs | MetaBAT2 2.17 | `10-11` | `10_metabat_depth/`, `11_metabat_MAG/` |
 | A.5 | MAG completeness and contamination | CheckM2 1.0.2 | `12-13` | `13_checkm2/` |
 | A.6 | MAG filtering and metadata | awk | `14` | `14_MAGs_high_quality/` |
 | A.7 | MAG annotation | TORMES 1.3.0 | `15` | `15_tormes_MAGs/` |
 | R.1 | Integrated report of both branches | Python 3 (`scripts/report/make_report.py`) | `16` | `report/` |
-| A.8 | Assembly quality check | QUAST | *planned* | – |
 
 Inputs, outputs, config keys and known issues of every step are in
 [`docs/steps.md`](docs/steps.md).
@@ -205,6 +205,7 @@ output/<run>/
 │   └── merged_tables/       C.4  joined + CPM tables, KO / EC / MetaCyc reaction tables
 ├── 05_spades_output/        A.1  one metaSPAdes folder per sample
 │   └── contigs/filtered/    A.2  <s>.fasta_sort.fasta (contigs > 500 bp)
+├── 06b_quast/               A.8  report.html, report.tsv, icarus.html (assembly statistics)
 ├── 07_Bowtie_Index/         A.3  Bowtie2 index of each sample's contigs
 ├── 08_mapping_coverage/     A.3  sorted BAM, idxstats, mapping logs
 ├── 10_metabat_depth/        A.4  <s>.depth.txt (contig coverage)

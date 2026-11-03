@@ -61,6 +61,12 @@ step06:
   var3: "filtered"                                       # output directory (created inside the previous directory)
   filter1: 16                                            # num threads for xargs
 
+step06b:
+  dir1: "../../output/@output_folder@/05_spades_output/contigs/filtered"  # filtered contigs (step 06)
+  dir2: "../../output/@output_folder@/06b_quast"                          # QUAST output folder
+  par1: 16                                              # threads
+  par2: 500                                             # minimum contig length counted by QUAST (bp)
+
 step07:
   dir1: "../../output/@output_folder@/07_Bowtie_Index"                    # output folder
   dir2: "../../output/@output_folder@/05_spades_output/contigs/filtered"  # folder with contigs .fasta

@@ -28,6 +28,7 @@ The examples ship their own configs, sized for their machines
 | `step04b_1` | `par1`, `par2` | HUMAnN threads, DIAMOND block size (~6 GB RAM per unit) | 16, 2 |
 | `step05` | `par1`, `par2` | metaSPAdes threads, memory limit (GB) | 16, 56 |
 | `step06` | `filter1` | parallel jobs for contig filtering | 32 |
+| `step06b` | `par1`, `par2` | QUAST threads, minimum contig length counted (bp) | 16, 500 |
 | `step07` | `par1` | Bowtie2-build threads (contig indexes) | 16 |
 | `step08_09` | `par1` | Bowtie2/samtools threads | 16 |
 | `step10_11` | `par1`, `par2` | MetaBAT2 min contig length, threads | 1500, 16 |

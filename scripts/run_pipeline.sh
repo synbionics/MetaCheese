@@ -43,6 +43,7 @@ function generate_scripts() {
         [step04b_last]="template_04b-last.humann_join_tables.sh scripts/pipeline/04b-last.humann_join_tables.sh 04b_last    dir1=dir1 dir2=dir2"
         [step05]="template_05.spades.assembly.sh                scripts/pipeline/05.spades.assembly.sh          05          var1=var1 var2=var2 par1=par1 par2=par2"
         [step06]="template_06.contig_filter.sh                  scripts/pipeline/06.contig_filter.sh            06          var1=var1 var2=var2 var3=var3 filter1=filter1"
+        [step06b]="template_06b.quast.sh                        scripts/pipeline/06b.quast.sh                   06b         dir1=dir1 dir2=dir2 par1=par1 par2=par2"
         [step07]="template_07.bowtie-MAG_database.sh            scripts/pipeline/07.bowtie-MAG_database.sh      07          var1=dir1 var2=dir2 par1=par1"
         [step08_09]="template_08-09.mapp_coverage.sh            scripts/pipeline/08-09.mapp_coverage.sh         08-09       var1=dir1 var2=dir2 var3=dir3 par1=par1"
         [step10_11]="template_10-11-11b.metabat.sh              scripts/pipeline/10-11-11b.metabat.sh           10-11       var1=dir1 var2=dir2 var3=dir3 var4=dir4 var5=dir5 par1=par1 par2=par2"
@@ -62,6 +63,7 @@ function generate_scripts() {
         [step04b_last]="_"
         [step05]="_"
         [step06]="_"
+        [step06b]="_"
         [step07]="_"
         [step08_09]="_"
         [step10_11]="_"
@@ -118,6 +120,7 @@ STEPS_ORDERED=(
     04b-last.humann_join_tables.sh
     05.spades.assembly.sh
     06.contig_filter.sh
+    06b.quast.sh
     07.bowtie-MAG_database.sh
     08-09.mapp_coverage.sh
     10-11-11b.metabat.sh

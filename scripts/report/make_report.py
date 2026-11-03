@@ -39,10 +39,11 @@ TOOLS = [
     ("C.3", "HUMAnN", "3.9 (ChocoPhlAn v201901_v31, UniRef90 DIAMOND)"),
     ("A.1", "metaSPAdes", "3.13.0"),
     ("A.3", "samtools", "1.6"),
+    ("A.8", "QUAST", "5.3.0"),
     ("A.4", "MetaBAT2", "2.17"),
     ("A.5", "CheckM2", "1.0.2"),
     ("A.7", "TORMES", "1.3.0"),
-    ("R.1", "make_report.py", "Python 3 standard library"),
+    ("R.1", "MetaCheese report", "Python 3 standard library"),
 ]
 
 # Pipeline scripts in execution order, with workflow IDs and output folders
@@ -55,6 +56,7 @@ STEPS = [
     ("04b-last.humann_join_tables", "C.4", "Community-level aggregation", ["04b_humann_output/merged_tables"]),
     ("05.spades.assembly", "A.1", "Metagenome assembly", ["05_spades_output"]),
     ("06.contig_filter", "A.2", "Contig filtering", ["05_spades_output/contigs/filtered"]),
+    ("06b.quast", "A.8", "Assembly quality", ["06b_quast"]),
     ("07.bowtie-MAG_database", "A.3", "Contig index", ["07_Bowtie_Index"]),
     ("08-09.mapp_coverage", "A.3", "Read mapping to the contigs", ["08_mapping_coverage"]),
     ("10-11-11b.metabat", "A.4", "Coverage and binning", ["11_metabat_MAG", "10_metabat_depth"]),
@@ -513,7 +515,33 @@ def collect_tormes(run):
     if not os.path.isdir(d):
         return None
     reports = sorted(glob.glob(os.path.join(d, "**", "*.html"), recursive=True))
-    return {"reports": [os.path.relpath(p, run) for p in reports][:20]}
+    return {"reports": [os.path.relpath(p, run) for p in reports]}
+
+
+def collect_quast(run, samples):
+    """A.8: QUAST statistics per assembly, from 06b_quast/transposed_report.tsv."""
+    d = os.path.join(run, "06b_quast")
+    f = os.path.join(d, "transposed_report.tsv")
+    rows = read_tsv(f) if os.path.isfile(f) else []
+    if len(rows) < 2:
+        return None
+    head = rows[0]
+    res = {}
+    for r in rows[1:]:
+        q = dict(zip(head, r))
+        s = match_sample(q.get("Assembly", ""), samples)
+        num = lambda k: to_float(q.get(k))
+        bins = {}
+        for k, v in q.items():
+            m = re.match(r"^Total length \(>= (\d+) bp\)$", k)
+            if m:
+                bins[int(m.group(1))] = to_float(v)
+        res[s] = {"contigs": num("# contigs"), "total": num("Total length"), "largest": num("Largest contig"),
+                  "n50": num("N50"), "n90": num("N90"), "l50": num("L50"), "l90": num("L90"),
+                  "gc": num("GC (%)"), "ns": num("# N's per 100 kbp"),
+                  "length_ge": {str(k): v for k, v in sorted(bins.items())}}
+    links = [os.path.relpath(os.path.join(d, f), run) for f in ("report.html", "icarus.html") if os.path.isfile(os.path.join(d, f))]
+    return {"assemblies": res, "links": links}
 
 
 def fasta_ids(path):
@@ -663,6 +691,7 @@ def main():
         "diversity": collect_diversity(run, samples),
         "humann": collect_humann(run, samples),
         "assembly": collect_assembly(run),
+        "quast": collect_quast(run, samples),
         "mapping": mapping,
         "mags": mags,
         "integration": collect_integration(run, samples, mags, metaphlan, mapping),

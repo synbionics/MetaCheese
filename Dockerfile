@@ -191,6 +191,15 @@ RUN conda create -y -n multiqcenv -c conda-forge -c bioconda multiqc=1.35 && \
     conda clean -afy
 
 # ======================================
+# QUAST (step 06b / diagram A.8): quality of the filtered assemblies. Own
+# environment and layer, after the databases. Run without a reference, so it
+# needs no download at run time.
+# ======================================
+
+RUN conda create -y -n quastenv -c conda-forge -c bioconda python=3.10 quast=5.3.0 && \
+    conda clean -afy
+
+# ======================================
 # COPIA LE CARTELLE DEL TUO PROGETTO (DOPO i DB, così non li sovrascrivi MAI!)
 # ======================================
 

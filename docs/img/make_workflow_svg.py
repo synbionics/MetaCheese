@@ -7,7 +7,7 @@ the README and in the scripts. Edit this file and run
 import sys
 from xml.sax.saxutils import escape
 
-W, H = 1100, 1510
+W, H = 1100, 1440
 out = []
 add = out.append
 
@@ -33,13 +33,12 @@ def step(x, y, w, h, sid, lines, script=None, planned=False):
     fill = PLANNED if planned else STEP_FILL
     add(f'<rect x="{x}" y="{y}" width="{w}" height="{h}" rx="8" fill="{fill}" stroke="#4a90b8" stroke-width="1.2"{dash}/>')
     badge(x + 4, y + 2, sid, STEP_ID)
-    n = len(lines) + (1 if script else 0)
+    # The script name (third argument) is kept in the calls as a cross-reference
+    # for readers of this file, but not drawn.
+    n = len(lines)
     y0 = y + h / 2 - (n - 1) * 8 + 4
     for i, ln in enumerate(lines):
         text(x + w / 2, y0 + i * 16, ln, size=13, weight="bold" if i == 0 else "normal", fill=STEP_TEXT)
-    if script:
-        text(x + w / 2, y0 + len(lines) * 16, script, size=11, fill="#35617d",
-             family="Menlo, Consolas, monospace")
 
 
 def artifact(x, y, w, h, aid, lines, label=None, planned=False):
@@ -91,14 +90,12 @@ add('<defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7"
 add(f'<rect width="{W}" height="{H}" fill="#ffffff"/>')
 
 # ---------------------------------------------------------------- legend
-add('<rect x="20" y="20" width="170" height="140" rx="10" fill="#f4f7fa" stroke="#d5dee6"/>')
+add('<rect x="20" y="20" width="170" height="114" rx="10" fill="#f4f7fa" stroke="#d5dee6"/>')
 text(32, 40, "Legend", size=13, weight="bold", anchor="start", fill="#1f6aa5")
 add(f'<rect x="32" y="47" width="26" height="13" rx="4" fill="{STEP_FILL}"/>'); text(66, 58, "computational step", size=11, anchor="start")
-add(f'<rect x="32" y="65" width="26" height="13" rx="4" fill="{PLANNED}" stroke="#4a90b8" stroke-dasharray="4 3"/>'); text(66, 76, "planned, not in code", size=11, anchor="start")
-add(f'<rect x="32" y="83" width="26" height="13" fill="{ART_FILL}" stroke="{ART_STROKE}"/>'); text(66, 94, "artifact (files)", size=11, anchor="start")
-add(f'<path d="M32,107 h26" stroke="{REPORT}" stroke-width="1.5" stroke-dasharray="4 3"/>'); text(66, 111, "read by report R.1", size=11, anchor="start")
-badge(45, 128, "X.n", STEP_ID); badge(85, 128, "X.n", ART_ID); text(108, 132, "step / artifact ID", size=11, anchor="start")
-text(32, 148, "monospace = script", size=10, anchor="start", fill="#35617d", family="Menlo, Consolas, monospace")
+add(f'<rect x="32" y="66" width="26" height="13" fill="{ART_FILL}" stroke="{ART_STROKE}"/>'); text(66, 77, "artifact (files)", size=11, anchor="start")
+add(f'<path d="M32,90 h26" stroke="{REPORT}" stroke-width="1.5" stroke-dasharray="4 3"/>'); text(66, 94, "read by report R.1", size=11, anchor="start")
+badge(45, 112, "X.n", STEP_ID); badge(85, 112, "X.n", ART_ID); text(108, 116, "step / artifact ID", size=11, anchor="start")
 
 # ---------------------------------------------------------------- top row: QC and host index
 step(250, 40, 170, 62, "Q.1", ["Quality check", "(FastQC, MultiQC)"], "00")
@@ -183,10 +180,10 @@ step(500, 470, 210, 62, "A.2", ["Contig filtering", "(> 500 bp)"], "06")
 arrow([(822, 432), (822, 455), (690, 455), (690, 467)])
 artifact(560, 566, 90, 54, "A.2", ["FASTA"], "filtered\ncontigs")
 arrow([(605, 532), (605, 563)])
-step(820, 470, 210, 62, "A.8", ["Quality check", "(QUAST)"], "planned", planned=True)
-arrow([(710, 501), (817, 501)], dashed=True)
-artifact(1000, 560, 70, 50, "A.8", ["reports"], None, planned=True)
-arrow([(925, 532), (925, 585), (997, 585)], dashed=True)
+step(820, 470, 210, 62, "A.8", ["Assembly quality", "(QUAST)"], "06b")
+arrow([(706, 592), (785, 592), (785, 501), (817, 501)])
+artifact(885, 562, 80, 50, "A.8", ["html", "tsv"], "QUAST\nreports")
+arrow([(925, 532), (925, 559)])
 step(820, 640, 210, 70, "A.3", ["Read mapping", "(Bowtie2 + samtools)"], "07, 08-09")
 arrow([(1060, 320), (1060, 625), (1030, 625), (1030, 637)])
 arrow([(650, 612), (760, 612), (760, 675), (817, 675)])
@@ -233,14 +230,12 @@ feed([(556, 585), (LB, 585)])                               # A.2 filtered conti
 feed([(516, 812), (LB, 812)])                               # A.4.1 bins
 feed([(556, 1068), (LB, 1068)])                             # A.6 kept MAGs + metadata
 feed([(925, 403), (RB, 403)])                               # A.1 contigs
+feed([(1034, 592), (RB, 592)])                              # A.8 QUAST report
 feed([(1064, 767), (RB, 767)])                              # A.3.2 mapping log
 feed([(724, 812), (RB, 812)])                               # A.4.2 contig depth
 feed([(1058, 975), (RB, 975)])                              # A.5 CheckM2 table
 feed([(990, 1155), (RB, 1155)])                             # A.7 TORMES
 
-# ---------------------------------------------------------------- downstream
-add('<rect x="20" y="1365" width="1060" height="40" rx="8" fill="#fbe3d6"/>')
-text(550, 1390, "Downstream analyses", size=14, weight="bold", fill="#7a3b1d")
 add("</g>")
 
 # collector lines into R.1 (absolute coordinates) and the feeds above the group

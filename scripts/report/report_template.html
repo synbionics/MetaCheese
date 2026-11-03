@@ -199,7 +199,7 @@ footer { margin-top: 56px; color: var(--muted); font-size: 0.85rem; }
       <div class="step-head"><span class="sid">run</span><h2>Workflow and run time</h2></div>
       <div class="explain">
         <div><h3>What happened</h3><p>Raw reads are cleaned (P.1) and stripped of host DNA (P.2). The microbial reads then follow two branches: community-level profiling (C.1 to C.4) describes the whole community, assembly-specific profiling (A.1 to A.7) reconstructs genomes (MAGs). The last section (R.1) joins the two branches.</p></div>
-        <div><h3>How to read it</h3><p>Each section below matches one box of the diagram, with the same ID. Steps without results are marked "not run". The table gives the wall-clock time of every pipeline script.</p></div>
+        <div><h3>How to read it</h3><p>Each section below matches one box of the diagram, with the same ID. Steps without results are marked "not run". The table gives the wall-clock time of every pipeline step.</p></div>
       </div>
       <div class="card workflow" aria-label="Workflow diagram"><!--__WORKFLOW__--></div>
       <div class="card"><div class="chart" id="chart-times"></div><details class="table"><summary>Show table</summary><div class="tablewrap" id="table-steps"></div></details></div>
@@ -527,11 +527,11 @@ const tilesEl = $("#tiles");
   const steps = D.steps;
   const ran = steps.filter(x => x.seconds != null);
   if (ran.length) {
-    live(() => hbars($("#chart-times"), ran.map(x => ({ label: `${x.id}  ${x.script.split(".")[0]}`, sub: x.name, parts: [{ name: x.name, value: x.seconds / 60, color: css("--s1") }] })),
+    live(() => hbars($("#chart-times"), ran.map(x => ({ label: x.id, sub: x.name, parts: [{ name: x.name, value: x.seconds / 60, color: css("--s1") }] })),
       { aria: "Minutes per pipeline step", tickFmt: t => fmt(t, 0) + " min", valueFmt: v => dur(v * 60), tip: v => dur(v * 60), right: 70, labelW: 130 }));
   } else $("#chart-times").textContent = "No step times recorded (step_times.tsv missing).";
-  table($("#table-steps"), ["ID", "Script", "Step", "Status", "Time", "Output folder"],
-    steps.map(x => [x.id, x.script + ".sh", x.name, pill(x.present ? "done" : "not run", x.present ? "ok" : ""), dur(x.seconds), x.folder]), [4]);
+  table($("#table-steps"), ["ID", "Step", "Status", "Time", "Output folder"],
+    steps.map(x => [x.id, x.name, pill(x.present ? "done" : "not run", x.present ? "ok" : ""), dur(x.seconds), x.folder]), [3]);
   const total = ran.reduce((a, x) => a + x.seconds, 0);
   if (total) h("p", { class: "tool" }, $("#overview"), `Total run time of the recorded steps: ${dur(total)}.`);
 })();
@@ -703,7 +703,7 @@ const tilesEl = $("#tiles");
 
 // ============================================================= C.2 diversity
 (function () {
-  const sec = section("c2", "C.2", "Diversity within and between samples", "calculate_diversity.R (vegan, rbiom)",
+  const sec = section("c2", "C.2", "Diversity within and between samples", "R · vegan, rbiom",
     [["What this step does", "Alpha diversity summarises each sample on its own: how many species (richness), and how evenly abundance is spread (Shannon, Gini-Simpson). Beta diversity compares every pair of samples: Bray-Curtis uses abundances, Jaccard only presence/absence (0 = identical, 1 = nothing shared)."],
      ["How to read it", "On the left, each dot is a sample, grouped by cheese type. On the right, the PCoA places samples so that distances on the plot approximate the beta-diversity distances: samples close together have similar communities. The axis titles say how much of the variation each axis shows."]], "com");
   const dv = D.diversity;
@@ -818,7 +818,7 @@ const tilesEl = $("#tiles");
      ["How to read it", "The heatmap shows the most abundant features across samples, darker = more abundant (log scale). The bars below show which species carry the pathways of each sample: the stratified pathway abundance split by species."]], "com");
   const hu = D.humann;
   if (!hu || !Object.keys(hu.tables).length) {
-    if (hu && hu.per_sample.length) return missing(sec, `Per-sample HUMAnN tables exist for ${hu.per_sample.length} samples, but the merged tables (step 04b-last) are missing.`);
+    if (hu && hu.per_sample.length) return missing(sec, `Per-sample HUMAnN tables exist for ${hu.per_sample.length} samples, but the merged tables (step C.4) are missing.`);
     return missing(sec);
   }
   const gf = hu.tables.genefamilies;
@@ -890,6 +890,42 @@ const tilesEl = $("#tiles");
     xs.map(x => [x, fmt(as[x].raw_contigs), fmt(as[x].raw_bp), fmt(as[x].contigs), fmt(as[x].total_bp), fmt(as[x].n50), fmt(as[x].longest)]), [1, 2, 3, 4, 5, 6]);
 })();
 
+// ============================================================= A.8 assembly quality
+(function () {
+  const sec = section("a8", "A.8", "Assembly quality", "QUAST 5.3.0 · no reference",
+    [["What this step does", "QUAST measures the filtered assemblies of all samples side by side. Without a reference genome (a metagenome has many) it reports how contiguous each assembly is: number and length of contigs, N50/N90, L50/L90, GC content and ambiguous bases."],
+     ["How to read it", "L50 is the number of contigs that together hold half of the assembly: fewer means larger pieces. The bars show how the assembled bases are spread over contig length classes; long contigs (dark) carry genes in their genomic context and bin better."]], "asm");
+  const q = D.quast;
+  const as = (q && q.assemblies) || {};
+  const xs = ordered.filter(x => as[x]);
+  if (!xs.length) return missing(sec);
+  const share = (a, lo, hi) => {
+    const t = a.length_ge["0"] || a.total;
+    const ge = (k) => k == null ? 0 : (a.length_ge[String(k)] || 0);
+    return t ? 100 * (ge(lo) - ge(hi)) / t : 0;
+  };
+  const cls = [[50000, null, "≥ 50 kb", "--seq-7"], [25000, 50000, "25–50 kb", "--seq-6"], [10000, 25000, "10–25 kb", "--seq-5"],
+               [5000, 10000, "5–10 kb", "--seq-4"], [1000, 5000, "1–5 kb", "--seq-3"], [0, 1000, "< 1 kb", "--seq-2"]];
+  const long10 = xs.map(x => share(as[x], 10000, null));
+  findings(sec, [
+    `L50 ${fmt(Math.min(...xs.map(x => as[x].l50)))}–${fmt(Math.max(...xs.map(x => as[x].l50)))} contigs; N50 ${fmt(Math.min(...xs.map(x => as[x].n50)))}–${fmt(Math.max(...xs.map(x => as[x].n50)))} bp.`,
+    `Share of the assembly in contigs of 10 kb or more: ${pct(Math.min(...long10), 0)} to ${pct(Math.max(...long10), 0)}.`]);
+  const c = card(sec);
+  h("h3", {}, c, "Assembled bases by contig length");
+  const ch = h("div", { class: "chart" }, c);
+  live(() => hbars(ch, xs.map(x => ({ label: x, sub: groupLabel(groupOf[x]), dot: groupColor(groupOf[x]),
+      parts: cls.map(([lo, hi, n, col], i) => ({ name: n, value: share(as[x], lo, hi), color: css(col), ink: i < 3 ? "#fff" : css("--ink") })) })),
+    { aria: "Assembled bases by contig length", max: 100, ticks: [0, 25, 50, 75, 100], tickFmt: t => t + "%", valueFmt: v => pct(v, 1), inside: v => v >= 9 ? pct(v, 0) : null }));
+  legend(c, cls.map(([, , n, col]) => [n, css(col)]));
+  tableView(c, ["Sample", "Contigs", "Total length", "Largest", "N50", "N90", "L50", "L90", "GC %", "N's per 100 kbp"],
+    xs.map(x => { const a = as[x]; return [x, fmt(a.contigs), fmt(a.total), fmt(a.largest), fmt(a.n50), fmt(a.n90), fmt(a.l50), fmt(a.l90), fmt(a.gc, 2), fmt(a.ns, 2)]; }),
+    [1, 2, 3, 4, 5, 6, 7, 8, 9]);
+  if (q.links.length) {
+    const p = h("p", { class: "tool" }, c, "QUAST's own pages (open this report from output/<run>/report/): ");
+    q.links.forEach((l, i) => { if (i) p.append(" · "); h("a", { href: "../" + l, target: "_blank", rel: "noopener" }, p, l); });
+  }
+})();
+
 // ============================================================= A.3 coverage
 (function () {
   const sec = section("a3", "A.3", "Read mapping to the contigs", "Bowtie2 · samtools 1.6",
@@ -954,7 +990,7 @@ const tilesEl = $("#tiles");
 
 // ============================================================= R.1 joint: both branches
 (function () {
-  const sec = section("r1", "R.1", "Both branches together", "make_report.py",
+  const sec = section("r1", "R.1", "Both branches together", "MetaCheese report",
     [["What this step does", "Joins the community-level profiles (C.1–C.4), built from all reads, with the genomes reconstructed by the assembly branch (A.1–A.7). For every sample it measures how much of the microbial community the MAGs capture, and checks each MAG against the abundance MetaPhlAn gives to the same organism."],
      ["How to read it", "The bars split each sample's microbial reads by where they end up: in kept MAGs, in other (lower-quality) bins, in contigs that were not binned, or not assembled at all. A large 'kept MAGs' share means the genomes describe most of the community. In the MAG table, a MAG of a species that MetaPhlAn also finds abundant confirms both branches; a MAG with no MetaPhlAn match may be an organism missing from the marker database."]], "joint");
   const ig = D.integration || { fate: {}, mags: [] };
@@ -1015,7 +1051,7 @@ const tilesEl = $("#tiles");
 // ============================================================= tools + config + rail
 table($("#table-tools"), ["Step", "Tool", "Version"], D.tools.map(x => [x.id, x.tool, x.version]));
 $("#config").textContent = D.config || "(config.yml not found)";
-$("#footer").textContent = `Generated by scripts/report/make_report.py from output/${D.run}. MetaCheese, Synbionics group.`;
+$("#footer").textContent = `Generated by the MetaCheese pipeline from output/${D.run}. MetaCheese, Synbionics group.`;
 
 const rail = $("#rail");
 const phases = { pre: "Preprocessing", com: "Community-level", asm: "Assembly-specific", joint: "Both branches" };
