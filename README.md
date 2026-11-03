@@ -13,6 +13,41 @@ HTML report of the whole run.
 - **Reproducible runs**: each run writes numbered result folders together with
   the exact config it used, its log and the time spent in each step.
 
+## Why one pipeline for both analyses
+
+> **Running community profiling and genome reconstruction as two separate
+> projects gives two sets of results that cannot be compared directly.
+> MetaCheese runs both analyses on the same reads, in the same environment,
+> and joins them in one report, where each analysis checks the other.**
+
+- **Same reads for both analyses.** Trimming and host removal run once, and
+  both analyses start from the same microbial reads (P.2). When the two are
+  run separately, these steps are usually repeated with different tools or
+  settings, and then part of the difference between their results comes
+  from preprocessing, not from the community.
+- **Each analysis validates the other.** The joint step (R.1) matches every
+  MAG to the species MetaPhlAn finds in the same sample. It also corrects for
+  the 2020 renaming of *Lactobacillus*, which the two tools' databases do not
+  share. Done by hand, this is easy to miss: in the small example 14 of the
+  27 kept MAGs would have no species match; with it, all 27 match a
+  MetaPhlAn species.
+- **Answers that neither analysis gives alone.** How much of each community
+  the genomes actually describe: in the small example, kept MAGs hold 19-68%
+  of each sample's microbial reads. Which abundant species have no genome
+  (too little coverage, or strain mixtures), and which genomes belong to
+  organisms missing from the marker database.
+- **Tools that do not install together.** The two analyses need more than a
+  dozen tools with conflicting requirements (Python 2.7 for Bowtie2, 3.7 for
+  HUMAnN, 3.10 for QUAST, ...) and their databases. The image has them in
+  separate environments with pinned versions, so every run uses the same
+  software.
+- **One config, one command, one record.** Threads, memory and thresholds of
+  both analyses are in one YAML file; each run keeps its config, log and step
+  times, and can be resumed from any step.
+- **One report.** The results of both analyses, explained step by step, in a
+  single HTML file that can be e-mailed to colleagues who do not use the
+  command line.
+
 ![MetaCheese workflow](docs/img/workflow.svg)
 
 ---
@@ -161,13 +196,33 @@ index if missing, runs every step and gives the output files back to your user.
 - `--from <step>` / `--to <step>` run part of the pipeline; `<step>` is a
   script name from the table above (`04b-1`, `05`, `12-13`, ...).
 - **Resume** an interrupted run with the same `--name` and `--from` the step
-  that stopped. The run reuses its saved `output/<name>/config.yml`, and
-  HUMAnN skips samples that are already finished.
+  that stopped (example below).
 - The log is `output/<name>/run_<timestamp>.log`; the time of each step is in
   `output/<name>/step_times.tsv`.
 - Environment variables: `HOST_SPECIES` (default `Bos_taurus`),
   `INDEX_THREADS`, `IMAGE` (default `metacheese`), `STEP14_CHOICE` (see A.6 in
   [`docs/steps.md`](docs/steps.md)).
+
+#### Resuming an interrupted run
+
+If a run stops (error, reboot, power cut), find the step that was running,
+the last `Executing` line of the newest log, and start again from it with the
+same `--name`:
+
+```bash
+grep Executing "$(ls -t output/my_run/run_*.log | head -1)" | tail -1
+#  [2026-11-03 09:08:39] Executing 04b-1.humann_job_array.sh
+
+bash examples/run_in_docker.sh --input my_dataset --name my_run --config config/Config.yml --from 04b-1
+```
+
+The steps before `04b-1` are not run again, and their results are kept. The
+resumed run uses the run's saved `output/my_run/config.yml`, so later edits to
+`config/Config.yml` do not change it. Within the step, HUMAnN skips the
+samples that are already finished; the other steps start over. For the small
+example the same is `bash examples/small_PRJNA1198075/run_example.sh --from 04b-1`.
+If files in `output/my_run/` give `Permission denied`, see
+[`docs/troubleshooting.md`](docs/troubleshooting.md).
 
 Other ways to start the pipeline (interactive menu, your own container) are
 in [`docs/configuration.md`](docs/configuration.md#other-ways-to-run).
