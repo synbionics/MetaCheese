@@ -29,7 +29,7 @@ Execution order (`STEPS_ORDERED` in `scripts/run_pipeline.sh`):
 | | |
 |---|---|
 | Template | `template_00.fastqc.sh` |
-| Tool | FastQC 0.12.1 (`qcenv`), MultiQC 1.25.1 (`multiqcenv`) |
+| Tool | FastQC 0.12.1 (`qcenv`), MultiQC 1.35 (`multiqcenv`) |
 | Input | `input/<dataset>/<s>_1.fq.gz`, `<s>_2.fq.gz` (also `_L1`/`_L2`) |
 | Output | `00_fastqc/multiqc_report.html` (all samples on one page, start here), `00_fastqc/multiqc_report_data/` (tables behind it), and per file `00_fastqc/<s>_{1,2}_fastqc.html` and `.zip` (one per read of the pair, so 2 per sample) |
 | Config | `step00.dir1` input, `dir2` output, `par1` threads (one file per thread) |
@@ -111,7 +111,7 @@ Execution order (`STEPS_ORDERED` in `scripts/run_pipeline.sh`):
 | Config | `step06.var1` SPAdes folder, `var2`, `var3` sub-folder names, `filter1` (unused) |
 | Notes | The 500 bp cut-off is hard-coded in the awk command. |
 
-## A.3: Contig index, read mapping and coverage (`07`, `08-09`)
+## A.3: Contig index and read mapping (`07`, `08-09`)
 
 | | |
 |---|---|
@@ -122,7 +122,7 @@ Execution order (`STEPS_ORDERED` in `scripts/run_pipeline.sh`):
 | Config | `step07.dir1` index output, `dir2` contigs, `par1` threads; `step08_09.dir1` reads, `dir2` indexes, `dir3` output, `par1` threads |
 | Notes | Each sample's reads are mapped to its own contigs only (single-sample coverage). The unsorted BAM is kept and can be deleted. |
 
-## A.4: Binning (`10-11`)
+## A.4: Contig coverage and binning (`10-11`)
 
 | | |
 |---|---|
@@ -169,10 +169,10 @@ Execution order (`STEPS_ORDERED` in `scripts/run_pipeline.sh`):
 | | |
 |---|---|
 | Template | `template_16.report.sh`, which runs `scripts/report/make_report.py` (Python 3 standard library only) |
-| Input | the outputs of every step of both branches, `config.yml`, `step_times.tsv`, the run log |
+| Input | the outputs of every step of both branches (dashed purple lines in the figure): Q.1 `00_fastqc/*_fastqc.zip`, P.1.2 `01_AdapterRemoval/*.settings`, P.2.2 `03_bowtie2_output/*.bowtie2.log`, C.1.1 `04_metaphlan_output/<s>.txt`, C.2.1-C.2.2 `merged_abundance_table.txt` and `diversity/`, C.3-C.4 `04b_humann_output/`, A.1-A.2 `05_spades_output/contigs/`, A.3.2 `08_mapping_coverage/*_bowtie2.log`, A.4.1 `11_metabat_MAG/`, A.4.2 `10_metabat_depth/*.depth.txt`, A.5 `13_checkm2/`, A.6 `14_MAGs_high_quality/`, A.7 `15_tormes_MAGs/` (Kraken2 taxonomy, links to the per-MAG reports); plus `config.yml`, `step_times.tsv` and the run log |
 | Output | `report/report.html`: one self-contained interactive file (no internet needed), suitable to send by e-mail |
 | Config | `step16.dir1` run folder |
-| Notes | One section per step, then a joint section that combines the branches: a per-sample summary (microbial reads, species, Shannon, pathways, contig N50, mapping rate, bins, kept MAGs); the share of each sample's microbial reads that ends up in kept MAGs, other bins, unbinned contigs or is not assembled (contig length × depth from `10_metabat_depth/`, scaled by the A.3 mapping rate); and each MAG's share of the reads next to the MetaPhlAn abundance of the same species and genus in the same sample (MAG taxonomy from TORMES' Kraken2, `15_tormes_MAGs/**/taxonomic-identification-kraken2.txt`). It also runs when an earlier step fails, so a partial run still gets a report. Regenerate it with `bash scripts/run_pipeline.sh --name <run> --from 16`, or on the host with `python3 scripts/report/make_report.py output/<run>`. |
+| Notes | One section per step, then a joint section that combines the branches: a per-sample summary (microbial reads, species, Shannon, pathways, contig N50, mapping rate, bins, kept MAGs); the share of each sample's microbial reads that ends up in kept MAGs, other bins, unbinned contigs or is not assembled (contig length × depth from `10_metabat_depth/`, scaled by the A.3 mapping rate); and each MAG's share of the reads next to the MetaPhlAn abundance of the same species and genus in the same sample (MAG taxonomy from TORMES' Kraken2, `15_tormes_MAGs/**/taxonomic-identification-kraken2.txt`; Kraken2 uses the *Lactobacillus* names from before the 2020 genus split, so a MAG is also matched to a MetaPhlAn species of the new genera with the same epithet, e.g. *Lactobacillus rhamnosus* = *Lacticaseibacillus rhamnosus*). It also runs when an earlier step fails, so a partial run still gets a report. Regenerate it with `bash scripts/run_pipeline.sh --name <run> --from 16`, or on the host with `python3 scripts/report/make_report.py output/<run>`. |
 
 ## A.8: Assembly quality (QUAST): planned
 

@@ -7,7 +7,7 @@ the README and in the scripts. Edit this file and run
 import sys
 from xml.sax.saxutils import escape
 
-W, H = 1100, 1345
+W, H = 1100, 1510
 out = []
 add = out.append
 
@@ -64,6 +64,19 @@ def arrow(points, dashed=False):
     add(f'<path d="{d}" fill="none" stroke="#1d2b36" stroke-width="1.4" marker-end="url(#ah)"{dash}/>')
 
 
+REPORT = "#7b4fbf"  # lines into the integrated report (R.1)
+
+
+def feed(points, end=False):
+    """Purple line from an artifact the report reads to a collector line."""
+    d = "M" + " L".join(f"{px},{py}" for px, py in points)
+    mk = ' marker-end="url(#ahp)"' if end else ""
+    add(f'<path d="{d}" fill="none" stroke="{REPORT}" stroke-width="1.3" stroke-dasharray="4 3"{mk}/>')
+    if not end:
+        px, py = points[-1]
+        add(f'<circle cx="{px}" cy="{py}" r="2.6" fill="{REPORT}"/>')
+
+
 def panel(x, y, w, h, title, anchor="start"):
     add(f'<rect x="{x}" y="{y}" width="{w}" height="{h}" rx="14" fill="{PANEL}"/>')
     tx = x + 14 if anchor == "start" else x + w - 14
@@ -72,16 +85,19 @@ def panel(x, y, w, h, title, anchor="start"):
 
 add(f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {W} {H}" width="{W}" height="{H}">')
 add('<defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">'
-    '<path d="M0,0 L10,5 L0,10 z" fill="#1d2b36"/></marker></defs>')
+    '<path d="M0,0 L10,5 L0,10 z" fill="#1d2b36"/></marker>'
+    '<marker id="ahp" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">'
+    f'<path d="M0,0 L10,5 L0,10 z" fill="{REPORT}"/></marker></defs>')
 add(f'<rect width="{W}" height="{H}" fill="#ffffff"/>')
 
 # ---------------------------------------------------------------- legend
 add('<rect x="20" y="20" width="170" height="140" rx="10" fill="#f4f7fa" stroke="#d5dee6"/>')
 text(32, 40, "Legend", size=13, weight="bold", anchor="start", fill="#1f6aa5")
-add(f'<rect x="32" y="50" width="26" height="14" rx="4" fill="{STEP_FILL}"/>'); text(66, 62, "computational step", size=11, anchor="start")
-add(f'<rect x="32" y="70" width="26" height="14" rx="4" fill="{PLANNED}" stroke="#4a90b8" stroke-dasharray="4 3"/>'); text(66, 82, "planned, not in code", size=11, anchor="start")
-add(f'<rect x="32" y="90" width="26" height="14" fill="{ART_FILL}" stroke="{ART_STROKE}"/>'); text(66, 102, "artifact (files)", size=11, anchor="start")
-badge(45, 120, "X.n", STEP_ID); badge(85, 120, "X.n", ART_ID); text(108, 124, "step / artifact ID", size=11, anchor="start")
+add(f'<rect x="32" y="47" width="26" height="13" rx="4" fill="{STEP_FILL}"/>'); text(66, 58, "computational step", size=11, anchor="start")
+add(f'<rect x="32" y="65" width="26" height="13" rx="4" fill="{PLANNED}" stroke="#4a90b8" stroke-dasharray="4 3"/>'); text(66, 76, "planned, not in code", size=11, anchor="start")
+add(f'<rect x="32" y="83" width="26" height="13" fill="{ART_FILL}" stroke="{ART_STROKE}"/>'); text(66, 94, "artifact (files)", size=11, anchor="start")
+add(f'<path d="M32,107 h26" stroke="{REPORT}" stroke-width="1.5" stroke-dasharray="4 3"/>'); text(66, 111, "read by report R.1", size=11, anchor="start")
+badge(45, 128, "X.n", STEP_ID); badge(85, 128, "X.n", ART_ID); text(108, 132, "step / artifact ID", size=11, anchor="start")
 text(32, 148, "monospace = script", size=10, anchor="start", fill="#35617d", family="Menlo, Consolas, monospace")
 
 # ---------------------------------------------------------------- top row: QC and host index
@@ -97,23 +113,35 @@ arrow([(722, 71), (757, 71)])
 arrow([(930, 71), (967, 71)])
 
 # ---------------------------------------------------------------- experimental data + preprocessing
-panel(20, 182, 170, 128, "Experimental data")
+# Rule: a step's real output (passed to the next step) and its logs/settings
+# (read only by the report) are separate artifacts.
+panel(20, 182, 170, 200, "Experimental data")
 artifact(55, 228, 90, 56, "I.1", ["FASTQ", "*_1/_2.fq.gz"], None)
 text(105, 300, "paired-end reads", size=11)
-panel(205, 182, 875, 128, "Preprocessing")
+panel(205, 182, 875, 200, "Preprocessing")
 step(250, 222, 190, 66, "P.1", ["Adapter removal", "(AdapterRemoval)"], "00-01")
-artifact(470, 228, 80, 54, "P.1", ["FASTQ"], "clean\nreads")
+artifact(470, 228, 80, 54, "P.1.1", ["FASTQ"], "clean\nreads")
+artifact(300, 312, 90, 48, "P.1.2", ["settings"], "trimming\nstats")
 step(620, 222, 190, 66, "P.2", ["Host DNA filtering", "(Bowtie2)"], "03")
-artifact(860, 228, 80, 54, "P.2", ["FASTQ"], "microbial\nreads")
+artifact(860, 228, 80, 54, "P.2.1", ["FASTQ"], "microbial\nreads")
+artifact(670, 312, 90, 48, "P.2.2", ["log"], "host\nfraction")
 arrow([(150, 256), (247, 256)])
 arrow([(105, 225), (105, 170), (230, 170), (230, 71), (247, 71)])
 arrow([(440, 255), (467, 255)])
+arrow([(345, 288), (345, 309)])
 arrow([(564, 255), (617, 255)])
 arrow([(1012, 98), (1012, 140), (715, 140), (715, 219)])
 arrow([(810, 255), (857, 255)])
+arrow([(715, 288), (715, 309)])
+# microbial reads (P.2.1) go down to the bus line feeding C.1, C.3, A.1, A.3
+add('<path d="M900,284 L900,410" fill="none" stroke="#1d2b36" stroke-width="1.4"/>')
+
+# Everything below the preprocessing panel is drawn 90 px lower.
+DY = 90
+add(f'<g transform="translate(0,{DY})">')
 
 # ---------------------------------------------------------------- community-level profiling
-panel(20, 330, 440, 840, "Community-level profiling")
+panel(20, 330, 440, 915, "Community-level profiling")
 add('<ellipse cx="72" cy="380" rx="38" ry="9" fill="#ffd43b" stroke="#b08900"/>')
 add('<path d="M34,380 v30 a38,9 0 0 0 76,0 v-30" fill="#ffd43b" stroke="#b08900"/>')
 badge(40, 372, "I.4", ART_ID)
@@ -121,10 +149,12 @@ text(72, 438, "MetaPhlAn DB", size=11, weight="bold")
 text(72, 452, "(vJun23)", size=11)
 step(150, 366, 260, 62, "C.1", ["Taxonomic profiling", "(MetaPhlAn 4.1)"], "04")
 arrow([(110, 395), (147, 395)])
-artifact(205, 458, 100, 56, "C.1", ["txt", "sam.bz2"], "taxonomic\nprofiles")
-arrow([(280, 428), (280, 455)])
+artifact(118, 462, 112, 52, "C.1.2", ["read", "alignments"], None)
+artifact(270, 462, 115, 52, "C.1.1", ["taxonomic", "profiles"], None)
+arrow([(210, 428), (175, 459)])
+arrow([(350, 428), (327, 459)])
 step(150, 544, 260, 70, "C.2", ["Profile merging,", "abundance and diversity"], "04 + calculate_diversity.R")
-arrow([(255, 514), (255, 541)])
+arrow([(327, 516), (327, 541)])
 artifact(110, 646, 115, 56, "C.2.1", ["merged", "abundance"], None)
 artifact(270, 646, 115, 56, "C.2.2", ["alpha/beta", "diversity"], None)
 arrow([(210, 614), (167, 643)])
@@ -137,14 +167,13 @@ step(150, 928, 260, 70, "C.4", ["Community-level aggregation", "(HUMAnN join, re
 arrow([(250, 896), (250, 925)])
 artifact(205, 1030, 100, 56, "C.4", ["CPM, KO,", "EC, MetaCyc"], "merged\nfunctional\ntables")
 arrow([(280, 998), (280, 1027)])
-# microbial reads feed C.1 and C.3
 # one bus line carries the microbial reads to C.1, C.3, A.1 and A.3
-add('<path d="M900,284 L900,320 M280,320 L1060,320" fill="none" stroke="#1d2b36" stroke-width="1.4"/>')
+add('<path d="M280,320 L1060,320" fill="none" stroke="#1d2b36" stroke-width="1.4"/>')
 arrow([(280, 320), (280, 363)])
 arrow([(430, 320), (430, 775), (413, 775)])
 
 # ---------------------------------------------------------------- assembly-specific profiling
-panel(475, 330, 605, 840, "")
+panel(475, 330, 605, 915, "")
 text(640, 350, "Assembly-specific profiling", size=14, weight="bold", anchor="start", fill="#1f6aa5")
 step(500, 372, 210, 62, "A.1", ["Contig assembly", "(metaSPAdes)"], "05")
 artifact(780, 376, 85, 54, "A.1", ["FASTA"], "contigs")
@@ -158,38 +187,68 @@ step(820, 470, 210, 62, "A.8", ["Quality check", "(QUAST)"], "planned", planned=
 arrow([(710, 501), (817, 501)], dashed=True)
 artifact(1000, 560, 70, 50, "A.8", ["reports"], None, planned=True)
 arrow([(925, 532), (925, 585), (997, 585)], dashed=True)
-step(820, 640, 210, 70, "A.3", ["Coverage depth", "(Bowtie2 + samtools)"], "07, 08-09")
+step(820, 640, 210, 70, "A.3", ["Read mapping", "(Bowtie2 + samtools)"], "07, 08-09")
 arrow([(1060, 320), (1060, 625), (1030, 625), (1030, 637)])
 arrow([(650, 612), (760, 612), (760, 675), (817, 675)])
-artifact(870, 742, 95, 56, "A.3", ["bam", "depth.txt"], "coverage")
-arrow([(925, 710), (925, 739)])
-step(500, 690, 210, 62, "A.4", ["Binning", "(MetaBAT2)"], "10-11")
+artifact(860, 742, 100, 54, "A.3.1", ["sorted BAM", "+ index"], None)
+artifact(990, 742, 70, 50, "A.3.2", ["mapping", "log"], None)
+arrow([(910, 710), (910, 739)])
+arrow([(1015, 710), (1015, 739)])
+step(500, 690, 210, 62, "A.4", ["Coverage and binning", "(MetaBAT2)"], "10-11")
 arrow([(580, 620), (580, 687)])
-arrow([(870, 775), (740, 775), (740, 721), (713, 721)])
-artifact(555, 785, 95, 54, "A.4", ["FASTA"], "MAGs")
-arrow([(605, 752), (605, 782)])
+arrow([(860, 770), (750, 770), (750, 721), (713, 721)])
+artifact(520, 785, 85, 54, "A.4.1", ["bins", "FASTA"], None)
+artifact(640, 785, 80, 54, "A.4.2", ["contig", "depth"], None)
+arrow([(562, 752), (562, 782)])
+arrow([(680, 752), (680, 782)])
 step(820, 860, 210, 62, "A.5", ["Quality check", "(CheckM2)"], "12-13")
-arrow([(650, 828), (790, 828), (790, 891), (817, 891)])
+arrow([(590, 841), (590, 858), (790, 858), (790, 891), (817, 891)])
 artifact(875, 955, 85, 54, "A.5", ["tsv"], "completeness,\ncontamination")
 arrow([(925, 922), (925, 952)])
 step(500, 950, 210, 62, "A.6", ["MAG filtering and", "metadata preparation"], "14")
-arrow([(605, 839), (605, 947)])
+arrow([(560, 841), (560, 947)])
 arrow([(872, 982), (713, 982)])
-step(500, 1050, 210, 62, "A.7", ["MAG annotation", "(TORMES)"], "15")
-arrow([(605, 1012), (605, 1047)])
-artifact(780, 1056, 90, 54, "A.7", ["GFF", "html"], "annotated MAGs,\nannotation reports")
-arrow([(710, 1081), (777, 1081)])
+arrow([(605, 1012), (605, 1037)])
+artifact(560, 1040, 90, 54, "A.6", ["FASTA", "metadata"], "kept MAGs")
+step(500, 1125, 210, 62, "A.7", ["MAG annotation", "(TORMES)"], "15")
+arrow([(605, 1094), (605, 1122)])
+artifact(780, 1131, 90, 54, "A.7", ["GFF, html", "Kraken2 txt"], "annotated MAGs,\nannotation reports")
+arrow([(710, 1156), (777, 1156)])
 
 # ---------------------------------------------------------------- joint step: both branches
-step(420, 1196, 260, 66, "R.1", ["Integrated report", "(both branches)"], "16")
-arrow([(255, 1088), (255, 1229), (417, 1229)])            # from C.4 (community branch)
-arrow([(825, 1112), (825, 1180), (600, 1180), (600, 1193)])  # from A.7 (assembly branch)
-artifact(745, 1202, 85, 54, "R.1", ["HTML"], "interactive\nreport")
-arrow([(680, 1229), (742, 1229)])
+step(420, 1271, 260, 66, "R.1", ["Integrated report", "(both branches)"], "16")
+artifact(745, 1277, 85, 54, "R.1", ["HTML"], "interactive\nreport")
+arrow([(680, 1304), (742, 1304)])
+# R.1 reads the files of almost every step (scripts/report/make_report.py).
+# Each dot is an artifact read by the report; the dots join two collector
+# lines (drawn below, outside this group): one in the gap between the two
+# branches, one on the right edge.
+LB, RB = 467, 1090
+feed([(397, 486), (LB, 486)])                               # C.1.1 taxonomic profiles
+feed([(397, 670), (LB, 670)])                               # C.2.2 diversity
+feed([(130, 704), (130, 714), (LB, 714)])                   # C.2.1 merged abundance
+feed([(395, 865), (LB, 865)])                               # C.3 per-sample functional profiles
+feed([(380, 1050), (LB, 1050)])                             # C.4 merged functional tables
+feed([(556, 585), (LB, 585)])                               # A.2 filtered contigs
+feed([(516, 812), (LB, 812)])                               # A.4.1 bins
+feed([(556, 1068), (LB, 1068)])                             # A.6 kept MAGs + metadata
+feed([(925, 403), (RB, 403)])                               # A.1 contigs
+feed([(1064, 767), (RB, 767)])                              # A.3.2 mapping log
+feed([(724, 812), (RB, 812)])                               # A.4.2 contig depth
+feed([(1058, 975), (RB, 975)])                              # A.5 CheckM2 table
+feed([(990, 1155), (RB, 1155)])                             # A.7 TORMES
 
 # ---------------------------------------------------------------- downstream
-add('<rect x="20" y="1290" width="1060" height="40" rx="8" fill="#fbe3d6"/>')
-text(550, 1315, "Downstream analyses", size=14, weight="bold", fill="#7a3b1d")
+add('<rect x="20" y="1365" width="1060" height="40" rx="8" fill="#fbe3d6"/>')
+text(550, 1390, "Downstream analyses", size=14, weight="bold", fill="#7a3b1d")
+add("</g>")
+
+# collector lines into R.1 (absolute coordinates) and the feeds above the group
+feed([(LB, 372), (LB, 1268 + DY)], end=True)                       # left collector
+feed([(RB, 10), (RB, 1257 + DY), (650, 1257 + DY), (650, 1268 + DY)], end=True)  # right collector
+feed([(500, 36), (500, 10), (RB, 10)])                      # Q.1 QC reports
+feed([(360, 364), (360, 372), (LB, 372)])                   # P.1.2 trimming settings
+feed([(842, 336), (RB, 336)])                               # P.2.2 host-removal log
 
 add("</svg>")
 open(sys.argv[1], "w").write("\n".join(out))

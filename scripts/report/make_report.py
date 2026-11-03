@@ -31,7 +31,7 @@ REPO = os.path.dirname(os.path.dirname(HERE))
 # Tool versions installed in the metacheese image (see Dockerfile / README)
 TOOLS = [
     ("Q.1", "FastQC", "0.12.1"),
-    ("Q.1", "MultiQC", "1.25.1"),
+    ("Q.1", "MultiQC", "1.35"),
     ("P.1", "AdapterRemoval", "2.3.3"),
     ("I.2, P.2, A.3", "Bowtie2", "2.3.3.1"),
     ("C.1", "MetaPhlAn", "4.1.0 (database mpa_vJun23_CHOCOPhlAnSGB_202307)"),
@@ -56,8 +56,8 @@ STEPS = [
     ("05.spades.assembly", "A.1", "Metagenome assembly", ["05_spades_output"]),
     ("06.contig_filter", "A.2", "Contig filtering", ["05_spades_output/contigs/filtered"]),
     ("07.bowtie-MAG_database", "A.3", "Contig index", ["07_Bowtie_Index"]),
-    ("08-09.mapp_coverage", "A.3", "Read mapping and coverage", ["08_mapping_coverage"]),
-    ("10-11-11b.metabat", "A.4", "Binning", ["11_metabat_MAG", "10_metabat_depth"]),
+    ("08-09.mapp_coverage", "A.3", "Read mapping to the contigs", ["08_mapping_coverage"]),
+    ("10-11-11b.metabat", "A.4", "Coverage and binning", ["11_metabat_MAG", "10_metabat_depth"]),
     ("12-13.checkm", "A.5", "MAG quality", ["13_checkm2"]),
     ("14.filter-metadata", "A.6", "MAG filtering and metadata", ["14_MAGs_high_quality"]),
     ("15.tormes_MAG", "A.7", "MAG annotation", ["15_tormes_MAGs"]),
@@ -590,17 +590,34 @@ def collect_integration(run, samples, mags, metaphlan, mapping):
                 for i, x in enumerate(cols):
                     prof[(rank, x, t["taxon"].lower())] = t["values"][i]
     norm = lambda x: re.sub(r"\s+", " ", (x or "").replace("_", " ")).strip().lower()
+    # TORMES' Kraken2 database predates the 2020 split of Lactobacillus into 25
+    # genera (Zheng et al. 2020), while MetaPhlAn uses the new names, e.g.
+    # Lactobacillus rhamnosus = Lacticaseibacillus rhamnosus. When the exact
+    # name is missing, accept a species of a new lactobacilli genus with the
+    # same epithet in the same sample.
+    split_genus = re.compile(r"^(\w*lactobacillus|lacti\w*bacillus)$")
+    by_epithet = {}
+    for (rank, x, taxon) in prof:
+        w = taxon.split(" ")
+        if rank == "species" and len(w) == 2 and split_genus.match(w[0]):
+            by_epithet[(x, w[1])] = taxon
     out_mags = []
     for m in mags:
         t = tax.get(m["name"], {})
         sp, gn = norm(t.get("species")), norm(t.get("genus"))
-        mpa_sp = prof.get(("species", m["sample"], sp)) if sp else None
-        mpa_gn = prof.get(("genus", m["sample"], gn)) if gn else None
-        if mpa_gn is None and sp:
-            mpa_gn = prof.get(("genus", m["sample"], sp.split(" ")[0]))
+        mpa_name = sp if sp and ("species", m["sample"], sp) in prof else None
+        if not mpa_name and gn == "lactobacillus" and len(sp.split(" ")) == 2:
+            mpa_name = by_epithet.get((m["sample"], sp.split(" ")[1]))
+        mpa_sp = prof.get(("species", m["sample"], mpa_name)) if mpa_name else None
+        mpa_gn = None
+        if mpa_name:
+            mpa_gn = prof.get(("genus", m["sample"], mpa_name.split(" ")[0]))
+        if mpa_gn is None and gn:
+            mpa_gn = prof.get(("genus", m["sample"], gn))
         out_mags.append({"name": m["name"], "sample": m["sample"], "passed": m["passed"],
                          "completeness": m["completeness"], "contamination": m["contamination"],
                          "share": mag_share.get(m["name"]), "species": t.get("species"), "genus": t.get("genus"),
+                         "mpa_name": mpa_name[0].upper() + mpa_name[1:] if mpa_name else None,
                          "mpa_species": mpa_sp, "mpa_genus": mpa_gn})
     return {"fate": fate, "mags": out_mags, "taxonomy": bool(tax)}
 

@@ -27,7 +27,7 @@ pipeline, not to reproduce the paper's results.
 - the `metacheese` Docker image (see the main [README](../../README.md#quick-start));
 - 16 cores and 64 GB RAM (lower `par*` threads and `step05.par2` in
   [`Config.yml`](Config.yml) for smaller machines);
-- about 50 GB of free disk for inputs (3.5 GB) and outputs;
+- about 25 GB of free disk: 3.5 GB of input reads and 19 GB of results;
 - the *Bos taurus* genome in `data/gene/Bos_taurus/` (see the main README, Quick start step 2;
   the index is built automatically on the first run).
 
@@ -76,8 +76,53 @@ folders are described in the main README ([Results](../../README.md#results)).
 
 Measured on a 16-core / 62 GB workstation (Docker, local SSD/HDD):
 
-<!-- RUNTIME_TABLE -->
+| Step | Tool | Time |
+|------|------|------|
+| 00 | FastQC + MultiQC | 1 min |
+| 00-01 | AdapterRemoval | 20 min |
+| 03 | Bowtie2 host removal | 25 min |
+| 04 | MetaPhlAn + diversity | 59 min |
+| 04b-1 | HUMAnN (about 37 min per sample) | 3 h 40 min |
+| 04b-last | HUMAnN join / renorm / regroup | < 1 min |
+| 05 | metaSPAdes | 1 h 57 min |
+| 06-07 | contig filter, Bowtie2 index | 1 min |
+| 08-09 | Bowtie2 mapping to contigs | 50 min |
+| 10-11 | MetaBAT2 | < 1 min |
+| 12-13 | CheckM2 | 5 min |
+| 14 | MAG filter | < 1 min |
+| 15 | TORMES | 32 min |
+| 16 | report | < 1 min |
+| **Total** | | **about 9 h** |
+
+The run was resumed twice inside HUMAnN, so the HUMAnN time is extrapolated
+from the 5 samples timed in one go; MetaPhlAn ran with 4 threads (now 16 in
+the config). Peak memory was set by metaSPAdes (`step05.par2`) and HUMAnN
+(DIAMOND block size `step04b_1.par2`). The run folder takes 19 GB.
 
 ## Expected results
 
-<!-- RESULTS_SUMMARY -->
+All numbers come from `output/example_small/report/report.html`.
+
+| Sample | Group | Microbial pairs (P.2) | Species (C.1) | Shannon | Top species (C.1) | Pathways (C.3) | Contig N50 | Kept MAGs | Reads in kept MAGs |
+|--------|-------|------:|---:|---:|---|---:|---:|---:|---:|
+| D_GP_02 | PDO | 4,869,435 | 14 | 1.30 | *L. delbrueckii* 59% | 142 | 8,818 | 4 | 23% |
+| D_GP_04 | PDO | 4,741,276 | 28 | 1.21 | *L. delbrueckii* 60% | 320 | 1,939 | 4 | 57% |
+| D_GP_13 | PDO | 4,949,888 | 15 | 0.67 | *Lacticaseibacillus rhamnosus* 86% | 146 | 2,791 | 4 | 68% |
+| ND_GP_4 | non-PDO | 4,752,018 | 9 | 0.86 | *L. helveticus* 79% | 180 | 5,382 | 4 | 19% |
+| ND_GP_10 | non-PDO | 4,674,647 | 29 | 1.70 | *L. helveticus* 45% | 183 | 12,403 | 6 | 56% |
+| ND_GP_15 | non-PDO | 4,498,918 | 19 | 0.60 | *Lacticaseibacillus rhamnosus* 87% | 144 | 5,245 | 5 | 65% |
+
+- Host (*Bos taurus*) reads are 1-11% of each sample.
+- HUMAnN maps 82-86% of the reads to UniRef90 genes in every sample except
+  ND_GP_4 (52%). 323 MetaCyc pathways are found across the six samples.
+- MetaBAT2 makes 41 bins; 27 pass CheckM2 (completeness > 50%,
+  contamination < 10%) and are annotated by TORMES. All 27 belong to a
+  species that MetaPhlAn also finds in the same sample: *Lactobacillus*
+  *delbrueckii*, *L. helveticus*, *Lacticaseibacillus rhamnosus* and
+  *paracasei*, *Lentilactobacillus buchneri*, *parabuchneri* and *kefiri*,
+  *Schleiferilactobacillus harbinensis*, *Streptococcus thermophilus*,
+  *Anoxybacillus flavithermus*.
+- TORMES' own summary report (`15_tormes_MAGs/*.html`) is not written: its R
+  script fails on the MLST table when MAGs of species with and without an
+  MLST scheme are mixed. The per-MAG results (annotation, MLST, resistance
+  and virulence genes, `genome_stats/*/report.html`) are complete.

@@ -12,49 +12,55 @@
 /* Layout: run notebook. A sticky rail of workflow step IDs on the left, one
    section per step on the right: explanation, chart, table view. */
 :root {
-  --bg: #f4f6f3;          /* page plane, faint whey-green bias */
-  --surface: #fcfcfb;     /* chart / card surface */
-  --ink: #141a17;
-  --ink-2: #4e5752;
-  --muted: #858b84;
-  --line: #dde2db;
-  --axis: #c3c7bd;
-  --accent: #1c5cab;      /* workflow blue, links and selection */
-  --accent-wash: #e3edf9;
-  --s1: #2a78d6; --s2: #eb6834; --s3: #1baf7a; --s4: #eda100;
-  --s5: #e87ba4; --s6: #008300; --s7: #6250d6; --s8: #e34948;
-  --other: #b9bdb5;
-  --good: #0ca30c; --warning: #fab219; --serious: #ec835a; --critical: #d03b3b;
-  --seq-0: #f1f6fd; --seq-1: #cde2fb; --seq-2: #9ec5f4; --seq-3: #6da7ec; --seq-4: #3987e5; --seq-5: #256abf; --seq-6: #184f95; --seq-7: #0d366b;
+  /* Always light, tuned for long reading: warm paper background instead of
+     pure white (less glare), soft charcoal text instead of black (strong but
+     not harsh contrast, about 12:1), slightly muted chart colours. */
+  color-scheme: light;
+  --bg: #f3f0e8;          /* warm paper */
+  --surface: #faf8f3;     /* cards and charts */
+  --ink: #2b2e2c;
+  --ink-2: #4b504c;
+  --muted: #656a64;
+  --line: #e2ddd2;
+  --axis: #c6c0b3;
+  --accent: #2a5f9e;      /* workflow blue, links and selection */
+  --accent-wash: #e4eaf1;
+  --s1: #3a78c4; --s2: #d4693c; --s3: #2a9a73; --s4: #cf9a22;
+  --s5: #c96f96; --s6: #3d8c3d; --s7: #6a5bc4; --s8: #c84f4f;
+  --other: #b8b4aa;
+  --good: #2e9a3a; --warning: #e0a526; --serious: #dd8159; --critical: #c44545;
+  --seq-0: #f1f4f8; --seq-1: #d3e2f3; --seq-2: #a9c7ea; --seq-3: #7aa8dc; --seq-4: #4f88cb; --seq-5: #346cb0; --seq-6: #23528c; --seq-7: #173a66;
   --font-display: "Bricolage Grotesque", "Avenir Next", "Segoe UI", system-ui, sans-serif;
   --font-body: "Source Sans 3", "Source Sans Pro", "Segoe UI", system-ui, -apple-system, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, Menlo, Consolas, monospace;
   --step-0: 0.8125rem; --step-1: 1rem; --step-2: 1.25rem; --step-3: 1.6rem; --step-4: 2.3rem;
   --radius: 10px;
 }
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --bg: #0f1110; --surface: #1a1a19; --ink: #eef0ec; --ink-2: #c3c6bd; --muted: #8b9089;
-    --line: #2c2e2b; --axis: #3a3d39; --accent: #6da7ec; --accent-wash: #1b2a3d;
-    --s1: #3987e5; --s2: #d95926; --s3: #199e70; --s4: #c98500; --s5: #d55181; --s6: #008300; --s7: #9085e9; --s8: #e66767;
-    --other: #5b5f58;
-    --seq-0: #1d2633; --seq-1: #183459; --seq-2: #184f95; --seq-3: #1c5cab; --seq-4: #2a78d6; --seq-5: #5598e7; --seq-6: #86b6ef; --seq-7: #cde2fb;
-    color-scheme: dark;
-  }
-}
 :root[data-theme="dark"] {
-  --bg: #0f1110; --surface: #1a1a19; --ink: #eef0ec; --ink-2: #c3c6bd; --muted: #8b9089;
-  --line: #2c2e2b; --axis: #3a3d39; --accent: #6da7ec; --accent-wash: #1b2a3d;
-  --s1: #3987e5; --s2: #d95926; --s3: #199e70; --s4: #c98500; --s5: #d55181; --s6: #008300; --s7: #9085e9; --s8: #e66767;
-  --other: #5b5f58;
-  --seq-0: #1d2633; --seq-1: #183459; --seq-2: #184f95; --seq-3: #1c5cab; --seq-4: #2a78d6; --seq-5: #5598e7; --seq-6: #86b6ef; --seq-7: #cde2fb;
+  /* Dark alternative, also tuned for long reading: warm charcoal instead of
+     black, off-white text instead of pure white (about 12:1 contrast). */
   color-scheme: dark;
+  --bg: #1e1f1c; --surface: #272925; --ink: #e6e3da; --ink-2: #c4c0b6; --muted: #9b988f;
+  --line: #3a3c37; --axis: #52554e; --accent: #8db4e6; --accent-wash: #2a3340;
+  --s1: #5b93d6; --s2: #d9794d; --s3: #3fae86; --s4: #d4a640;
+  --s5: #d382a6; --s6: #5ea65e; --s7: #8b7fd8; --s8: #d96a6a;
+  --other: #6b6a63;
+  --good: #4fb05a; --warning: #e0b040; --serious: #e08c66; --critical: #d45a5a;
+  --seq-0: #2a3038; --seq-1: #233b5c; --seq-2: #2c5384; --seq-3: #3a6dab; --seq-4: #5b8fcf; --seq-5: #86afe0; --seq-6: #b0cbec; --seq-7: #d8e5f5;
 }
+:root[data-theme="dark"] .sid { color: #1e1f1c; }
+:root[data-theme="dark"] .workflow svg { filter: brightness(0.86); }
+.theme-toggle {
+  display: inline-flex; align-items: center; gap: 6px; margin: 0 0 16px; padding: 4px 10px;
+  font: 500 0.82rem var(--font-body); color: var(--ink-2); background: var(--surface);
+  border: 1px solid var(--axis); border-radius: 999px; cursor: pointer;
+}
+.theme-toggle:hover { color: var(--ink); border-color: var(--ink-2); }
 * { box-sizing: border-box; }
 html { -webkit-text-size-adjust: 100%; }
 body {
   margin: 0; background: var(--bg); color: var(--ink);
-  font: 400 1rem/1.55 var(--font-body);
+  font: 400 1.03rem/1.62 var(--font-body);
 }
 a { color: var(--accent); }
 a:focus-visible, button:focus-visible, select:focus-visible, summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
@@ -93,8 +99,6 @@ h1 { font: 700 var(--step-4)/1.05 var(--font-display); letter-spacing: -0.02em; 
 section.step { padding-top: 34px; margin-top: 34px; border-top: 1px solid var(--line); scroll-margin-top: 16px; min-width: 0; }
 .step-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 10px 14px; }
 .sid { font: 500 0.8rem var(--font-mono); color: #fff; background: var(--accent); border-radius: 999px; padding: 2px 9px; }
-:root[data-theme="dark"] .sid { color: #0f1110; }
-@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .sid { color: #0f1110; } }
 h2 { font: 700 var(--step-3)/1.15 var(--font-display); letter-spacing: -0.01em; margin: 0; text-wrap: balance; }
 .tool { font: 400 var(--step-0) var(--font-mono); color: var(--muted); }
 .explain { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px 28px; margin: 14px 0 18px; }
@@ -181,6 +185,7 @@ footer { margin-top: 56px; color: var(--muted); font-size: 0.85rem; }
 <div class="page">
   <nav class="rail" aria-label="Pipeline steps">
     <div class="brand">MetaCheese<small id="rail-run"></small></div>
+    <button type="button" class="theme-toggle" id="theme-toggle" aria-pressed="false">◐ Dark theme</button>
     <ol id="rail"></ol>
   </nav>
   <main id="main">
@@ -319,9 +324,25 @@ const ordered = [...samples].sort((a, b) => groups.indexOf(groupOf[a]) - groups.
 const renderers = [];
 let resizeTimer;
 window.addEventListener("resize", () => { clearTimeout(resizeTimer); resizeTimer = setTimeout(() => renderers.forEach(f => f()), 150); });
-const mqDark = window.matchMedia("(prefers-color-scheme: dark)");
-mqDark.addEventListener && mqDark.addEventListener("change", () => renderers.forEach(f => f()));
 new MutationObserver(() => renderers.forEach(f => f())).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+
+// Theme switch: warm light (default) or dark; the choice is remembered in
+// this browser when storage is available.
+(function () {
+  const root = document.documentElement, btn = document.getElementById("theme-toggle");
+  const apply = (t) => {
+    if (t === "dark") root.setAttribute("data-theme", "dark"); else root.removeAttribute("data-theme");
+    if (btn) { btn.setAttribute("aria-pressed", t === "dark" ? "true" : "false"); btn.textContent = t === "dark" ? "◑ Warm theme" : "◐ Dark theme"; }
+  };
+  let saved = null;
+  try { saved = localStorage.getItem("metacheese-theme"); } catch (e) { /* storage blocked */ }
+  apply(saved === "dark" ? "dark" : "light");
+  if (btn) btn.addEventListener("click", () => {
+    const t = root.getAttribute("data-theme") === "dark" ? "light" : "dark";
+    apply(t);
+    try { localStorage.setItem("metacheese-theme", t); } catch (e) { /* storage blocked */ }
+  });
+})();
 function chartWidth(el) { return Math.max(300, el.clientWidth || 600); }
 
 // ------------------------------------------------------------- generic charts
@@ -871,8 +892,8 @@ const tilesEl = $("#tiles");
 
 // ============================================================= A.3 coverage
 (function () {
-  const sec = section("a3", "A.3", "Read mapping and contig coverage", "Bowtie2 · samtools 1.6",
-    [["What this step does", "Each sample's reads are mapped back to its own contigs to measure how deeply every contig is covered. Contigs from the same genome share a similar coverage, which is what the binning step uses."],
+  const sec = section("a3", "A.3", "Read mapping to the contigs", "Bowtie2 · samtools 1.6",
+    [["What this step does", "Each sample's reads are mapped back to its own contigs. The sorted alignments (BAM) are passed to the binning step, which measures from them how deeply every contig is covered."],
      ["How to read it", "The mapping rate is the share of reads that align to the sample's own assembly. A high rate means the assembly represents most of the sequenced community."]], "asm");
   const mp = D.mapping || {};
   const xs = ordered.filter(x => mp[x] != null);
@@ -888,7 +909,7 @@ const tilesEl = $("#tiles");
 // ============================================================= A.4-A.6 MAGs
 (function () {
   const sec = section("a4", "A.4–A.6", "Genomes from the metagenome (MAGs)", "MetaBAT2 2.17 · CheckM2 1.0.2",
-    [["What this step does", "MetaBAT2 groups contigs into bins (draft genomes, MAGs) using their coverage and sequence composition. CheckM2 estimates for each bin how complete it is and how much contamination (DNA from other organisms) it carries. Bins with completeness above 50% and contamination below 10% are kept for annotation."],
+    [["What this step does", "MetaBAT2 first computes the coverage depth of every contig from the alignments of A.3 (contigs from the same genome share a similar depth), then groups contigs into bins (draft genomes, MAGs) using their coverage and sequence composition. CheckM2 estimates for each bin how complete it is and how much contamination (DNA from other organisms) it carries. Bins with completeness above 50% and contamination below 10% are kept for annotation."],
      ["How to read it", "Each dot is a MAG. Right and low is good. The shaded areas follow the MIMAG standard: high quality (≥ 90% complete, < 5% contaminated), medium quality (≥ 50%, < 10%). With 5 million read pairs per sample only the dominant species reach enough coverage to give good bins."]], "asm");
   const mags = D.mags || [];
   if (!mags.length) return missing(sec);
@@ -983,9 +1004,11 @@ const tilesEl = $("#tiles");
     h("h3", {}, c3, "MAGs against the community profile");
     if (!ig.taxonomy) h("p", { class: "tool" }, c3, "No TORMES taxonomy in this run (A.7 not run), so MAGs cannot be named and matched to MetaPhlAn species yet.");
     const t = h("div", { class: "tablewrap" }, c3);
-    table(t, ["MAG", "Sample", "Kept", "Completeness %", "Contamination %", "Reads in MAG %", "Species (A.7, Kraken2)", "MetaPhlAn species % (C.1)", "MetaPhlAn genus % (C.1)"],
+    table(t, ["MAG", "Sample", "Kept", "Completeness %", "Contamination %", "Reads in MAG %", "Species (A.7, Kraken2)", "MetaPhlAn name (C.1)", "MetaPhlAn species %", "MetaPhlAn genus %"],
       km.slice(0, 60).map(m => [m.name, m.sample, m.passed ? "yes" : "", fmt(m.completeness, 1), fmt(m.contamination, 2), m.share != null ? fmt(m.share, 2) : null,
-        m.species || m.genus || null, m.mpa_species != null ? fmt(m.mpa_species, 2) : null, m.mpa_genus != null ? fmt(m.mpa_genus, 2) : null]), [3, 4, 5, 7, 8]);
+        m.species || m.genus || null, m.mpa_name && m.mpa_name.toLowerCase() !== (m.species || "").toLowerCase() ? m.mpa_name : (m.mpa_name ? "same" : null),
+        m.mpa_species != null ? fmt(m.mpa_species, 2) : null, m.mpa_genus != null ? fmt(m.mpa_genus, 2) : null]), [3, 4, 5, 8, 9]);
+    h("p", { class: "tool" }, c3, "TORMES' Kraken2 database uses the names from before the 2020 split of Lactobacillus (e.g. Lactobacillus rhamnosus); MetaPhlAn uses the new genera (Lacticaseibacillus rhamnosus). MAGs are matched by species epithet across the split, and the MetaPhlAn name is shown when it differs.");
   }
 })();
 

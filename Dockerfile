@@ -187,7 +187,7 @@ RUN mkdir -p /main/db/humann/utility_mapping && \
 # adding it does not invalidate them.
 # ======================================
 
-RUN conda create -y -n multiqcenv -c conda-forge -c bioconda multiqc=1.25.1 && \
+RUN conda create -y -n multiqcenv -c conda-forge -c bioconda multiqc=1.35 && \
     conda clean -afy
 
 # ======================================

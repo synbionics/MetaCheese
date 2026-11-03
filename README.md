@@ -44,7 +44,7 @@ bash examples/small_PRJNA1198075/run_example.sh
 
 Step 3 streams the reads from ENA and stops after the first 5 million pairs
 of each file, so the full dataset (125 GB) is never downloaded. The run
-takes <!-- QUICKSTART_RUNTIME --> and ends with the report in
+takes about 9 hours on a 16-core / 62 GB workstation and ends with the report in
 `output/example_small/report/report.html`. Details are in the
 [small example README](examples/small_PRJNA1198075/README.md).
 
@@ -61,16 +61,20 @@ two branches:
   (MetaBAT2), MAG quality (CheckM2) and annotation of the good MAGs (TORMES).
 
 A final joint step (R.1) brings the two branches together in one interactive
-report: how much of each community the MAGs capture, and whether the MAGs
-match the species the community profiles found.
+report. It reads the outputs of every step (dashed purple lines in the
+figure) and adds a section that combines them: how much of each community
+the MAGs capture, and whether the MAGs match the species the community
+profiles found.
 
 Step IDs (blue in the figure) and artifact IDs (orange) are used throughout
-the docs, the scripts and the report. The script column is the pipeline step
+the docs, the scripts and the report. When a step writes both data passed to
+the next step and logs or side files, these are separate artifacts
+(e.g. P.1.1 trimmed reads, P.1.2 trimming settings). The script column is the pipeline step
 name (`scripts/templates/template_<script>*.sh`), also used with `--from`/`--to`.
 
 | ID | Step | Tool (version in the image) | Script | Output folder |
 |----|------|-----------------------------|--------|---------------|
-| Q.1 | Quality check of raw reads | FastQC 0.12.1, MultiQC 1.25.1 | `00` | `00_fastqc/` |
+| Q.1 | Quality check of raw reads | FastQC 0.12.1, MultiQC 1.35 | `00` | `00_fastqc/` |
 | I.2 | Host genome index (once per host) | Bowtie2 2.3.3.1 | `scripts/build_bowtie2_index.sh` | `data/gene/<Host>/` |
 | P.1 | Adapter and quality trimming | AdapterRemoval 2.3.3 | `00-01` | `01_AdapterRemoval/` |
 | P.2 | Host DNA removal | Bowtie2 2.3.3.1 | `03` | `03_bowtie2_output/` |
@@ -80,8 +84,8 @@ name (`scripts/templates/template_<script>*.sh`), also used with `--from`/`--to`
 | C.4 | Community-level aggregation of the functional profiles | HUMAnN 3.9 utilities | `04b-last` | `04b_humann_output/merged_tables/` |
 | A.1 | Metagenome assembly (per sample) | metaSPAdes 3.13.0 | `05` | `05_spades_output/` |
 | A.2 | Contig filtering (> 500 bp) | awk | `06` | `05_spades_output/contigs/filtered/` |
-| A.3 | Read mapping and contig coverage | Bowtie2, samtools 1.6 | `07`, `08-09` | `07_Bowtie_Index/`, `08_mapping_coverage/` |
-| A.4 | Binning into MAGs | MetaBAT2 2.17 | `10-11` | `10_metabat_depth/`, `11_metabat_MAG/` |
+| A.3 | Read mapping to the contigs | Bowtie2, samtools 1.6 | `07`, `08-09` | `07_Bowtie_Index/`, `08_mapping_coverage/` |
+| A.4 | Contig coverage and binning into MAGs | MetaBAT2 2.17 | `10-11` | `10_metabat_depth/`, `11_metabat_MAG/` |
 | A.5 | MAG completeness and contamination | CheckM2 1.0.2 | `12-13` | `13_checkm2/` |
 | A.6 | MAG filtering and metadata | awk | `14` | `14_MAGs_high_quality/` |
 | A.7 | MAG annotation | TORMES 1.3.0 | `15` | `15_tormes_MAGs/` |
@@ -183,7 +187,7 @@ Start from two pages:
 - **`00_fastqc/multiqc_report.html`**: the quality of the raw reads, all
   samples on one page.
 
-<!-- REPORT_SCREENSHOT -->
+![The R.1 section of the report for the small example: per-sample summary of both branches and where the microbial reads end up](docs/img/report_r1.png)
 
 All files of a run:
 
@@ -203,7 +207,7 @@ output/<run>/
 │   └── contigs/filtered/    A.2  <s>.fasta_sort.fasta (contigs > 500 bp)
 ├── 07_Bowtie_Index/         A.3  Bowtie2 index of each sample's contigs
 ├── 08_mapping_coverage/     A.3  sorted BAM, idxstats, mapping logs
-├── 10_metabat_depth/        A.3  <s>.depth.txt
+├── 10_metabat_depth/        A.4  <s>.depth.txt (contig coverage)
 ├── 11_metabat_MAG/          A.4  bins <s>.<n>.fa
 ├── 13_checkm2/              A.5  quality_report.tsv
 ├── 14_MAGs_high_quality/    A.6  MAGs passing the filter + TORMES metadata
