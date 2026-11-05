@@ -167,8 +167,11 @@ dots. Files from ENA/SRA (`SRRxxxx_1.fastq.gz`) must be renamed; the
 
 ### 3. Config
 
-Copy `config/Config.yml` and adapt threads and memory to your machine (the
-defaults fit 16 cores / 64 GB). The keys you are most likely to change:
+The easiest way is to open [`config/configurator.html`](config/configurator.html)
+in a browser. It works offline: fill in your machine and host, download the
+file, and it gives you the command to run. Or copy `config/Config.yml` and adapt
+threads and memory to your machine (the defaults fit 16 cores / 64 GB). The keys
+you are most likely to change:
 
 | Key | Meaning | Default |
 |-----|---------|---------|

@@ -17,6 +17,10 @@ edits to `config/Config.yml` do not change a run that already exists.
 The examples ship their own configs, sized for their machines
 (`examples/*/Config.yml`).
 
+`config/configurator.html` is a form that writes this file: open it in a browser
+(no internet or installation needed). Threads follow the cores you enter, and the
+metaSPAdes memory limit is your RAM minus 8 GB; each value can be edited.
+
 ## Parameters
 
 | Section | Key | Meaning | Default |
@@ -73,7 +77,9 @@ so `@04b_1_par2@` in the template becomes the value of `step04b_1.par2`.
 
 To add a parameter: use a new placeholder in the template, add `name=key` to
 the step's `STEPS` entry, and add the key to every config
-(`config/Config.yml`, `examples/*/Config.yml`). A key missing from the config
+(`config/Config.yml`, `examples/*/Config.yml`). Also update the copy of
+`config/Config.yml` inside `config/configurator.html` (block `id="template"`), and
+add a field to its `GROUPS` table if users should set the key. A key missing from the config
 stops the run with an error.
 
 The scripts in `scripts/pipeline/` are regenerated at the start of each run:

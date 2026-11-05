@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MetaCheese configurator</title>
+<!-- Works offline: one file, nothing is sent anywhere. The block with id="template"
+     is a copy of config/Config.yml: update it whenever that file changes. -->
+<style>
+:root {
+  color-scheme: light;
+  --bg: #f3f0e8; --surface: #faf8f3; --ink: #2b2e2c; --ink-2: #4b504c; --muted: #656a64;
+  --line: #e2ddd2; --field: #fff; --accent: #2a5f9e; --accent-ink: #fff; --accent-wash: #e4eaf1;
+  --critical: #a83232; --critical-wash: #f7e4e1; --warning: #7a5a08; --warning-wash: #f6edd2;
+  --font-body: "Source Sans 3", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+    --bg: #1e1f1c; --surface: #272925; --ink: #e6e3da; --ink-2: #c4c0b6; --muted: #a09d94;
+    --line: #3a3c37; --field: #1e1f1c; --accent: #8db4e6; --accent-ink: #14181d; --accent-wash: #2a3340;
+    --critical: #ec8d8d; --critical-wash: #3d2424; --warning: #e6c365; --warning-wash: #38301a;
+  }
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.5 var(--font-body); }
+.page { max-width: 1240px; margin: 0 auto; padding: 32px 16px 64px; }
+h1 { font-size: 1.9rem; line-height: 1.2; margin: 0 0 8px; }
+.lede { margin: 0 0 28px; max-width: 70ch; color: var(--ink-2); }
+.layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 24px; align-items: start; }
+.result { position: sticky; top: 16px; display: grid; gap: 16px; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 20px; margin: 0 0 16px; min-width: 0; }
+.result .card { margin: 0; }
+h2 { font-size: 1.1rem; margin: 0 0 4px; }
+.card > p { margin: 0 0 14px; color: var(--ink-2); font-size: .94rem; }
+.fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px 18px; }
+.field { display: flex; flex-direction: column; min-width: 0; }
+.field.wide { grid-column: 1 / -1; }
+label { font-weight: 600; font-size: .94rem; }
+.help { color: var(--muted); font-size: .84rem; line-height: 1.35; margin: 2px 0 6px; }
+input { width: 100%; margin-top: auto; padding: 8px 10px; font: inherit; color: var(--ink); background: var(--field); border: 1px solid var(--line); border-radius: 6px; }
+input:focus-visible, button:focus-visible, a:focus-visible, summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+input[aria-invalid="true"] { border-color: var(--critical); }
+details > summary { cursor: pointer; font-weight: 700; font-size: 1.1rem; }
+details[open] > summary { margin-bottom: 12px; }
+button, .button { font: inherit; font-weight: 600; padding: 9px 14px; border-radius: 6px; border: 1px solid var(--accent); cursor: pointer; background: transparent; color: var(--accent); }
+.primary { background: var(--accent); color: var(--accent-ink); }
+button[disabled] { opacity: .5; cursor: not-allowed; }
+.row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.head { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-bottom: 8px; }
+.head h2 { margin: 0; }
+pre { margin: 0; padding: 12px; overflow: auto; background: var(--field); border: 1px solid var(--line); border-radius: 6px; font: .79rem/1.5 var(--font-mono); }
+#preview { max-height: 46vh; }
+#command { white-space: pre-wrap; overflow-wrap: anywhere; }
+.msgs { display: grid; gap: 8px; margin: 0 0 14px; padding: 0; list-style: none; font-size: .92rem; }
+.msgs:empty { display: none; }
+.msgs li { padding: 8px 10px; border-radius: 6px; }
+.error { background: var(--critical-wash); color: var(--critical); }
+.warn { background: var(--warning-wash); color: var(--warning); }
+ol.next { margin: 10px 0 0; padding-left: 20px; font-size: .92rem; color: var(--ink-2); }
+code { font-family: var(--font-mono); font-size: .88em; overflow-wrap: anywhere; }
+@media (max-width: 900px) {
+  .layout { grid-template-columns: minmax(0, 1fr); }
+  .result { position: static; }
+  #preview { max-height: 360px; }
+}
+@media (max-width: 480px) { .fields { grid-template-columns: minmax(0, 1fr); } }
+</style>
+</head>
+<body>
+<div class="page">
+  <h1>MetaCheese configurator</h1>
+  <p class="lede">Fill in this form to create the config file for a run. The defaults are the pipeline's, so you only need to set your machine and the host. The other settings can stay as they are unless you have a reason to change them.</p>
+  <div class="layout">
+    <form id="form" novalidate autocomplete="off"></form>
+    <div class="result">
+      <section class="card" aria-labelledby="h-save">
+        <h2 id="h-save">Your config file</h2>
+        <p style="margin:0 0 14px;color:var(--ink-2);font-size:.94rem">Nothing leaves this page: the file is built in your browser.</p>
+        <ul class="msgs" id="msgs" aria-live="polite"></ul>
+        <div class="row"><button type="button" class="primary" id="download">Download</button><button type="button" id="copy-config">Copy text</button></div>
+      </section>
+      <section class="card" aria-labelledby="h-cmd">
+        <div class="head"><h2 id="h-cmd">Run it</h2><button type="button" id="copy-command">Copy</button></div>
+        <pre id="command"></pre>
+        <ol class="next" id="next"></ol>
+      </section>
+      <section class="card" aria-labelledby="h-prev">
+        <h2 id="h-prev" style="margin-bottom:8px">Preview</h2>
+        <pre id="preview" tabindex="0" aria-label="Preview of the config file"></pre>
+      </section>
+    </div>
+  </div>
+</div>
+
+<script type="text/plain" id="template">
+step00:
+  dir1: "../../input/@input_sample@"                   # raw reads (*_1.fq.gz / *_2.fq.gz)
+  dir2: "../../output/@output_folder@/00_fastqc"        # FastQC reports
+  par1: 8                                              # threads (one file per thread)
+
+step00_01:
+  dir1: "../../input/@input_sample@"                    # raw reads (*_1.fq.gz / *_2.fq.gz)
+  dir2: "../../output/@output_folder@/01_AdapterRemoval" # (legacy, unused)
+  dir3: "../../output/@output_folder@/01_AdapterRemoval" # AdapterRemoval output directory
+  dir4: ""                                              # (legacy .tar input, unused)
+  dir5: ""                                              # (legacy .tar input, unused)
+  par1: 16                                              # threads
+  par2: 50                                              # minimum length
+  par3: 30                                              # minimum quality
+  par4: 10                                              # max Ns
+  par5: 2                                               # trim5p
+  par6: 2                                               # trim3p
+
+step03:
+  dir1: "../../output/@output_folder@/01_AdapterRemoval" # input directory
+  dir2: "../../output/@output_folder@/03_bowtie2_output" # output directory
+  dir3: "../../data/gene/Bos_taurus/Bos_taurus"          # database
+  par1: 16                                                # threads (Bowtie2 host removal)
+
+step04:
+  #dir1: "../../data/metaphlan_database"                 # Metaphlan DB
+  dir2: "../../output/@output_folder@/03_bowtie2_output" # input fastq folder
+  dir3: "../../output/@output_folder@/04_metaphlan_output" # metaphlan output
+  rscript: "../../data/calculate_diversity.R"            # → Rscript for diversity analysis
+  par1: 16                                                # threads (MetaPhlAn)
+  
+step04b_1:
+  dir1: "../../output/@output_folder@/04_metaphlan_output" # metaphlan output
+  dir2: "../../output/@output_folder@/03_bowtie2_output"   # input fastq folder
+  dir3: "../../output/@output_folder@/04b_humann_output"   # humann output
+  par1: 16                                              # HUMAnN threads
+  par2: 2                                                 # DIAMOND --block-size (2 = default; higher = faster, ~6 GB RAM per unit)
+
+step04b_2:
+  dir1: "../../output/@output_folder@/04_metaphlan_output" # metaphlan output
+  dir2: "../../output/@output_folder@/03_bowtie2_output"   # input fastq folder
+  dir3: "../../output/@output_folder@/04b_humann_output"   # humann output
+  
+step04b_last:
+  dir1: "../../output/@output_folder@/04b_humann_output"       # humann output
+  dir2: "../../output/@output_folder@/04b_humann_output/merged_tables" # merged tables output
+
+step05:
+  var1: "../../output/@output_folder@/03_bowtie2_output"  # input directory
+  var2: "../../output/@output_folder@/05_spades_output"   # output directory
+  par1: 16                                              # threads
+  par2: 56                                              # memory limit in GB (keep below the machine RAM)
+
+step06:
+  var1: "../../output/@output_folder@/05_spades_output"  # input directory
+  var2: "contigs"                                        # directory containing the copied input files (created inside the input directory)
+  var3: "filtered"                                       # output directory (created inside the previous directory)
+  filter1: 32                                            # num threads for xargs
+
+step06b:
+  dir1: "../../output/@output_folder@/05_spades_output/contigs/filtered"  # filtered contigs (step 06)
+  dir2: "../../output/@output_folder@/06b_quast"                          # QUAST output folder
+  par1: 16                                              # threads
+  par2: 500                                             # minimum contig length counted by QUAST (bp)
+
+step07:
+  dir1: "../../output/@output_folder@/07_Bowtie_Index"                    # output folder
+  dir2: "../../output/@output_folder@/05_spades_output/contigs/filtered"  # folder with contigs .fasta
+  par1: 16                                              # threads
+
+step08_09:
+  dir1: "../../output/@output_folder@/03_bowtie2_output" # input fastq files
+  dir2: "../../output/@output_folder@/07_Bowtie_Index"   # Bowtie2 index input
+  dir3: "../../output/@output_folder@/08_mapping_coverage" # BAM + log output
+  par1: 16                                                # threads (Bowtie2 mapping + samtools sort)
+
+step10_11:
+  dir1: "../../output/@output_folder@/08_mapping_coverage"              # output from step 08-09
+  dir2: "../../output/@output_folder@/10_metabat_depth"                 # output step 10
+  dir3: "../../output/@output_folder@/05_spades_output/contigs/filtered" # output step 05
+  dir4: "../../output/@output_folder@/11_metabat_MAG"                   # output step 11
+  dir5: "../../output/@output_folder@/11b_metabat_MAG"                  # output step 11b
+  par1: 1500                                                            # min contig length for binning
+  par2: 16                                              # threads
+
+step12_13:
+  var1: "../../output/@output_folder@/11_metabat_MAG"  # input MAGs .fa
+  var2: "../../output/@output_folder@/12_checkm"       # checkm output
+  var3: "../../output/@output_folder@/13_checkm2"      # checkm2 output
+  par1: 16                                              # threads for CheckM (not run)
+  par2: 4                                             # threads for pplacer
+  par3: 16                                              # threads for CheckM2
+
+step14:
+  var1: "../../output/@output_folder@/13_checkm2/quality_report.tsv"   # TSV_FILE
+  var2: "../../output/@output_folder@/11_metabat_MAG"                  # SOURCE_DIR (MAGs to filter)
+  var3: "../../output/@output_folder@/14_MAGs_high_quality"            # TARGET_DIR (filtered MAGs output)
+  var4: "../../output/@output_folder@/14_MAGs_high_quality"            # ALL_MAGS_DIR (for complete metadata)
+  var5: 50                                                             # COMPLETENESS
+  var6: 10                                                             # CONTAMINATION
+  var7: "my-metadata2.txt"                                             # METADATA_FILTERED
+  var8: "all_metadata.tsv"                                             # METADATA_ALL
+
+step15:
+  var1: "../../output/@output_folder@"                  # working dir → parameterized
+  var2: "14_MAGs_high_quality/my-metadata2.txt"         # input metadata
+  par1: "15_tormes_MAGs/"                               # output
+  par2: 16                                              # threads
+
+step16:
+  dir1: "../../output/@output_folder@"                      # run folder (report goes to <run>/report/)
+</script>
+<script>
+"use strict";
+const $ = id => document.getElementById(id);
+const TEMPLATE = $("template").textContent.replace(/^\n/, "");
+
+// Values that follow the machine, same rule as the examples: every tool gets all
+// the cores (one tool runs at a time), metaSPAdes all the RAM but 8 GB.
+const threads = m => m.cores;
+const memory = m => Math.max(1, m.ram - 8);
+
+// key: "<section>.<key>" in Config.yml. auto: follows cores and RAM unless edited.
+const GROUPS = [
+  { title: "Your machine", text: "Threads and memory for every step are worked out from these two numbers.", fields: [
+    { id: "cores", label: "CPU cores", help: "How many the run may use.", value: 16, min: 1 },
+    { id: "ram", label: "RAM (GB)", help: "How much the run may use.", value: 64, min: 1 },
+  ]},
+  { title: "Host", text: "Reads that align to the host genome are removed before the analysis. Host removal cannot be turned off yet, so a host is required.", fields: [
+    { id: "host", label: "Host genome folder", help: "Folder name inside data/gene/ holding the host's FASTA file. Use letters, numbers, dots, dashes and underscores, no spaces.", type: "text", value: "", placeholder: "e.g. Homo_sapiens", wide: true },
+  ]},
+  { title: "Read trimming (AdapterRemoval)", text: "Which reads and bases are kept before the analysis.", fields: [
+    { key: "step00_01.par2", label: "Minimum read length (bp)", help: "Shorter reads are discarded.", value: 50, min: 1 },
+    { key: "step00_01.par3", label: "Minimum base quality (Phred)", help: "Lower-quality bases are trimmed from the read ends.", value: 30, min: 0, max: 93 },
+    { key: "step00_01.par4", label: "Maximum Ns per read", help: "Reads with more Ns are discarded.", value: 10, min: 0 },
+    { key: "step00_01.par5", label: "Bases cut from the 5' end", help: "Removed from every read.", value: 2, min: 0 },
+    { key: "step00_01.par6", label: "Bases cut from the 3' end", help: "Removed from every read.", value: 2, min: 0 },
+  ]},
+  { title: "Binning and MAG quality", text: "Which contigs are binned, and which bins are kept as MAGs and annotated.", fields: [
+    { key: "step10_11.par1", label: "Minimum contig length to bin (bp)", help: "MetaBAT2 needs at least 1500.", value: 1500, min: 1500 },
+    { key: "step14.var5", label: "Minimum completeness (%)", help: "CheckM2. A bin must be above this.", value: 50, min: 0, max: 100, decimal: true },
+    { key: "step14.var6", label: "Maximum contamination (%)", help: "CheckM2. A bin must be below this.", value: 10, min: 0, max: 100, decimal: true },
+  ]},
+  { title: "Advanced: threads and memory per step", collapsed: true, text: "These follow your machine until you edit one. Most people can leave them alone.", reset: true, fields: [
+    { key: "step00.par1", label: "FastQC threads", help: "One file per thread.", auto: threads, min: 1 },
+    { key: "step00_01.par1", label: "AdapterRemoval threads", auto: threads, min: 1 },
+    { key: "step03.par1", label: "Bowtie2 host removal threads", auto: threads, min: 1 },
+    { key: "step04.par1", label: "MetaPhlAn threads", auto: threads, min: 1 },
+    { key: "step04b_1.par1", label: "HUMAnN threads", auto: threads, min: 1 },
+    { key: "step04b_1.par2", label: "DIAMOND block size (HUMAnN)", help: "Higher is faster, about 6 GB of RAM per unit.", value: 2, min: 1 },
+    { key: "step05.par1", label: "metaSPAdes threads", auto: threads, min: 1 },
+    { key: "step05.par2", label: "metaSPAdes memory limit (GB)", help: "Keep below the machine's RAM.", auto: memory, min: 1 },
+    { key: "step06.filter1", label: "Contig filtering jobs", auto: threads, min: 1 },
+    { key: "step06b.par1", label: "QUAST threads", auto: threads, min: 1 },
+    { key: "step06b.par2", label: "Minimum contig length in QUAST (bp)", value: 500, min: 0 },
+    { key: "step07.par1", label: "Bowtie2 index threads (contigs)", auto: threads, min: 1 },
+    { key: "step08_09.par1", label: "Bowtie2 and samtools threads (contigs)", auto: threads, min: 1 },
+    { key: "step10_11.par2", label: "MetaBAT2 threads", auto: threads, min: 1 },
+    { key: "step12_13.par3", label: "CheckM2 threads", auto: threads, min: 1 },
+    { key: "step15.par2", label: "TORMES threads", auto: threads, min: 1 },
+  ]},
+  { title: "Names for this run", text: "Only used for the file name and the command on this page. The config file does not depend on them.", fields: [
+    { id: "file", label: "Config file name", type: "text", value: "my_study.yml" },
+    { id: "input", label: "Input folder", help: "Inside input/, with <sample>_1.fq.gz and <sample>_2.fq.gz.", type: "text", value: "my_dataset" },
+    { id: "run", label: "Run name", help: "Results go to output/<run name>/.", type: "text", value: "my_run" },
+  ]},
+];
+// Required by the config but not used, because CheckM does not run (CheckM2 does).
+const HIDDEN = { "step12_13.par1": threads, "step12_13.par2": m => Math.min(4, m.cores) };
+
+const FIELDS = GROUPS.flatMap(g => g.fields);
+const NAME_OK = /^[A-Za-z0-9._-]+$/;
+const edited = new Set();
+const inputOf = f => $("f-" + (f.id || f.key));
+const num = id => Number($("f-" + id).value);
+
+function buildForm() {
+  const form = $("form");
+  GROUPS.forEach(g => {
+    const card = document.createElement(g.collapsed ? "details" : "section");
+    card.className = "card";
+    const title = document.createElement(g.collapsed ? "summary" : "h2");
+    title.textContent = g.title;
+    card.append(title);
+    const p = document.createElement("p");
+    p.textContent = g.text;
+    card.append(p);
+    const box = document.createElement("div");
+    box.className = "fields";
+    g.fields.forEach(f => {
+      const wrap = document.createElement("div");
+      wrap.className = "field" + (f.wide ? " wide" : "");
+      const id = "f-" + (f.id || f.key);
+      const label = document.createElement("label");
+      label.htmlFor = id;
+      label.textContent = f.label;
+      wrap.append(label);
+      if (f.help) {
+        const help = document.createElement("div");
+        help.className = "help";
+        help.id = id + "-help";
+        help.textContent = f.help;
+        wrap.append(help);
+      }
+      const input = document.createElement("input");
+      input.id = id;
+      if (f.help) input.setAttribute("aria-describedby", id + "-help");
+      if (f.type === "text") {
+        input.type = "text";
+        input.spellcheck = false;
+        input.placeholder = f.placeholder || "";
+      } else {
+        input.type = "number";
+        input.step = f.decimal ? "any" : "1";
+        input.min = f.min;
+        if (f.max != null) input.max = f.max;
+        input.inputMode = f.decimal ? "decimal" : "numeric";
+      }
+      if (f.value !== undefined) input.value = f.value;
+      input.addEventListener("input", () => {
+        if (f.auto) edited.add(f.key);
+        update();
+      });
+      wrap.append(input);
+      box.append(wrap);
+    });
+    card.append(box);
+    if (g.reset) {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.textContent = "Reset to match my machine";
+      b.style.marginTop = "14px";
+      b.addEventListener("click", () => { edited.clear(); update(); });
+      card.append(b);
+    }
+    form.append(card);
+  });
+  form.addEventListener("submit", e => e.preventDefault());
+}
+
+function fieldError(f) {
+  const v = inputOf(f).value.trim();
+  if (f.type === "text") return v && NAME_OK.test(v) ? null : `${f.label}: ${v ? "use only letters, numbers, dots, dashes and underscores" : "required"}.`;
+  const n = Number(v);
+  if (v === "" || !Number.isFinite(n)) return `${f.label}: enter a number.`;
+  if (!f.decimal && !Number.isInteger(n)) return `${f.label}: enter a whole number.`;
+  if (n < f.min) return `${f.label}: must be at least ${f.min}.`;
+  if (f.max != null && n > f.max) return `${f.label}: must be at most ${f.max}.`;
+  return null;
+}
+
+// Replace values in the template line by line, so its comments and layout stay.
+function renderConfig(values) {
+  let section = null;
+  return TEMPLATE.split("\n").map(line => {
+    const s = line.match(/^(\w+):/);
+    if (s) { section = s[1]; return line; }
+    const m = line.match(/^(\s+)(\w+):(\s*)("[^"]*"|[^\s#]+)(.*)$/);
+    const full = m && `${section}.${m[2]}`;
+    if (!m || !(full in values)) return line;
+    const value = String(values[full]);
+    const spare = m[4].length - value.length;
+    const rest = m[5].replace(/^\s+/, sp => " ".repeat(Math.max(1, sp.length + spare)));
+    return `${m[1]}${m[2]}:${m[3]}${value}${rest}`;
+  }).join("\n");
+}
+
+let configText = "";
+
+function update() {
+  const machine = { cores: Math.floor(num("cores")) || 1, ram: Math.floor(num("ram")) || 1 };
+  FIELDS.forEach(f => { if (f.auto && !edited.has(f.key)) inputOf(f).value = f.auto(machine); });
+
+  const errors = [], warnings = [];
+  FIELDS.forEach(f => {
+    const e = fieldError(f);
+    inputOf(f).setAttribute("aria-invalid", e ? "true" : "false");
+    if (e) errors.push(e);
+  });
+
+  const host = $("f-host").value.trim();
+  const hostOk = NAME_OK.test(host);
+  const values = {};
+  FIELDS.forEach(f => { if (f.key) values[f.key] = inputOf(f).value.trim(); });
+  Object.entries(HIDDEN).forEach(([k, rule]) => { values[k] = rule(machine); });
+  const hostName = hostOk ? host : "<Host>";
+  values["step03.dir3"] = `"../../data/gene/${hostName}/${hostName}"`;
+  configText = "# Made with config/configurator.html\n" + renderConfig(values);
+
+  if (!errors.length) {
+    if (machine.ram < 62) warnings.push("Less RAM than the smallest machine this pipeline was tested on (62 GB). HUMAnN and metaSPAdes may run out of memory.");
+    if (num("step05.par2") >= machine.ram) warnings.push("The metaSPAdes memory limit should stay below the machine's RAM.");
+    if (num("step04b_1.par2") * 6 > machine.ram) warnings.push("This DIAMOND block size needs more RAM than the machine has (about 6 GB per unit).");
+    const over = FIELDS.filter(f => f.auto === threads && num(f.key) > machine.cores).map(f => f.label);
+    if (over.length) warnings.push(`More threads than cores: ${over.join(", ")}.`);
+  }
+
+  const msgs = $("msgs");
+  msgs.replaceChildren(...errors.map(t => li(t, "error")), ...warnings.map(t => li(t, "warn")));
+  $("download").disabled = errors.length > 0;
+  $("copy-config").disabled = errors.length > 0;
+  $("download").textContent = `Download ${fileName()}`;
+  $("preview").textContent = configText;
+
+  const q = id => $("f-" + id).value.trim() || `<${id}>`;
+  $("command").textContent =
+    `HOST_SPECIES=${hostOk ? host : "<Host>"} INDEX_THREADS=${machine.cores} \\\n` +
+    `  bash examples/run_in_docker.sh --input ${q("input")} --name ${q("run")} \\\n` +
+    `  --config config/${fileName()}`;
+  const next = $("next");
+  next.replaceChildren(
+    item(`Move the downloaded file to the repository's <code>config/</code> folder.`),
+    item(`Put the host's FASTA file in <code>data/gene/${escapeHtml(hostOk ? host : "<Host>")}/</code>. Its index is built on the first run.`),
+    item(`Run the command from the repository root. A run that already has a folder keeps its saved config, so use a new run name to apply a new file.`));
+}
+
+function fileName() {
+  const v = $("f-file").value.trim();
+  if (!v || !NAME_OK.test(v)) return "my_study.yml";
+  return /\.ya?ml$/i.test(v) ? v : v + ".yml";
+}
+function li(text, cls) { const e = document.createElement("li"); e.className = cls; e.textContent = text; return e; }
+function item(html) { const e = document.createElement("li"); e.innerHTML = html; return e; }
+function escapeHtml(t) { const d = document.createElement("div"); d.textContent = t; return d.innerHTML; }
+
+async function copy(text, button) {
+  const old = button.textContent;
+  let ok = false;
+  try {
+    await navigator.clipboard.writeText(text);
+    ok = true;
+  } catch (_) {
+    // file:// pages may not get the clipboard API
+    const t = document.createElement("textarea");
+    t.value = text;
+    t.style.position = "fixed";
+    t.style.opacity = "0";
+    document.body.append(t);
+    t.select();
+    try { ok = document.execCommand("copy"); } catch (_) { ok = false; }
+    t.remove();
+  }
+  button.textContent = ok ? "Copied" : "Could not copy";
+  setTimeout(() => { button.textContent = old; }, 1500);
+}
+
+$("download").addEventListener("click", () => {
+  const url = URL.createObjectURL(new Blob([configText], { type: "text/yaml" }));
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = fileName();
+  document.body.append(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+});
+$("copy-config").addEventListener("click", e => copy(configText, e.currentTarget));
+$("copy-command").addEventListener("click", e => copy($("command").textContent, e.currentTarget));
+
+buildForm();
+update();
+</script>
+</body>
+</html>
