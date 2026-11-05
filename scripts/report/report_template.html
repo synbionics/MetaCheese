@@ -509,6 +509,7 @@ $("#eyebrow").textContent = `MetaCheese run report · generated ${D.generated}`;
 const groupCounts = groups.map(g => `${samples.filter(x => groupOf[x] === g).length} ${groupLabel(g)}`).join(", ");
 $("#lede").textContent = `${samples.length} samples (${groupCounts}) processed with the MetaCheese pipeline. Each section explains one workflow step and shows its results for this run.` + (D.samplesheet ? ` Sample groups from ${D.samplesheet}.` : "");
 
+const linkHelp = `If a link does not open, this page was copied without the pages it links to: unzip ${D.run}_report.zip and open report.html from the unzipped folder.`;
 const host = D.host || {}, trim = D.trimming || {};
 const microbialPct = samples.map(x => host[x] && trim[x] && host[x].not_concordant != null ? 100 * host[x].not_concordant / trim[x].pairs : null);
 const totalPairs = samples.reduce((a, x) => a + ((trim[x] || {}).pairs || 0), 0);
@@ -538,7 +539,7 @@ const tilesEl = $("#tiles");
 
 // ============================================================= Q.1 FastQC
 (function () {
-  const sec = section("q1", "Q.1", "Quality of the raw reads", "FastQC 0.12.1",
+  const sec = section("q1", "Q.1", "Quality of the raw reads", "FastQC 0.12.1 · MultiQC 1.35",
     [["What this step does", "FastQC reads each raw FASTQ file and runs a set of standard checks: base quality along the read, GC content, duplication, adapter content and others. It changes nothing; it tells you whether the sequencing run is usable before you spend hours on the analysis."],
      ["How to read it", "Each check is PASS, WARN or FAIL against thresholds designed for genomic DNA of a single organism. In metagenomes some warnings are expected: GC content and sequence duplication often 'fail' because many species with different GC are mixed. Look first at per-base quality and adapter content."]], "pre");
   const fq = D.fastqc || [];
@@ -553,6 +554,11 @@ const tilesEl = $("#tiles");
   ]);
   // status grid
   const c1 = card(sec);
+  if (D.multiqc) {
+    const p = h("p", { class: "tool" }, c1, "All FastQC results on one page: ");
+    h("a", { href: D.link_base + D.multiqc, target: "_blank", rel: "noopener" }, p, "MultiQC report");
+    p.append(". " + linkHelp);
+  }
   h("div", { class: "controls" }, c1, "Status of each FastQC check per file");
   const tw = h("div", { class: "tablewrap" }, c1);
   const t = h("table", { class: "qc-grid" }, tw);
@@ -921,8 +927,9 @@ const tilesEl = $("#tiles");
     xs.map(x => { const a = as[x]; return [x, fmt(a.contigs), fmt(a.total), fmt(a.largest), fmt(a.n50), fmt(a.n90), fmt(a.l50), fmt(a.l90), fmt(a.gc, 2), fmt(a.ns, 2)]; }),
     [1, 2, 3, 4, 5, 6, 7, 8, 9]);
   if (q.links.length) {
-    const p = h("p", { class: "tool" }, c, "QUAST's own pages (open this report from output/<run>/report/): ");
-    q.links.forEach((l, i) => { if (i) p.append(" · "); h("a", { href: "../" + l, target: "_blank", rel: "noopener" }, p, l); });
+    const p = h("p", { class: "tool" }, c, "QUAST's own pages: ");
+    q.links.forEach((l, i) => { if (i) p.append(" · "); h("a", { href: D.link_base + l, target: "_blank", rel: "noopener" }, p, l); });
+    h("p", { class: "tool" }, c, linkHelp);
   }
 })();
 
@@ -980,12 +987,12 @@ const tilesEl = $("#tiles");
 (function () {
   const sec = section("a7", "A.7", "MAG annotation", "TORMES 1.3.0",
     [["What this step does", "TORMES annotates each kept MAG: genes (Prokka), taxonomy, MLST, antimicrobial resistance and virulence genes, plasmids. It writes an HTML report per run."],
-     ["How to read it", "Open the TORMES report from the run folder (links below work when this report is opened from output/<run>/report/)."]], "asm");
+     ["How to read it", "Open each MAG's report from the links below. " + linkHelp]], "asm");
   const t = D.tormes;
   if (!t || !t.reports.length) return missing(sec, (D.mags || []).length && !(D.mags || []).some(m => m.passed) ? "No MAG passed the quality filter, so TORMES was not run." : null);
   const c = card(sec);
   const ul = h("ul", {}, c);
-  t.reports.forEach(r => { const li = h("li", {}, ul); h("a", { href: "../" + r, target: "_blank", rel: "noopener" }, li, r); });
+  t.reports.forEach(r => { const li = h("li", {}, ul); h("a", { href: D.link_base + r, target: "_blank", rel: "noopener" }, li, r); });
 })();
 
 // ============================================================= R.1 joint: both branches

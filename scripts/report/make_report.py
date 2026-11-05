@@ -3,8 +3,9 @@
 
 Collects the results of every pipeline step from a run folder, joins the two
 branches (community-level and assembly-specific profiling) and writes one
-self-contained interactive HTML file (no internet connection or extra software
-needed to open it), meant to be read in a browser and shared with colleagues.
+interactive HTML file (no internet connection or extra software needed to open
+it), meant to be read in a browser. To share it, send <run>_report.zip, written
+next to it: it also holds the pages the report links to.
 
 Usage:
     python3 scripts/report/make_report.py output/<run> [--out FILE] [--samplesheet TSV]
@@ -588,6 +589,39 @@ def collect_tormes_taxonomy(run):
     return tax
 
 
+def linked_files(run, pages):
+    """Files of the run folder needed by the linked pages: the pages themselves
+    and, following their href/src attributes, the local files they refer to."""
+    ref = re.compile(r"""(?:href|src)\s*=\s*["']([^"'#?]+)""", re.I)
+    root = os.path.abspath(run)
+    found, todo = set(), list(pages)
+    while todo:
+        rel = todo.pop()
+        path = os.path.join(root, rel)
+        if rel in found or not os.path.isfile(path):
+            continue
+        found.add(rel)
+        if rel.lower().endswith((".html", ".htm")):
+            for target in ref.findall(read_text(path, "")):
+                if re.match(r"^([a-z][a-z0-9+.-]*:|/)", target, re.I):
+                    continue
+                new = os.path.normpath(os.path.join(os.path.dirname(rel), target))
+                if not new.startswith(".."):
+                    todo.append(new)
+    return sorted(found)
+
+
+def write_package(path, run, name, page, pages):
+    """Zip holding the report and the pages it links to, in one folder, so that
+    the links still work on another computer once it is unzipped."""
+    tmp = path + ".tmp"
+    with zipfile.ZipFile(tmp, "w", zipfile.ZIP_DEFLATED) as zf:
+        zf.writestr(f"{name}/report.html", page)
+        for rel in linked_files(run, pages):
+            zf.write(os.path.join(run, rel), f"{name}/{rel}")
+    os.replace(tmp, path)
+
+
 def collect_integration(run, samples, mags, metaphlan, mapping):
     """R.1: join the two branches.
 
@@ -723,6 +757,7 @@ def main():
                      "title": next((x["title"] for x in sheet if x["sample"] == s), "")} for s in samples],
         "steps": collect_steps(run),
         "fastqc": collect_fastqc(run),
+        "multiqc": "00_fastqc/multiqc_report.html" if os.path.isfile(os.path.join(run, "00_fastqc", "multiqc_report.html")) else None,
         "trimming": trimming,
         "host": host,
         "metaphlan": metaphlan,
@@ -743,19 +778,28 @@ def main():
     template = read_text(os.path.join(HERE, "report_template.html"))
     if template is None:
         sys.exit("ERROR: report_template.html not found next to make_report.py")
-    payload = json.dumps(data, separators=(",", ":")).replace("</", "<\\/")
-    page = (template.replace("/*__DATA__*/null", payload)
-                    .replace("<!--__WORKFLOW__-->", svg)
-                    .replace("__TITLE__", html.escape(data["title"])))
-    if args.fragment:
-        page = "".join(re.findall(r"(?s)<!--__FRAGMENT_START__-->(.*?)<!--__FRAGMENT_END__-->", page))
-    else:
-        page = page.replace("<!--__FRAGMENT_START__-->", "").replace("<!--__FRAGMENT_END__-->", "")
+
+    def render(link_base):
+        """The page, with its links to other pages starting with link_base."""
+        payload = json.dumps({**data, "link_base": link_base}, separators=(",", ":")).replace("</", "<\\/")
+        page = (template.replace("/*__DATA__*/null", payload)
+                        .replace("<!--__WORKFLOW__-->", svg)
+                        .replace("__TITLE__", html.escape(data["title"])))
+        if args.fragment:
+            return "".join(re.findall(r"(?s)<!--__FRAGMENT_START__-->(.*?)<!--__FRAGMENT_END__-->", page))
+        return page.replace("<!--__FRAGMENT_START__-->", "").replace("<!--__FRAGMENT_END__-->", "")
+
     out = args.out or os.path.join(run, "report", "report.html")
     os.makedirs(os.path.dirname(os.path.abspath(out)), exist_ok=True)
     with open(out, "w") as fh:
-        fh.write(page)
+        fh.write(render("../"))
     print(f"Report written to {out} ({os.path.getsize(out) / 1024:.0f} KB)")
+    if not args.fragment:
+        package = os.path.join(os.path.dirname(os.path.abspath(out)), f"{name}_report.zip")
+        write_package(package, run, f"{name}_report", render(""),
+                      ([data["multiqc"]] if data["multiqc"] else [])
+                      + (data["quast"] or {}).get("links", []) + (data["tormes"] or {}).get("reports", []))
+        print(f"Package to share written to {package} ({os.path.getsize(package) / 1024 ** 2:.0f} MB)")
 
 
 if __name__ == "__main__":

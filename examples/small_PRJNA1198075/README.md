@@ -77,8 +77,10 @@ RUN_NAME=test2 bash examples/small_PRJNA1198075/run_example.sh       # a second,
 ## What you get
 
 `output/example_small/report/report.html` is the final report: open it in a
-browser, or send the file to a colleague (it is a single file and needs no
-internet connection). It explains each step and shows its results; the other
+browser (it needs no internet connection). To send it to a colleague, use
+`output/example_small/report/example_small_report.zip`, which also holds the
+pages the report links to: unzip it and open `report.html`. The report explains
+each step and shows its results; the other
 folders are described in the main README ([Results](../../README.md#results)).
 
 ## Run time and resources

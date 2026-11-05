@@ -39,8 +39,8 @@ HTML report of the whole run.
 - **One config, one command, one record.** Threads, memory and thresholds of
   both analyses are in one YAML file; each run keeps its config, log and step
   times, and can be resumed from any step.
-- **One report.** The results of both analyses, explained step by step, in a
-  single HTML file that can be e-mailed to colleagues who do not use the
+- **One report.** The results of both analyses, explained step by step, in one
+  HTML report, with a zip file to send to colleagues who do not use the
   command line.
 
 ![MetaCheese workflow](docs/img/workflow.svg)
@@ -228,8 +228,9 @@ in [`docs/configuration.md`](docs/configuration.md#other-ways-to-run).
 
 Start from two pages:
 
-- **`report/report.html`**: the final report. One self-contained file (no
-  internet needed, can be sent by e-mail) that explains each step and shows
+- **`report/report.html`**: the final report (no internet needed). To share it,
+  send **`report/<run>_report.zip`**, which also holds the MultiQC, QUAST and TORMES pages
+  it links to; the links work once it is unzipped. The report explains each step and shows
   its results (read quality and trimming, host removal, taxonomic and
   functional profiles, diversity, assemblies, MAGs, run times), then joins the
   two branches: share of each sample captured by the MAGs, and MAGs matched
@@ -263,7 +264,7 @@ output/<run>/
 ├── 13_checkm2/              A.5  quality_report.tsv
 ├── 14_MAGs_high_quality/    A.6  MAGs passing the filter + TORMES metadata
 ├── 15_tormes_MAGs/          A.7  TORMES annotation and report
-└── report/                  R.1  report.html (both branches)
+└── report/                  R.1  report.html (both branches), <run>_report.zip (to share it)
 ```
 
 `scripts/clean_output_folders.sh` deletes the bulky intermediate files of a
