@@ -23,7 +23,7 @@ awk -F'\t' 'NR==1 { for (i=1;i<=NF;i++) col[$i]=i; next }
       for (i=1;i<=n;i++) print "https://" u[i] "\t" m[i] }' metadata.tsv > files.tsv
 
 # Sample groups: ENA leaves sample_alias/title empty, so fetch the BioSample
-# records from NCBI. Sample names D_GP_xx = DOP (= PDO), ND_GP_xx = non-DOP (NONPDO).
+# records from NCBI. Sample names D_GP_xx = DOP (= PDO), ND_GP_xx = non-DOP (non-PDO).
 echo "Fetching BioSample records and writing samplesheet.tsv ..."
 SAMPLE_IDS="$(tail -n +2 metadata.tsv | cut -f2 | paste -sd,)"
 curl -sSf "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=biosample&id=${SAMPLE_IDS}&retmode=xml" \
@@ -40,7 +40,7 @@ for b in ET.parse(xml_file).getroot().findall('BioSample'):
 rows = []
 for r in csv.DictReader(open(meta_file), delimiter='\t'):
     name, title = biosamples[r['sample_accession']]
-    group = 'NONPDO' if name.startswith('ND_') else 'PDO' if name.startswith('D_') else 'UNKNOWN'
+    group = 'non-PDO' if name.startswith('ND_') else 'PDO' if name.startswith('D_') else 'UNKNOWN'
     run = r['run_accession']
     rows.append((group != 'PDO', int(name.rsplit('_', 1)[1]),
                  [name, run, r['sample_accession'], title, group,

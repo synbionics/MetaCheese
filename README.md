@@ -1,7 +1,7 @@
 # MetaCheese
 
-MetaCheese is a containerised pipeline for shotgun metagenomics of cheese, and
-of any other sample where host DNA has to be removed first. From paired-end
+MetaCheese is a containerised pipeline for shotgun metagenomic studies, with
+host DNA removal as one of its steps. From paired-end
 FASTQ files it produces taxonomic and functional profiles of the community,
 diversity measures, metagenome-assembled genomes (MAGs) and one interactive
 HTML report of the whole run.
@@ -20,19 +20,14 @@ HTML report of the whole run.
 > MetaCheese runs both analyses on the same reads, in the same environment,
 > and joins them in one report, where each analysis checks the other.**
 
-- **Same reads for both analyses.** Trimming and host removal run once, and
-  both analyses start from the same microbial reads (P.2). When the two are
-  run separately, these steps are usually repeated with different tools or
-  settings, and then part of the difference between their results comes
-  from preprocessing, not from the community.
 - **Each analysis validates the other.** The joint step (R.1) matches every
   MAG to the species MetaPhlAn finds in the same sample. It also corrects for
   the 2020 renaming of *Lactobacillus*, which the two tools' databases do not
-  share. Done by hand, this is easy to miss: in the small example 14 of the
-  27 kept MAGs would have no species match; with it, all 27 match a
-  MetaPhlAn species.
+  share. Done by hand, this is easy to miss: in the small example 16 of the
+  29 kept MAGs would have no species match; with it, 26 match a MetaPhlAn
+  species, and the other 3 match only at genus level.
 - **Answers that neither analysis gives alone.** How much of each community
-  the genomes actually describe: in the small example, kept MAGs hold 19-68%
+  the genomes actually describe: in the small example, kept MAGs hold 21-76%
   of each sample's microbial reads. Which abundant species have no genome
   (too little coverage, or strain mixtures), and which genomes belong to
   organisms missing from the marker database.

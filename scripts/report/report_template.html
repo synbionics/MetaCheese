@@ -318,7 +318,7 @@ const samples = D.samples.map(x => x.sample);
 const groupOf = Object.fromEntries(D.samples.map(x => [x.sample, x.group || "all samples"]));
 const groups = [...new Set(samples.map(x => groupOf[x]))];
 const groupColor = (g) => css(SERIES[Math.min(groups.indexOf(g), 2)] || "--other");
-const groupLabel = (g) => g === "PDO" ? "PDO" : g === "NONPDO" ? "non-PDO" : g;
+const groupLabel = (g) => g;
 const ordered = [...samples].sort((a, b) => groups.indexOf(groupOf[a]) - groups.indexOf(groupOf[b]));
 
 const renderers = [];
@@ -629,15 +629,15 @@ const tilesEl = $("#tiles");
   tableView(sec, ["Sample", "Group", "Read pairs in", "Reads with adapters", "Discarded reads", "Singletons", "Pairs kept", "Avg. retained length (bp)"],
     rows.map(x => [x, groupLabel(groupOf[x]), fmt(tr[x].pairs), fmt(tr[x].adapters), fmt(tr[x].discarded), fmt(tr[x].singletons), keptPairs(x) ? fmt(keptPairs(x)) : "–", fmt(tr[x].avg_length, 1)]), [2, 3, 4, 5, 6, 7]);
 
-  const sec2 = section("p2", "P.2", "Host DNA removal", "Bowtie2 2.3.3.1 · Bos taurus ARS-UCD2.0",
-    [["What this step does", "Aligns every read pair to the host genome (cow, the milk's source) and keeps only pairs that do not align as a proper pair. Host DNA carries no information about the microbes and would slow down every later step."],
-     ["How to read it", "Each bar is one sample's read pairs, split into those lost at trimming, those removed as host, and the microbial pairs used downstream. Cheese is usually low in host DNA (a few percent); a high host fraction leaves fewer microbial reads and weaker profiles."]], "pre");
+  const sec2 = section("p2", "P.2", "Host DNA removal", "Bowtie2 2.3.3.1" + (D.host_name ? ` · ${D.host_name}` : ""),
+    [["What this step does", "Aligns every read pair to the host genome set in the configuration and keeps only pairs that do not align as a proper pair. Host DNA carries no information about the microbes and would slow down every later step."],
+     ["How to read it", "Each bar is one sample's read pairs, split into those lost at trimming, those removed as host, and the microbial pairs used downstream. How much host DNA to expect depends on the sample type; a high host fraction leaves fewer microbial reads and weaker profiles."]], "pre");
   const hs = ordered.filter(x => host[x] && tr[x]);
   if (!hs.length) return missing(sec2);
   const parts = (x) => {
     const total = tr[x].pairs, kept = host[x].pairs_in, micro = host[x].not_concordant;
     return [{ name: "microbial", value: 100 * micro / total, color: css("--s1"), ink: "#fff" },
-            { name: "host (cow)", value: 100 * (kept - micro) / total, color: css("--s2"), ink: "#fff" },
+            { name: "host", value: 100 * (kept - micro) / total, color: css("--s2"), ink: "#fff" },
             { name: "removed at trimming", value: 100 * (total - kept) / total, color: css("--other"), ink: css("--ink") }];
   };
   const hostPct = hs.map(x => 100 * (host[x].pairs_in - host[x].not_concordant) / host[x].pairs_in);
@@ -647,7 +647,7 @@ const tilesEl = $("#tiles");
   const ch = h("div", { class: "chart" }, c);
   live(() => hbars(ch, hs.map(x => ({ label: x, sub: groupLabel(groupOf[x]), dot: groupColor(groupOf[x]), parts: parts(x) })),
     { aria: "Fate of read pairs per sample", max: 100, ticks: [0, 25, 50, 75, 100], tickFmt: t => t + "%", valueFmt: v => pct(v, 2), inside: (v, p) => p.name === "microbial" ? pct(v, 0) : null }));
-  legend(c, [["microbial", css("--s1")], ["host (cow)", css("--s2")], ["removed at trimming", css("--other")]]);
+  legend(c, [["microbial", css("--s1")], ["host", css("--s2")], ["removed at trimming", css("--other")]]);
   legend(c, groups.map(g => [groupLabel(g), groupColor(g)]), true);
   tableView(c, ["Sample", "Pairs after trimming", "Host pairs", "Host %", "Microbial pairs", "Overall alignment rate"],
     hs.map(x => [x, fmt(host[x].pairs_in), fmt(host[x].pairs_in - host[x].not_concordant), pct(100 * (host[x].pairs_in - host[x].not_concordant) / host[x].pairs_in, 2), fmt(host[x].not_concordant), pct(host[x].overall_rate, 2)]), [1, 2, 3, 4, 5]);
@@ -657,7 +657,7 @@ const tilesEl = $("#tiles");
 (function () {
   const sec = section("c1", "C.1", "Who is there: taxonomic profiles", "MetaPhlAn 4.1.0 · mpa_vJun23",
     [["What this step does", "MetaPhlAn maps the microbial reads to about 5 million clade-specific marker genes and estimates the relative abundance of each taxon, from phylum down to species-level genome bins (SGBs). Abundances in a sample add up to 100% at every rank."],
-     ["How to read it", "Each bar is one sample. The 8 most abundant taxa across all samples keep their colour at every rank you pick; everything else is 'Other'. Cheese communities are usually dominated by a few lactic acid bacteria (starter cultures such as Lactobacillus, Streptococcus, Lactococcus)."]], "com");
+     ["How to read it", "Each bar is one sample. The 8 most abundant taxa across all samples keep their colour at every rank you pick; everything else is 'Other'."]], "com");
   const mp = D.metaphlan;
   if (!mp) return missing(sec);
   const cols = mp.samples;
@@ -705,7 +705,7 @@ const tilesEl = $("#tiles");
 (function () {
   const sec = section("c2", "C.2", "Diversity within and between samples", "R · vegan, rbiom",
     [["What this step does", "Alpha diversity summarises each sample on its own: how many species (richness), and how evenly abundance is spread (Shannon, Gini-Simpson). Beta diversity compares every pair of samples: Bray-Curtis uses abundances, Jaccard only presence/absence (0 = identical, 1 = nothing shared)."],
-     ["How to read it", "On the left, each dot is a sample, grouped by cheese type. On the right, the PCoA places samples so that distances on the plot approximate the beta-diversity distances: samples close together have similar communities. The axis titles say how much of the variation each axis shows."]], "com");
+     ["How to read it", "On the left, each dot is a sample, grouped as in the sample sheet. On the right, the PCoA places samples so that distances on the plot approximate the beta-diversity distances: samples close together have similar communities. The axis titles say how much of the variation each axis shows."]], "com");
   const dv = D.diversity;
   if (!dv || (!Object.keys(dv.alpha).length && !Object.keys(dv.beta).length)) return missing(sec);
   const two = h("div", { class: "two" }, sec);
@@ -790,7 +790,7 @@ const tilesEl = $("#tiles");
 (function () {
   const sec = section("c3", "C.3", "What they can do: functional profiles", "HUMAnN 3.9 · UniRef90 · MetaCyc",
     [["What this step does", "For each sample, HUMAnN maps the reads to the pangenomes of the species MetaPhlAn found (fast nucleotide search), then translates the remaining reads and searches them against UniRef90 proteins (DIAMOND). Hits are counted as UniRef90 gene families, which are then assembled into MetaCyc metabolic pathways. Only read 1 of each pair is used."],
-     ["How to read it", "'Unmapped' is the share of reads that matched no known gene; in food metagenomes it is often 15–60%. 'Unintegrated' is the share of gene-family abundance that does not complete any known pathway, normally the large majority. More gene families and pathways mean a more diverse functional repertoire (or deeper sequencing)."]], "com");
+     ["How to read it", "'Unmapped' is the share of reads that matched no known gene; how much to expect depends on the environment and on how well its organisms are represented in the databases. 'Unintegrated' is the share of gene-family abundance that does not complete any known pathway, normally the large majority. More gene families and pathways mean a more diverse functional repertoire (or deeper sequencing)."]], "com");
   const hu = D.humann;
   const st = hu ? hu.stats || {} : {};
   const xs = ordered.filter(x => st[x]);
@@ -870,7 +870,7 @@ const tilesEl = $("#tiles");
 (function () {
   const sec = section("a1", "A.1–A.2", "Assembly and contig filtering", "metaSPAdes 3.13.0 · contigs > 500 bp",
     [["What this step does", "metaSPAdes assembles each sample's microbial reads into contigs: longer stretches of genome reconstructed from overlapping reads. Contigs of 500 bp or less are then dropped, because they are too short to bin reliably."],
-     ["How to read it", "N50 is the contig length such that half of the assembled bases are in contigs at least that long: higher means a more contiguous assembly. Low-diversity, deeply sequenced communities (typical of cheese) assemble well; with only 5 million read pairs per sample, expect fragmented assemblies for the less abundant species."]], "asm");
+     ["How to read it", "N50 is the contig length such that half of the assembled bases are in contigs at least that long: higher means a more contiguous assembly. Low-diversity, deeply sequenced communities assemble well; at low depth, expect fragmented assemblies for the less abundant species."]], "asm");
   const as = D.assembly || {};
   const xs = ordered.filter(x => as[x]);
   if (!xs.length) return missing(sec);
@@ -992,7 +992,7 @@ const tilesEl = $("#tiles");
 (function () {
   const sec = section("r1", "R.1", "Both branches together", "MetaCheese report",
     [["What this step does", "Joins the community-level profiles (C.1–C.4), built from all reads, with the genomes reconstructed by the assembly branch (A.1–A.7). For every sample it measures how much of the microbial community the MAGs capture, and checks each MAG against the abundance MetaPhlAn gives to the same organism."],
-     ["How to read it", "The bars split each sample's microbial reads by where they end up: in kept MAGs, in other (lower-quality) bins, in contigs that were not binned, or not assembled at all. A large 'kept MAGs' share means the genomes describe most of the community. In the MAG table, a MAG of a species that MetaPhlAn also finds abundant confirms both branches; a MAG with no MetaPhlAn match may be an organism missing from the marker database."]], "joint");
+     ["How to read it", "The bars split each sample's microbial reads by where they end up: in kept MAGs, in other (lower-quality) bins, in contigs that were not binned, or not assembled at all. A large 'kept MAGs' share means the genomes describe most of the community. In the MAG table, a MAG of a species that MetaPhlAn also finds abundant confirms both branches; a MAG with no MetaPhlAn match may be an organism missing from the marker database, or the same organism under a different name in the two tools' databases."]], "joint");
   const ig = D.integration || { fate: {}, mags: [] };
   const mp = D.metaphlan, hu = D.humann || {}, dv = D.diversity, as = D.assembly || {}, mpg = D.mapping || {};
   const host = D.host || {};
@@ -1007,7 +1007,12 @@ const tilesEl = $("#tiles");
     !hasAsm ? "The assembly branch has no results yet: only the community-level columns are filled." : null,
     !hasCom ? "The community-level branch has no results yet: only the assembly columns are filled." : null,
     fx.length ? `Share of the microbial reads captured by kept MAGs: ${fx.map(x => `${x} ${pct(fate[x].kept, 1)}`).join(", ")}.` : null,
-    ig.mags.some(m => m.passed && (m.mpa_species != null || m.mpa_genus != null)) ? `${ig.mags.filter(m => m.passed && (m.mpa_species != null || m.mpa_genus != null)).length} of ${ig.mags.filter(m => m.passed).length} kept MAGs match a species or genus detected by MetaPhlAn in the same sample.` : null,
+    ig.taxonomy && ig.mags.some(m => m.passed) ? (() => {
+      const kept = ig.mags.filter(m => m.passed);
+      const sp = kept.filter(m => m.mpa_species != null).length;
+      const gn = kept.filter(m => m.mpa_species == null && m.mpa_genus != null).length;
+      return `${sp} of ${kept.length} kept MAGs have a species that MetaPhlAn detects in the same sample` + (gn ? `; ${gn} more match at genus level only, so their species names need checking.` : ".");
+    })() : null,
   ]);
   // per-sample summary across both branches
   const c = card(sec);
@@ -1044,7 +1049,7 @@ const tilesEl = $("#tiles");
       km.slice(0, 60).map(m => [m.name, m.sample, m.passed ? "yes" : "", fmt(m.completeness, 1), fmt(m.contamination, 2), m.share != null ? fmt(m.share, 2) : null,
         m.species || m.genus || null, m.mpa_name && m.mpa_name.toLowerCase() !== (m.species || "").toLowerCase() ? m.mpa_name : (m.mpa_name ? "same" : null),
         m.mpa_species != null ? fmt(m.mpa_species, 2) : null, m.mpa_genus != null ? fmt(m.mpa_genus, 2) : null]), [3, 4, 5, 8, 9]);
-    h("p", { class: "tool" }, c3, "TORMES' Kraken2 database uses the names from before the 2020 split of Lactobacillus (e.g. Lactobacillus rhamnosus); MetaPhlAn uses the new genera (Lacticaseibacillus rhamnosus). MAGs are matched by species epithet across the split, and the MetaPhlAn name is shown when it differs.");
+    (ig.name_notes || []).forEach(n => h("p", { class: "tool" }, c3, n));
   }
 })();
 

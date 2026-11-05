@@ -1,0 +1,28 @@
+sample	mag	tormes_species	metaphlan_species	completeness	contamination	pct_microbial_reads	pct_of_kept_mag_reads	metaphlan_pct
+D_GP_02	D_GP_02.unmapped.4	Lactobacillus rhamnosus	Lacticaseibacillus rhamnosus	95.17	0.42	13.70	58.79	18.18
+D_GP_02	D_GP_02.unmapped.5	Lactobacillus helveticus	Lactobacillus helveticus	98.22	2.08	5.04	21.63	10.22
+D_GP_02	D_GP_02.unmapped.8	Lactobacillus harbinensis	Schleiferilactobacillus harbinensis	99.94	2.16	2.31	9.90	2.84
+D_GP_02	D_GP_02.unmapped.2	Lactobacillus buchneri	Lentilactobacillus buchneri	99.22	0.81	2.26	9.68	2.88
+D_GP_04	D_GP_04.unmapped.7	Lactobacillus delbrueckii	Lactobacillus delbrueckii	84.60	0.51	30.15	52.54	59.78
+D_GP_04	D_GP_04.unmapped.3	Lactobacillus rhamnosus	Lacticaseibacillus rhamnosus	89.96	1.56	21.83	38.05	27.42
+D_GP_04	D_GP_04.unmapped.5	Lactobacillus parabuchneri	Lentilactobacillus parabuchneri	99.98	1.50	3.09	5.39	3.23
+D_GP_04	D_GP_04.unmapped.1	Lactobacillus helveticus	Lactobacillus helveticus	82.48	3.01	2.31	4.03	3.43
+D_GP_13	D_GP_13.unmapped.4	Lactobacillus rhamnosus	Lacticaseibacillus rhamnosus	98.49	0.18	62.41	91.77	86.13
+D_GP_13	D_GP_13.unmapped.6	Lactobacillus paracasei	Lacticaseibacillus paracasei	91.53	2.69	2.99	4.40	4.11
+D_GP_13	D_GP_13.unmapped.3	Lactobacillus delbrueckii	Lactobacillus delbrueckii	83.32	3.09	1.31	1.93	2.47
+D_GP_13	D_GP_13.unmapped.5	Lactobacillus helveticus	Lactobacillus helveticus	83.95	7.66	1.29	1.89	2.42
+ND_GP_10	ND_GP_10.unmapped.5	Lactobacillus helveticus	Lactobacillus helveticus	98.75	0.27	26.08	46.56	45.07
+ND_GP_10	ND_GP_10.unmapped.2	Lactobacillus kefiri	not found in MetaPhlAn	98.62	0.87	15.97	28.52	0.00
+ND_GP_10	ND_GP_10.unmapped.3	Lactobacillus rhamnosus	Lacticaseibacillus rhamnosus	90.12	0.54	6.56	11.72	10.45
+ND_GP_10	ND_GP_10.unmapped.7	Streptococcus thermophilus	Streptococcus thermophilus	99.40	0.38	3.06	5.47	5.55
+ND_GP_10	ND_GP_10.unmapped.1	Lactobacillus parabuchneri	Lentilactobacillus parabuchneri	84.36	8.33	2.19	3.90	3.06
+ND_GP_10	ND_GP_10.unmapped.4	Lactobacillus buchneri	not found in MetaPhlAn	56.81	0.14	2.15	3.83	0.00
+ND_GP_15	ND_GP_15.unmapped.3	Lactobacillus rhamnosus	Lacticaseibacillus rhamnosus	98.65	0.16	59.59	91.18	87.08
+ND_GP_15	ND_GP_15.unmapped.2	Lactobacillus delbrueckii	Lactobacillus delbrueckii	84.47	1.04	2.14	3.28	4.42
+ND_GP_15	ND_GP_15.unmapped.5	Lactobacillus helveticus	Lactobacillus helveticus	91.51	2.00	1.61	2.46	3.29
+ND_GP_15	ND_GP_15.unmapped.4	Lactobacillus paracasei	Lacticaseibacillus paracasei	76.40	1.25	1.18	1.81	2.16
+ND_GP_15	ND_GP_15.unmapped.1	Streptococcus thermophilus	Streptococcus thermophilus	78.19	2.90	0.83	1.27	1.75
+ND_GP_4	ND_GP_4.unmapped.3	Lactobacillus helveticus	Lactobacillus helveticus	95.27	1.63	14.78	78.37	78.58
+ND_GP_4	ND_GP_4.unmapped.1	Anoxybacillus flavithermus	Anoxybacillus flavithermus	88.21	0.21	1.87	9.94	6.54
+ND_GP_4	ND_GP_4.unmapped.4	Streptococcus thermophilus	Streptococcus thermophilus	87.22	0.42	1.19	6.32	5.42
+ND_GP_4	ND_GP_4.unmapped.2	Lactobacillus delbrueckii	Lactobacillus delbrueckii	76.48	1.75	1.01	5.36	5.57

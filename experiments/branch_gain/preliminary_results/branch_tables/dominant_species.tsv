@@ -1,0 +1,7 @@
+sample	top_metaphlan	metaphlan_pct	top_kept_mag	same
+D_GP_02	Lactobacillus delbrueckii	59.33	Lacticaseibacillus rhamnosus	NO
+D_GP_04	Lactobacillus delbrueckii	59.78	Lactobacillus delbrueckii	yes
+D_GP_13	Lacticaseibacillus rhamnosus	86.13	Lacticaseibacillus rhamnosus	yes
+ND_GP_10	Lactobacillus helveticus	45.07	Lactobacillus helveticus	yes
+ND_GP_15	Lacticaseibacillus rhamnosus	87.08	Lacticaseibacillus rhamnosus	yes
+ND_GP_4	Lactobacillus helveticus	78.58	Lactobacillus helveticus	yes

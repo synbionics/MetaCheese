@@ -28,6 +28,24 @@ import zipfile
 HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.dirname(os.path.dirname(HERE))
 
+# Genera that reference databases of different ages name differently. A MAG whose
+# TORMES genus is a key here also matches a detected species of the same epithet
+# in any genus accepted by "current". If no species matches, its genus abundance
+# is the sum of those genera, because the old name cannot say which new genus the
+# MAG belongs to. Add an entry when another split matters.
+RENAMED_GENERA = {
+    "lactobacillus": {
+        "current": re.compile(r"^(\w*lactobacillus|lacti\w*bacillus)$"),
+        "note": "TORMES' Kraken2 database uses the names from before the 2020 split of Lactobacillus "
+                "(Zheng et al. 2020; e.g. Lactobacillus rhamnosus), while MetaPhlAn uses the new genera "
+                "(Lacticaseibacillus rhamnosus). These MAGs are matched by species epithet across the "
+                "split, and the MetaPhlAn name is shown when it differs.",
+        "genus_note": "For a Lactobacillus MAG with no MetaPhlAn name, the MetaPhlAn genus value is the sum of "
+                      "Lactobacillus and the genera split from it, because the old name cannot say which new "
+                      "genus the MAG belongs to.",
+    },
+}
+
 # Tool versions installed in the metacheese image (see Dockerfile / README)
 TOOLS = [
     ("Q.1", "FastQC", "0.12.1"),
@@ -549,6 +567,14 @@ def fasta_ids(path):
         return [l[1:].split()[0] for l in fh if l.startswith(">")]
 
 
+def host_name(config_text):
+    """Host folder from step03.dir3 of the run's config, e.g. .../Bos_taurus/Bos_taurus -> Bos taurus."""
+    m = re.search(r'^step03:\s*\n(?:[ \t]+.*\n)*?[ \t]+dir3:\s*"?([^"\n#]+)', config_text or "", re.M)
+    if not m:
+        return None
+    return os.path.basename(os.path.dirname(m.group(1).strip())).replace("_", " ") or None
+
+
 def collect_tormes_taxonomy(run):
     """MAG -> (family, genus, species) from TORMES' Kraken2 identification."""
     tax = {}
@@ -616,38 +642,49 @@ def collect_integration(run, samples, mags, metaphlan, mapping):
         for rank in ("species", "genus"):
             for t in metaphlan["profiles"].get(rank, []):
                 for i, x in enumerate(cols):
-                    prof[(rank, x, t["taxon"].lower())] = t["values"][i]
+                    # The merged table lists every taxon in every sample: keep
+                    # only those MetaPhlAn really finds in this sample.
+                    if (t["values"][i] or 0) > 0:
+                        prof[(rank, x, t["taxon"].lower())] = t["values"][i]
     norm = lambda x: re.sub(r"\s+", " ", (x or "").replace("_", " ")).strip().lower()
-    # TORMES' Kraken2 database predates the 2020 split of Lactobacillus into 25
-    # genera (Zheng et al. 2020), while MetaPhlAn uses the new names, e.g.
-    # Lactobacillus rhamnosus = Lacticaseibacillus rhamnosus. When the exact
-    # name is missing, accept a species of a new lactobacilli genus with the
-    # same epithet in the same sample.
-    split_genus = re.compile(r"^(\w*lactobacillus|lacti\w*bacillus)$")
     by_epithet = {}
     for (rank, x, taxon) in prof:
         w = taxon.split(" ")
-        if rank == "species" and len(w) == 2 and split_genus.match(w[0]):
-            by_epithet[(x, w[1])] = taxon
+        if rank == "species" and len(w) == 2:
+            for old, rule in RENAMED_GENERA.items():
+                if rule["current"].match(w[0]):
+                    by_epithet[(old, x, w[1])] = taxon
+    name_notes = []
     out_mags = []
     for m in mags:
         t = tax.get(m["name"], {})
         sp, gn = norm(t.get("species")), norm(t.get("genus"))
         mpa_name = sp if sp and ("species", m["sample"], sp) in prof else None
-        if not mpa_name and gn == "lactobacillus" and len(sp.split(" ")) == 2:
-            mpa_name = by_epithet.get((m["sample"], sp.split(" ")[1]))
+        if not mpa_name and gn in RENAMED_GENERA and len(sp.split(" ")) == 2:
+            mpa_name = by_epithet.get((gn, m["sample"], sp.split(" ")[1]))
+            note = RENAMED_GENERA[gn]["note"]
+            if mpa_name and note not in name_notes:
+                name_notes.append(note)
         mpa_sp = prof.get(("species", m["sample"], mpa_name)) if mpa_name else None
         mpa_gn = None
         if mpa_name:
             mpa_gn = prof.get(("genus", m["sample"], mpa_name.split(" ")[0]))
-        if mpa_gn is None and gn:
+        if mpa_gn is None and gn in RENAMED_GENERA:
+            rule = RENAMED_GENERA[gn]
+            parts = [v for (rank, x, taxon), v in prof.items()
+                     if rank == "genus" and x == m["sample"] and rule["current"].match(taxon)]
+            if parts:
+                mpa_gn = sum(parts)
+                if rule["genus_note"] not in name_notes:
+                    name_notes.append(rule["genus_note"])
+        elif mpa_gn is None and gn:
             mpa_gn = prof.get(("genus", m["sample"], gn))
         out_mags.append({"name": m["name"], "sample": m["sample"], "passed": m["passed"],
                          "completeness": m["completeness"], "contamination": m["contamination"],
                          "share": mag_share.get(m["name"]), "species": t.get("species"), "genus": t.get("genus"),
                          "mpa_name": mpa_name[0].upper() + mpa_name[1:] if mpa_name else None,
                          "mpa_species": mpa_sp, "mpa_genus": mpa_gn})
-    return {"fate": fate, "mags": out_mags, "taxonomy": bool(tax)}
+    return {"fate": fate, "mags": out_mags, "taxonomy": bool(tax), "name_notes": name_notes}
 
 
 # --------------------------------------------------------------------------- main
@@ -680,6 +717,7 @@ def main():
         "title": args.title or name,
         "generated": dt.datetime.now().strftime("%Y-%m-%d %H:%M"),
         "samplesheet": sheet_path,
+        "host_name": host_name(config_text),
         "samples": [{"sample": s, "group": groups.get(s, ""),
                      "run": next((x["run"] for x in sheet if x["sample"] == s), ""),
                      "title": next((x["title"] for x in sheet if x["sample"] == s), "")} for s in samples],

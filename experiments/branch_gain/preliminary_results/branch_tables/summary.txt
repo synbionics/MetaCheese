@@ -1,0 +1,6 @@
+run: example_small_with_ND_GP_4; samples: 6
+kept MAGs: 27; with a species MetaPhlAn finds in the same sample: 25
+MAGs with no match: ND_GP_10.unmapped.2 (Lactobacillus kefiri), ND_GP_10.unmapped.4 (Lactobacillus buchneri)
+MetaPhlAn species >= 1% with no kept MAG: 13
+samples where the top species differs between branches: 1/6
+MetaPhlAn vs share among kept MAGs, all kept MAGs: Pearson 0.942, Spearman 0.784

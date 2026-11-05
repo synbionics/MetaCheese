@@ -1,0 +1,151 @@
+protein	uniref90	pct_identity	bitscore	name	organism
+NODE_716_length_4297_cov_1501.187647_2	UniRef90_UPI00093394AE	98.2	2303		
+NODE_30_length_24159_cov_1633.237056_5	UniRef90_UPI00062A9425	70.7	2111		
+NODE_30_length_24159_cov_1633.237056_3	UniRef90_UPI0009BC9D0E	58.1	1283		
+NODE_30_length_24159_cov_1633.237056_17	UniRef90_UPI0007616690	96.0	1239		
+NODE_1230_length_2042_cov_2410.081530_1	UniRef90_A0A2I6BL68	87.8	1117	deleted	
+NODE_1102_length_2373_cov_1340.480155_2	UniRef90_A0A2X0PXY0	98.8	954	deleted	
+NODE_1544_length_1513_cov_1525.107682_1	UniRef90_A0A2I6BL68	99.4	922	deleted	
+NODE_1210_length_2085_cov_1384.375862_1	UniRef90_L0P6Z6	96.5	868	deleted	
+NODE_13_length_33640_cov_1723.721840_14	UniRef90_C1KFP4	40.1	822	Putative tail protein	Lactobacillus phage Lb338-1
+NODE_30_length_24159_cov_1633.237056_25	UniRef90_A0A2V4EP05	95.2	808	deleted	
+NODE_30_length_24159_cov_1633.237056_13	UniRef90_A0A135ZG49	93.5	807	deleted	
+NODE_30_length_24159_cov_1633.237056_15	UniRef90_K1M6R8	94.2	743	deleted	
+NODE_275_length_8825_cov_1653.610718_1	UniRef90_A0A120HUP3	33.3	731	DNA polymerase	Bacillus phage Eldridge
+NODE_1070_length_2431_cov_2002.420875_1	UniRef90_A0A1Y4TYH3	89.6	684	deleted	
+NODE_275_length_8825_cov_1653.610718_5	UniRef90_A0A1C2D7M0	86.1	676	deleted	
+NODE_1017_length_2587_cov_1480.028831_2	UniRef90_F2M3X2	78.2	643	deleted	
+NODE_13_length_33640_cov_1723.721840_5	UniRef90_C1KFN1	37.9	602	Putative tail lysin	Lactobacillus phage Lb338-1
+NODE_1441_length_1630_cov_1401.410794_2	UniRef90_F0TIF0	74.2	590	deleted	
+NODE_2623_length_874_cov_1826.451770_1	UniRef90_F0NRK7	98.3	576	deleted	
+NODE_161_length_11794_cov_13991.614735_10	UniRef90_A0A2D2W6B7	46.2	574	deleted	
+NODE_104_length_14929_cov_1510.245193_20	UniRef90_A0A1I9KKE7	70.8	542	Putative DNA methylase	Lactobacillus phage SA-C12
+NODE_304_length_8246_cov_1865.789159_1	UniRef90_D2J7G9	54.4	539	deleted	
+NODE_1102_length_2373_cov_1340.480155_3	UniRef90_F0NRK7	96.6	523	deleted	
+NODE_808_length_3708_cov_1545.813852_3	UniRef90_A0A226SGC1	90.8	504	deleted	
+NODE_868_length_3365_cov_1908.158912_4	UniRef90_A0A060AGH6	45.7	491	Terminase large subunit	Listeria phage LMSP-25
+NODE_1702_length_1345_cov_2088.285271_1	UniRef90_UPI000D7D042C	94.4	486		
+NODE_13_length_33640_cov_1723.721840_20	UniRef90_C1KFQ1	44.7	476	Putative exonuclease	Lactobacillus phage Lb338-1
+NODE_808_length_3708_cov_1545.813852_2	UniRef90_R5T2M3	60.3	476	deleted	
+NODE_1219_length_2067_cov_2001.152087_4	UniRef90_UPI000E520913	74.4	464		
+NODE_161_length_11794_cov_13991.614735_8	UniRef90_A0A3D5XP32	60.1	458	deleted	
+NODE_304_length_8246_cov_1865.789159_3	UniRef90_C1KFM5	44.9	443	Putative tail sheath protein	Lactobacillus phage Lb338-1
+NODE_13_length_33640_cov_1723.721840_16	UniRef90_A8ASU5	42.2	442	Gp111	Listeria phage A511
+NODE_228_length_9935_cov_1939.276518_6	UniRef90_C1KFL6	49.5	440	Putative portal protein	Lactobacillus phage Lb338-1
+NODE_2661_length_865_cov_1643.688889_1	UniRef90_L0P7C9	100	432	deleted	
+NODE_1636_length_1422_cov_1885.661302_1	UniRef90_A0A3A9XZE3	91.9	426	deleted	
+NODE_810_length_3683_cov_2240.887266_7	UniRef90_UPI000E47A4B8	84.7	422		
+NODE_1177_length_2178_cov_1816.515780_2	UniRef90_A0A226SMW8	56.8	422	deleted	
+NODE_30_length_24159_cov_1633.237056_14	UniRef90_D0DKS7	90.2	416	deleted	
+NODE_1177_length_2178_cov_1816.515780_3	UniRef90_A0A1Y4TP09	92.7	410	deleted	
+NODE_3850_length_650_cov_1351.657143_1	UniRef90_F2M1F1	99.5	405	deleted	
+NODE_228_length_9935_cov_1939.276518_1	UniRef90_A0A1Q2T7E6	81.0	399	deleted	
+NODE_1636_length_1422_cov_1885.661302_2	UniRef90_A0A0R1H6U2	96.0	389	deleted	
+NODE_161_length_11794_cov_13991.614735_4	UniRef90_A0A385E2C4	53.6	386	deleted	
+NODE_104_length_14929_cov_1510.245193_18	UniRef90_A0A2N6QZF7	75.7	376	deleted	
+NODE_30_length_24159_cov_1633.237056_4	UniRef90_C7XJ30	68.8	375	deleted	
+NODE_2560_length_893_cov_1480.594272_1	UniRef90_L0P6H5	98.5	369	deleted	
+NODE_13_length_33640_cov_1723.721840_18	UniRef90_C1KFP8	38.9	361	Putative helicase	Lactobacillus phage Lb338-1
+NODE_1210_length_2085_cov_1384.375862_2	UniRef90_L0P6I1	99.4	353	deleted	
+NODE_808_length_3708_cov_1545.813852_5	UniRef90_UPI000CD9C493	53.3	348		
+NODE_30_length_24159_cov_1633.237056_20	UniRef90_D0DKQ3	87.3	340	deleted	
+NODE_104_length_14929_cov_1510.245193_19	UniRef90_I7L5U7	67.5	335	Methyltransferase (EC 2.1.1.-)	Lactobacillus hominis DSM 23910 = CRBIP 24.179
+NODE_228_length_9935_cov_1939.276518_3	UniRef90_Q4Z9G0	42.9	320	ORF016	Staphylococcus phage Twort (strain DSM 17442 / HER 48) (Bacteriophage Twort)
+NODE_5470_length_508_cov_3687.907285_1	UniRef90_A0A0U0X0E0	97.4	309	deleted	
+NODE_2576_length_888_cov_1748.265306_2	UniRef90_A0A2M9WPJ1	91.1	303	deleted	
+NODE_30_length_24159_cov_1633.237056_8	UniRef90_UPI000761A0FF	69.9	302		
+NODE_30_length_24159_cov_1633.237056_19	UniRef90_E3R6Z6	99.3	301	deleted	
+NODE_1070_length_2431_cov_2002.420875_4	UniRef90_U6FCN7	99.4	300	deleted	
+NODE_275_length_8825_cov_1653.610718_4	UniRef90_C1KFR4	42.4	291	Putative recombinase A	Lactobacillus phage Lb338-1
+NODE_228_length_9935_cov_1939.276518_9	UniRef90_UPI00065DCEC7	42.7	287		
+NODE_13_length_33640_cov_1723.721840_6	UniRef90_C1KFN2	44.3	275	Putative tail fibre protein	Lactobacillus phage Lb338-1
+NODE_30_length_24159_cov_1633.237056_22	UniRef90_UPI00062A70AE	91.3	275		
+NODE_104_length_14929_cov_1510.245193_17	UniRef90_A0A2V4EFD9	79.7	273	deleted	
+NODE_2867_length_815_cov_6629.032895_2	UniRef90_A0A386RCX1	98.6	270	deleted	
+NODE_1017_length_2587_cov_1480.028831_3	UniRef90_A0A2X0SVM7	93.8	268	deleted	
+NODE_1697_length_1350_cov_2018.116602_2	UniRef90_U6FAX3	85.0	265	deleted	
+NODE_13_length_33640_cov_1723.721840_19	UniRef90_C1KFQ0	42.5	264	Putative exonuclease	Lactobacillus phage Lb338-1
+NODE_13_length_33640_cov_1723.721840_11	UniRef90_C1KFP1	41.2	253	Baseplate protein J-like barrel domain-containing protein	Lactobacillus phage Lb338-1
+NODE_304_length_8246_cov_1865.789159_8	UniRef90_A0A0E3TAB4	45.8	253	Uncharacterized protein	Enterococcus phage EFLK1
+NODE_13_length_33640_cov_1723.721840_22	UniRef90_A0A0E3TA93	39.4	248	DNA primase / DNA helicase	Enterococcus phage EFLK1
+NODE_1697_length_1350_cov_2018.116602_1	UniRef90_UPI000B5DB60C	95.9	239		
+NODE_304_length_8246_cov_1865.789159_7	UniRef90_C1KFM2	45.3	229	Uncharacterized protein	Lactobacillus phage Lb338-1
+NODE_985_length_2686_cov_2287.944128_1	UniRef90_UPI000A066AEF	62.4	224		
+NODE_716_length_4297_cov_1501.187647_3	UniRef90_A0A2R7FNX0	85.7	221	deleted	
+NODE_2591_length_884_cov_1409.378770_2	UniRef90_A0A0R1HAP1	94.7	219	deleted	
+NODE_30_length_24159_cov_1633.237056_1	UniRef90_UPI000761C68D	43.4	214		
+NODE_30_length_24159_cov_1633.237056_23	UniRef90_A0A2V4EN63	93.5	214	deleted	
+NODE_30_length_24159_cov_1633.237056_10	UniRef90_UPI000CD86886	73.2	213		
+NODE_13_length_33640_cov_1723.721840_12	UniRef90_C1KFP2	34.0	211	Uncharacterized protein	Lactobacillus phage Lb338-1
+NODE_228_length_9935_cov_1939.276518_2	UniRef90_A0A3F3A334	80.5	211	deleted	
+NODE_1219_length_2067_cov_2001.152087_1	UniRef90_UPI000A82A732	70.1	205		
+NODE_228_length_9935_cov_1939.276518_8	UniRef90_A0A1T4JBB6	36.6	203	deleted	
+NODE_1017_length_2587_cov_1480.028831_1	UniRef90_K0NV67	75.6	198	deleted	
+NODE_228_length_9935_cov_1939.276518_5	UniRef90_C1KFL7	42.4	196	Putative prohead protease	Lactobacillus phage Lb338-1
+NODE_13_length_33640_cov_1723.721840_29	UniRef90_UPI000EFD43D4	35.5	192		
+NODE_810_length_3683_cov_2240.887266_4	UniRef90_L0P7D6	78.9	191	deleted	
+NODE_985_length_2686_cov_2287.944128_4	UniRef90_UPI000CF02F2B	82.9	189		
+NODE_2867_length_815_cov_6629.032895_1	UniRef90_U4QNX8	100	185	50S ribosomal protein L7/L12	Lactobacillus helveticus CIRM-BIA 953
+NODE_30_length_24159_cov_1633.237056_12	UniRef90_UPI000761E3DB	79.6	184		
+NODE_161_length_11794_cov_13991.614735_6	UniRef90_A0A385E2D1	37.8	183	deleted	
+NODE_1702_length_1345_cov_2088.285271_2	UniRef90_A0A2V4EFW2	95.5	183	deleted	
+NODE_304_length_8246_cov_1865.789159_2	UniRef90_C1KFM6	61.2	178	Putative structural protein	Lactobacillus phage Lb338-1
+NODE_304_length_8246_cov_1865.789159_5	UniRef90_C1KFM4	36.0	178	Uncharacterized protein	Lactobacillus phage Lb338-1
+NODE_13_length_33640_cov_1723.721840_10	UniRef90_A8AST6	38.3	176	Gp102	Listeria phage A511
+NODE_1177_length_2178_cov_1816.515780_1	UniRef90_F2M1F1	97.5	167	deleted	
+NODE_13_length_33640_cov_1723.721840_2	UniRef90_C1KFM8	43.1	165	Uncharacterized protein	Lactobacillus phage Lb338-1
+NODE_2591_length_884_cov_1409.378770_3	UniRef90_A0A1Y4TYA6	93.7	165	deleted	
+NODE_30_length_24159_cov_1633.237056_7	UniRef90_UPI000CD93C7F	69.0	163		
+NODE_1219_length_2067_cov_2001.152087_3	UniRef90_UPI000CD8F4B2	59.8	162		
+NODE_985_length_2686_cov_2287.944128_3	UniRef90_E6LJ15	92.8	157	site-specific DNA-methyltransferase (adenine-specific) (EC 2.1.1.72)	Enterococcus italicus (strain DSM 15952 / CCUG 50447 / LMG 22039 / TP 1.5)
+NODE_30_length_24159_cov_1633.237056_11	UniRef90_UPI000EFAB1EB	62.3	152		
+NODE_13_length_33640_cov_1723.721840_8	UniRef90_C1KFN8	44.6	143	Uncharacterized protein	Lactobacillus phage Lb338-1
+NODE_30_length_24159_cov_1633.237056_9	UniRef90_UPI000EFB18D8	55.8	137		
+NODE_13_length_33640_cov_1723.721840_27	UniRef90_C1KFQ8	31.0	130	Uncharacterized protein	Lactobacillus phage Lb338-1
+NODE_2576_length_888_cov_1748.265306_3	UniRef90_UPI000D7C1479	100	130		
+NODE_5748_length_491_cov_1970.302752_2	UniRef90_U6FBX6	98.6	127	deleted	
+NODE_810_length_3683_cov_2240.887266_8	UniRef90_L0P7D3	98.5	126	deleted	
+NODE_104_length_14929_cov_1510.245193_12	UniRef90_A0A0D3MVG2	36.4	125	Uncharacterized protein	Staphylococcus phage vB_SepM_ phiIPLA-C1C
+NODE_30_length_24159_cov_1633.237056_16	UniRef90_K1MBD2	95.4	122	deleted	
+NODE_104_length_14929_cov_1510.245193_5	UniRef90_J1F3Y7	43.1	122	Uncharacterized protein	Liquorilactobacillus mali KCTC 3596 = DSM 20444
+NODE_304_length_8246_cov_1865.789159_6	UniRef90_A0A0E3XCL2	37.7	122	Uncharacterized protein	Enterococcus phage EFLK1
+NODE_104_length_14929_cov_1510.245193_21	UniRef90_A0A345MWI5	40.4	120	deleted	
+NODE_104_length_14929_cov_1510.245193_9	UniRef90_L0LAF9	39.4	118	Uncharacterized protein	Bacillus phage phiAGATE
+NODE_756_length_4007_cov_1785.752530_1	UniRef90_A0A0U0XI27	38.5	114	deleted	
+NODE_1219_length_2067_cov_2001.152087_2	UniRef90_UPI000CD95078	75.3	113		
+NODE_2560_length_893_cov_1480.594272_2	UniRef90_L0P7C5	96.4	107	deleted	
+NODE_3344_length_724_cov_2141.545590_2	UniRef90_K1MRE3	55.0	106	deleted	
+NODE_275_length_8825_cov_1653.610718_3	UniRef90_C1KFR2	29.2	105	SsDNA binding protein	Lactobacillus phage Lb338-1
+NODE_810_length_3683_cov_2240.887266_3	UniRef90_L0P7E1	92.7	105	deleted	
+NODE_808_length_3708_cov_1545.813852_1	UniRef90_U6F3H9	98.0	103	deleted	
+NODE_30_length_24159_cov_1633.237056_6	UniRef90_UPI000CD8BDB7	81.7	102		
+NODE_4296_length_599_cov_3681.814338_1	UniRef90_UPI000CD9F12F	64.2	102		
+NODE_1210_length_2085_cov_1384.375862_3	UniRef90_A0A2M9WND9	78.8	101	deleted	
+NODE_13_length_33640_cov_1723.721840_25	UniRef90_R4JKD7	29.2	99.0	Resolvase	Bacillus phage SIOphi
+NODE_1702_length_1345_cov_2088.285271_3	UniRef90_U6F9A9	79.4	97.8	deleted	
+NODE_161_length_11794_cov_13991.614735_1	UniRef90_UPI00082B86B1	34.4	95.9		
+NODE_808_length_3708_cov_1545.813852_6	UniRef90_A0A2X0PCI2	71.9	93.6	deleted	
+NODE_1441_length_1630_cov_1401.410794_1	UniRef90_F0TIF1	91.3	92.0	deleted	
+NODE_275_length_8825_cov_1653.610718_2	UniRef90_A0A0E3XDM3	36.0	91.3	Uncharacterized protein	Enterococcus phage EFLK1
+NODE_13_length_33640_cov_1723.721840_13	UniRef90_Q6Y7Q3	28.3	87.8	Uncharacterized protein	Staphylococcus phage K
+NODE_30_length_24159_cov_1633.237056_18	UniRef90_E3R6Z7	87.0	87.0	deleted	
+NODE_13_length_33640_cov_1723.721840_3	UniRef90_C1KFM9	32.9	82.4	Putative RNA polymerase	Lactobacillus phage Lb338-1
+NODE_104_length_14929_cov_1510.245193_3	UniRef90_A0A345MK02	33.1	77.0	Putative RNA polymerase sigma factor 1	Bacillus phage BSP38
+NODE_1102_length_2373_cov_1340.480155_1	UniRef90_U4QKT6	100	76.6	Type I site-specific deoxyribonuclease	Lactobacillus helveticus CIRM-BIA 953
+NODE_1070_length_2431_cov_2002.420875_6	UniRef90_A0A2V4EFV4	100	76.3	deleted	
+NODE_5748_length_491_cov_1970.302752_1	UniRef90_UPI000CD9CF47	66.1	71.6		
+NODE_104_length_14929_cov_1510.245193_15	UniRef90_A0A088A8R6	30.2	71.2	deleted	
+NODE_13_length_33640_cov_1723.721840_4	UniRef90_A0A0E3D9A7	21.6	70.9	Putative tail lysin II	Bacillus phage BCP8-2
+NODE_161_length_11794_cov_13991.614735_13	UniRef90_A0A3D5XP03	31.1	70.1	deleted	
+NODE_985_length_2686_cov_2287.944128_2	UniRef90_UPI000D3D969B	61.0	69.7		
+NODE_13_length_33640_cov_1723.721840_9	UniRef90_A0A0A0RV49	24.9	66.6	Uncharacterized protein	Bacillus phage Moonbeam
+NODE_1070_length_2431_cov_2002.420875_5	UniRef90_U6FE05	100	64.7	deleted	
+NODE_1544_length_1513_cov_1525.107682_2	UniRef90_A0A2I6BL66	100	64.7	deleted	
+NODE_1070_length_2431_cov_2002.420875_3	UniRef90_U6FBX0	97.1	64.3	deleted	
+NODE_30_length_24159_cov_1633.237056_21	UniRef90_E4SKS0	68.8	63.5	deleted	
+NODE_2576_length_888_cov_1748.265306_1	UniRef90_A0A1Y4TYA6	81.3	61.6	deleted	
+NODE_808_length_3708_cov_1545.813852_4	UniRef90_F0TIF1	80.0	60.5	deleted	
+NODE_716_length_4297_cov_1501.187647_1	UniRef90_U6FBD2	100	58.5	deleted	
+NODE_30_length_24159_cov_1633.237056_2	UniRef90_E4SKP4	53.4	56.6	deleted	
+NODE_104_length_14929_cov_1510.245193_1	UniRef90_F3ML58	92.9	55.1	deleted	
+NODE_1070_length_2431_cov_2002.420875_2	UniRef90_A0A0R1HHD5	65.6	48.9	deleted	
