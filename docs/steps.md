@@ -18,11 +18,11 @@ Execution order (`STEPS_ORDERED` in `scripts/run_pipeline.sh`):
 
 | | |
 |---|---|
-| Script | `scripts/build_bowtie2_index.sh [HOST] [THREADS]` (run once, not part of `STEPS_ORDERED`) |
+| Script | `scripts/build_bowtie2_index.sh [HOST] [THREADS]` (run once, not part of `STEPS_ORDERED`). `HOST` is `step03.dir3`, or a folder name inside `data/gene/` |
 | Tool | `bowtie2-build` (Bowtie2 2.3.3.1, `bowtieenv`) |
-| Input | `data/gene/<HOST>/*.fa|*.fna|*.fasta` (downloaded by the user, see README) |
-| Output | `data/gene/<HOST>/<HOST>.{1-4,rev.1,rev.2}.bt2` |
-| Notes | Without arguments it asks for the host name. An existing index is kept. *Bos taurus* ARS-UCD2.0 takes ~40 min with 16 threads and ~4 GB of index files. |
+| Input | `*.fa`, `*.fna` or `*.fasta` in the host's folder (downloaded by the user, see README) |
+| Output | `<index_name>.{1-4,rev.1,rev.2}.bt2` in the host's folder |
+| Notes | Without arguments it asks for the host. An existing index is kept, and then no FASTA is needed. *Bos taurus* ARS-UCD2.0 takes ~40 min with 16 threads and ~4 GB of index files. |
 
 ## Q.1: Quality check of raw reads (`00`)
 
@@ -55,7 +55,7 @@ Execution order (`STEPS_ORDERED` in `scripts/run_pipeline.sh`):
 | Input | `01_AdapterRemoval/<s>_cleaned_L{1,2}.fq.gz`, host index `step03.dir3` |
 | Output | `03_bowtie2_output/<s>.unmapped.fq.1.gz`, `<s>.unmapped.fq.2.gz` (pairs that do not align concordantly to the host), `<s>.bowtie2.log` (alignment summary) |
 | Config | `step03.dir1` input, `dir2` output, `dir3` index prefix, `par1` threads |
-| Notes | The sample name used by every later step becomes `<s>.unmapped`. Alignments are discarded (`-S /dev/null`). |
+| Notes | This step always runs, and a new run stops with an error if no host index is set. The sample name used by every later step becomes `<s>.unmapped`. Alignments are discarded (`-S /dev/null`). |
 
 ## C.1 + C.2: Taxonomic profiling and diversity (`04`)
 

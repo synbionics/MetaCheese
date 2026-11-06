@@ -27,7 +27,7 @@ metaSPAdes memory limit is your RAM minus 8 GB; each value can be edited.
 |---------|-----|---------|---------|
 | `step00` | `par1` | FastQC threads (one file per thread) | 8 |
 | `step00_01` | `par1`-`par6` | AdapterRemoval threads, min length, min quality, max Ns, trim 5', trim 3' | 16, 50, 30, 10, 2, 2 |
-| `step03` | `dir3`, `par1` | host Bowtie2 index prefix, threads | `Bos_taurus`, 16 |
+| `step03` | `dir3`, `par1` | host files, as `/path/to/host_folder/<index_name>` (required, see README, Host genome), threads | none, 16 |
 | `step04` | `par1` | MetaPhlAn threads | 16 |
 | `step04b_1` | `par1`, `par2` | HUMAnN threads, DIAMOND block size (~6 GB RAM per unit) | 16, 2 |
 | `step05` | `par1`, `par2` | metaSPAdes threads, memory limit (GB) | 16, 56 |

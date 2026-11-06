@@ -105,7 +105,7 @@ name (`scripts/templates/template_<script>*.sh`), also used with `--from`/`--to`
 | ID | Step | Tool (version in the image) | Script | Output folder |
 |----|------|-----------------------------|--------|---------------|
 | Q.1 | Quality check of raw reads | FastQC 0.12.1, MultiQC 1.35 | `00` | `00_fastqc/` |
-| I.2 | Host genome index (once per host) | Bowtie2 2.3.3.1 | `scripts/build_bowtie2_index.sh` | `data/gene/<Host>/` |
+| I.2 | Host genome index (once per host) | Bowtie2 2.3.3.1 | `scripts/build_bowtie2_index.sh` | the host's folder |
 | P.1 | Adapter and quality trimming | AdapterRemoval 2.3.3 | `00-01` | `01_AdapterRemoval/` |
 | P.2 | Host DNA removal | Bowtie2 2.3.3.1 | `03` | `03_bowtie2_output/` |
 | C.1 | Taxonomic profiling | MetaPhlAn 4.1.0, db `mpa_vJun23_CHOCOPhlAnSGB_202307` | `04` | `04_metaphlan_output/` |
@@ -144,11 +144,24 @@ Inputs, outputs, config keys and known issues of every step are in
 
 ### 1. Host genome
 
-Put the host genome FASTA in `data/gene/<Host>/` (see Quick start, step 2, for
-*Bos taurus*). For another host, use another folder name, set `step03.dir3` in
-the config to `../../data/gene/<Host>/<Host>` and run with
-`HOST_SPECIES=<Host>`. The Bowtie2 index is built the first time (about 40 min
-with 16 threads for *Bos taurus*).
+Host removal always runs, so every run needs a host genome, and there is no
+default: a run stops with an error until you set one. The host files can be in
+any folder whose path has no spaces (Bowtie2 cannot use them). Set `step03.dir3` in the config to the folder's full path followed
+by a name for the index:
+
+```yaml
+dir3: "/data/genomes/Homo_sapiens/Homo_sapiens"
+```
+
+- If the folder holds a FASTA file, the Bowtie2 index is built there the first
+  time (about 40 min with 16 threads for *Bos taurus*).
+- If that index already exists, it is used as it is and no FASTA is needed. The
+  name must match the index files (`<name>.1.bt2`).
+- `examples/run_in_docker.sh` mounts the folder at the same path in the
+  container, read-only when there is nothing to build. If you run
+  `scripts/run_pipeline.sh` inside your own container, mount it yourself.
+- Paths inside the repository's `data/` folder can also be written relative to
+  the step scripts, as the examples do (`../../data/gene/Bos_taurus/Bos_taurus`).
 
 ### 2. Input files
 
@@ -169,12 +182,13 @@ dots. Files from ENA/SRA (`SRRxxxx_1.fastq.gz`) must be renamed; the
 
 The easiest way is to open [`config/configurator.html`](config/configurator.html)
 in a browser. It works offline: fill in your machine and host, download the
-file, and it gives you the command to run. Or copy `config/Config.yml` and adapt
-threads and memory to your machine (the defaults fit 16 cores / 64 GB). The keys
-you are most likely to change:
+file, and it gives you the command to run. Or copy `config/Config.yml`, set the
+host and adapt threads and memory to your machine (the defaults fit 16 cores /
+64 GB). The keys you are most likely to change:
 
 | Key | Meaning | Default |
 |-----|---------|---------|
+| `step03.dir3` | host files: folder path and index name, required | none |
 | `step*.par1` | threads of each step | 8-16 |
 | `step05.par2` | metaSPAdes memory limit (GB), keep below the machine RAM | 56 |
 | `step04b_1.par2` | DIAMOND block size for HUMAnN, higher is faster (~6 GB RAM per unit) | 2 |
@@ -197,9 +211,8 @@ index if missing, runs every step and gives the output files back to your user.
   that stopped (example below).
 - The log is `output/<name>/run_<timestamp>.log`; the time of each step is in
   `output/<name>/step_times.tsv`.
-- Environment variables: `HOST_SPECIES` (default `Bos_taurus`),
-  `INDEX_THREADS`, `IMAGE` (default `metacheese`), `STEP14_CHOICE` (see A.6 in
-  [`docs/steps.md`](docs/steps.md)).
+- Environment variables: `INDEX_THREADS`, `IMAGE` (default `metacheese`),
+  `STEP14_CHOICE` (see A.6 in [`docs/steps.md`](docs/steps.md)).
 
 #### Resuming an interrupted run
 

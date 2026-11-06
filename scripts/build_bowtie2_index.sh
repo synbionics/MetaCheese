@@ -6,12 +6,19 @@ conda activate bowtieenv
 
 BASE="data/gene"
 
-# Usage: bash scripts/build_bowtie2_index.sh [SPECIES] [THREADS]
-# Species folder name (e.g. Bos_taurus): from the first argument, or asked
+# Usage: bash scripts/build_bowtie2_index.sh [HOST] [THREADS]
+# HOST is an index path (/path/to/host_folder/<index_name>), or a folder name
+# inside data/gene/ (e.g. Bos_taurus). It is asked for if not given.
 SPECIES="${1:-}"
 THREADS="${2:-4}"
 [[ -n "$SPECIES" ]] || read -p "Species folder name inside $BASE/: " SPECIES
-DIR="$BASE/$SPECIES"
+if [[ "$SPECIES" == */* ]]; then
+  PREFIX="$SPECIES"
+  DIR="${SPECIES%/*}"
+else
+  PREFIX="$BASE/$SPECIES/$SPECIES"
+  DIR="$BASE/$SPECIES"
+fi
 
 # Check if folder exists
 if [ ! -d "$DIR" ]; then
@@ -19,22 +26,19 @@ if [ ! -d "$DIR" ]; then
   exit 1
 fi
 
+# Check if index already exists (.bt2l for genomes above 4 Gb)
+if compgen -G "$PREFIX.1.bt2*" >/dev/null; then
+  # non-interactive call (species given as argument): keep the existing index
+  [[ -n "${1:-}" ]] && { echo "[OK] Index already exists: $PREFIX"; conda deactivate; exit 0; }
+  read -p "Index already exists, do you want to rebuild it? [y/N]: " ans
+  [[ "$ans" != "s" && "$ans" != "S" && "$ans" != "y" && "$ans" != "Y" ]] && { echo "Exiting."; conda deactivate; exit 0; }
+fi
+
 # Check for FASTA files
 FASTA=$(ls "$DIR"/*.fa "$DIR"/*.fna "$DIR"/*.fasta 2>/dev/null | head -n1)
 if [ -z "$FASTA" ]; then
   echo "[ERROR] No FASTA file (.fa/.fna/.fasta) found in $DIR."
   exit 1
-fi
-
-# Index prefix (same name as FASTA without extension)
-PREFIX="$DIR/$SPECIES"
-
-# Check if index already exists
-if ls "${PREFIX}"*.bt2 &>/dev/null; then
-  # non-interactive call (species given as argument): keep the existing index
-  [[ -n "${1:-}" ]] && { echo "[OK] Index already exists: $PREFIX"; conda deactivate; exit 0; }
-  read -p "Index already exists, do you want to rebuild it? [y/N]: " ans
-  [[ "$ans" != "s" && "$ans" != "S" && "$ans" != "y" && "$ans" != "Y" ]] && { echo "Exiting."; conda deactivate; exit 0; }
 fi
 
 # Build index

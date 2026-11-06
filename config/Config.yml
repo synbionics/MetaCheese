@@ -19,7 +19,7 @@ step00_01:
 step03:
   dir1: "../../output/@output_folder@/01_AdapterRemoval" # input directory
   dir2: "../../output/@output_folder@/03_bowtie2_output" # output directory
-  dir3: "../../data/gene/Bos_taurus/Bos_taurus"          # database
+  dir3: ""                                               # REQUIRED: host files, /path/to/host_folder/<index_name>
   par1: 16                                                # threads (Bowtie2 host removal)
 
 step04:

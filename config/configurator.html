@@ -116,7 +116,7 @@ step00_01:
 step03:
   dir1: "../../output/@output_folder@/01_AdapterRemoval" # input directory
   dir2: "../../output/@output_folder@/03_bowtie2_output" # output directory
-  dir3: "../../data/gene/Bos_taurus/Bos_taurus"          # database
+  dir3: ""                                               # REQUIRED: host files, /path/to/host_folder/<index_name>
   par1: 16                                                # threads (Bowtie2 host removal)
 
 step04:
@@ -223,8 +223,8 @@ const GROUPS = [
     { id: "cores", label: "CPU cores", help: "How many the run may use.", value: 16, min: 1 },
     { id: "ram", label: "RAM (GB)", help: "How much the run may use.", value: 64, min: 1 },
   ]},
-  { title: "Host", text: "Reads that align to the host genome are removed before the analysis. Host removal cannot be turned off yet, so a host is required.", fields: [
-    { id: "host", label: "Host genome folder", help: "Folder name inside data/gene/ holding the host's FASTA file. Use letters, numbers, dots, dashes and underscores, no spaces.", type: "text", value: "", placeholder: "e.g. Homo_sapiens", wide: true },
+  { title: "Host", text: "Reads that align to the host genome are removed before the analysis. Host removal always runs, so a host genome is required.", fields: [
+    { id: "host", label: "Host genome folder", help: "Full path of the folder holding the host's FASTA file, anywhere on this machine, without spaces. Its index is built in the same folder on the first run.", type: "text", value: "", placeholder: "e.g. /data/genomes/Homo_sapiens", wide: true },
   ]},
   { title: "Read trimming (AdapterRemoval)", text: "Which reads and bases are kept before the analysis.", fields: [
     { key: "step00_01.par2", label: "Minimum read length (bp)", help: "Shorter reads are discarded.", value: 50, min: 1 },
@@ -267,6 +267,8 @@ const HIDDEN = { "step12_13.par1": threads, "step12_13.par2": m => Math.min(4, m
 
 const FIELDS = GROUPS.flatMap(g => g.fields);
 const NAME_OK = /^[A-Za-z0-9._-]+$/;
+const HOST_DIR_OK = /^(\/[^\/"#|\\\s]+)+$/;
+const hostDir = () => $("f-host").value.trim().replace(/\/+$/, "");
 const edited = new Set();
 const inputOf = f => $("f-" + (f.id || f.key));
 const num = id => Number($("f-" + id).value);
@@ -337,6 +339,7 @@ function buildForm() {
 
 function fieldError(f) {
   const v = inputOf(f).value.trim();
+  if (f.id === "host") return HOST_DIR_OK.test(hostDir()) ? null : `${f.label}: ${v ? "use a full path starting with /, without spaces or the characters \" # | \\" : "required"}.`;
   if (f.type === "text") return v && NAME_OK.test(v) ? null : `${f.label}: ${v ? "use only letters, numbers, dots, dashes and underscores" : "required"}.`;
   const n = Number(v);
   if (v === "" || !Number.isFinite(n)) return `${f.label}: enter a number.`;
@@ -375,13 +378,12 @@ function update() {
     if (e) errors.push(e);
   });
 
-  const host = $("f-host").value.trim();
-  const hostOk = NAME_OK.test(host);
+  const host = hostDir();
+  const hostOk = HOST_DIR_OK.test(host);
   const values = {};
   FIELDS.forEach(f => { if (f.key) values[f.key] = inputOf(f).value.trim(); });
   Object.entries(HIDDEN).forEach(([k, rule]) => { values[k] = rule(machine); });
-  const hostName = hostOk ? host : "<Host>";
-  values["step03.dir3"] = `"../../data/gene/${hostName}/${hostName}"`;
+  values["step03.dir3"] = hostOk ? `"${host}/${host.split("/").pop()}"` : `"/path/to/host_folder/<index_name>"`;
   configText = "# Made with config/configurator.html\n" + renderConfig(values);
 
   if (!errors.length) {
@@ -401,13 +403,13 @@ function update() {
 
   const q = id => $("f-" + id).value.trim() || `<${id}>`;
   $("command").textContent =
-    `HOST_SPECIES=${hostOk ? host : "<Host>"} INDEX_THREADS=${machine.cores} \\\n` +
+    `INDEX_THREADS=${machine.cores} \\\n` +
     `  bash examples/run_in_docker.sh --input ${q("input")} --name ${q("run")} \\\n` +
     `  --config config/${fileName()}`;
   const next = $("next");
   next.replaceChildren(
     item(`Move the downloaded file to the repository's <code>config/</code> folder.`),
-    item(`Put the host's FASTA file in <code>data/gene/${escapeHtml(hostOk ? host : "<Host>")}/</code>. Its index is built on the first run.`),
+    item(`Put the host's FASTA file in <code>${escapeHtml(hostOk ? host : "<host folder>")}</code>. Its index is built there on the first run.`),
     item(`Run the command from the repository root. A run that already has a folder keeps its saved config, so use a new run name to apply a new file.`));
 }
 

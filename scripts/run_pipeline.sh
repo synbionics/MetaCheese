@@ -138,6 +138,25 @@ SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 CONFIG_TEMPLATE="$PROJECT_ROOT/config/Config.yml"
 
+# Host removal (step 03) always runs, so a new run needs a host index.
+function check_host_index() {
+    local config="$1" index
+    index=$(yq eval -r '.step03.dir3' "$config")
+    if [[ -z "$index" || "$index" == "null" ]]; then
+        echo "Error: no host set: set step03.dir3 in $config to /path/to/host_folder/<index_name> (see README, Host genome)" >&2
+        exit 1
+    fi
+    if [[ "$index" == *[[:space:]]* ]]; then
+        echo "Error: Bowtie2 cannot use a host path with spaces: $index" >&2
+        exit 1
+    fi
+    mkdir -p "$PROJECT_ROOT/scripts/pipeline"
+    if ! (cd "$PROJECT_ROOT/scripts/pipeline" && compgen -G "$index.1.bt2*" >/dev/null); then
+        echo "Error: no Bowtie2 index for step03.dir3 = $index (build it with scripts/build_bowtie2_index.sh <index path>)" >&2
+        exit 1
+    fi
+}
+
 # Check that yq is available
 command -v yq >/dev/null 2>&1 || { echo "Error: 'yq' not found in PATH." >&2; exit 1; }
 
@@ -177,6 +196,7 @@ if [[ $# -gt 0 ]]; then
     if [[ ! -f "$CONFIG_FILE" ]]; then
         [[ -n "$input_sample" ]] || { echo "Error: --input is required for a new run" >&2; exit 1; }
         [[ -d "$PROJECT_ROOT/input/$input_sample" ]] || { echo "Error: input/$input_sample not found" >&2; exit 1; }
+        check_host_index "$CONFIG_TEMPLATE"
         mkdir -p "$OUTPUT_DIR"
         sed -e "s|@output_folder@|$output_folder|g" -e "s|@input_sample@|$input_sample|g" \
             "$CONFIG_TEMPLATE" > "$CONFIG_FILE"
@@ -251,6 +271,8 @@ if [[ "$scelta" == "1" ]]; then
     data=$(date +%Y%m%d)
     read -p "Enter descriptive code: " codice
     [[ -z "$codice" ]] && { echo "Error: descriptive code cannot be empty!" >&2; exit 1; }
+
+    check_host_index "$CONFIG_TEMPLATE"
 
     output_folder="${data}_${codice}"
     mkdir -p "$PROJECT_ROOT/output/$output_folder"
