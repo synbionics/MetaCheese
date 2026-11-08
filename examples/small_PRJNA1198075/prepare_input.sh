@@ -22,6 +22,7 @@
 # Environment variables:
 #   READ_PAIRS  read pairs to keep per sample (default 5000000)
 #   OUT_DIR     output folder (default input/small_PRJNA1198075)
+#   SAMPLES     sample table to use instead of the one below (same columns)
 set -euo pipefail
 
 SRC="${1:-}"
@@ -33,13 +34,13 @@ OUT="${OUT_DIR:-$REPO_ROOT/input/small_PRJNA1198075}"
 # separated in beta diversity, while D_GP_13 + ND_GP_15 are similar to each other.
 # ND_GP_16 replaces ND_GP_4, whose reads fail FastQC's duplication check (60%).
 # sample_name  run_accession  biosample  title  group (from ENA + NCBI BioSample)
-SAMPLES="\
+SAMPLES="${SAMPLES:-\
 D_GP_02  SRR31729973 SAMN45828310 cheese02  PDO
 D_GP_04  SRR31729955 SAMN45828335 cheese04  PDO
 D_GP_13  SRR31729948 SAMN45828317 cheese13  PDO
 ND_GP_16 SRR31729960 SAMN45828330 Ncheese16 non-PDO
 ND_GP_10 SRR31729968 SAMN45828323 Ncheese10 non-PDO
-ND_GP_15 SRR31729961 SAMN45828329 Ncheese15 non-PDO"
+ND_GP_15 SRR31729961 SAMN45828329 Ncheese15 non-PDO}"
 
 if command -v pigz >/dev/null; then GZ="pigz -p 4"; ZCAT="pigz -dc"; else GZ="gzip"; ZCAT="zcat"; fi
 LINES=$((PAIRS * 4))

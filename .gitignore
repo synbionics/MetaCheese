@@ -3,6 +3,7 @@ input/
 output/
 data/gene/
 scripts/pipeline/
+__pycache__/
 
 # Local logs
 *.log

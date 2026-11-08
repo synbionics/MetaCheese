@@ -1,0 +1,20 @@
+FastQC	FastQC v0.12.1
+MultiQC	multiqc, version 1.35
+AdapterRemoval	AdapterRemoval ver. 2.3.3
+Bowtie2	/opt/conda/envs/bowtieenv/bin/bowtie2-align-s version 2.3.3.1
+samtools	samtools 1.6
+MetaPhlAn	MetaPhlAn version 4.1.0 (23 Aug 2023)
+HUMAnN	humann v3.9
+DIAMOND_humann	diamond version 2.0.15
+metaSPAdes	SPAdes v3.13.0 [metaSPAdes mode]
+QUAST	QUAST v5.3.0
+MetaBAT2	MetaBAT: Metagenome Binning based on Abundance and Tetranucleotide frequency (version 2:2.17 (Bioconda); 2024-06-20T09:50:37)
+CheckM2	1.0.2
+DIAMOND_checkm2	diamond version 2.0.4
+TORMES	TORMES version 1.3.0
+Kraken2	Kraken version 2.0.9-beta
+db_MetaPhlAn	mpa_vJun23_CHOCOPhlAnSGB_202307.1.bt2l (23969563398 bytes)
+db_ChocoPhlAn	alaS.centroids.v201901_v31.ffn.gz (16497929304 bytes)
+db_UniRef	uniref90_201901b_full.dmnd (36332007356 bytes)
+db_CheckM2	uniref100.KO.1.dmnd (3082500605 bytes)
+db_Kraken2	database100mers.kmer_distrib (8018631765 bytes)
