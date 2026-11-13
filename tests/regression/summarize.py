@@ -49,6 +49,8 @@ RUN_FILES = [
     "06b_quast/transposed_report.tsv",
     "13_checkm2/quality_report.tsv",
     "15_tormes_MAGs/taxonomic_identification/taxonomic-identification-kraken2.txt",
+    "16_integration/read_fate.tsv",
+    "16_integration/mags.tsv",
     "report/report.html",
 ]
 # The columns of these tables must not change.
@@ -58,6 +60,8 @@ COLUMN_TABLES = {
     "15_tormes_MAGs/taxonomic_identification/taxonomic-identification-kraken2.txt": None,
     "04b_humann_output/merged_tables/merged_table_ko.tsv": None,
     "04b_humann_output/merged_tables/merged_table_ec.tsv": None,
+    "16_integration/read_fate.tsv": None,
+    "16_integration/mags.tsv": None,
 }
 # Kept as they are, for reading and for summarising again later.
 COPIED_TABLES = [
@@ -69,6 +73,8 @@ COPIED_TABLES = [
     "06b_quast/transposed_report.tsv",
     "13_checkm2/quality_report.tsv",
     "15_tormes_MAGs/taxonomic_identification/taxonomic-identification-kraken2.txt",
+    "16_integration/read_fate.tsv",
+    "16_integration/mags.tsv",
     "step_times.tsv",
     "versions.tsv",
 ]
@@ -136,8 +142,9 @@ def summarize(run, pipeline_exit=None):
     mags = mr.collect_mags(run, samples)
     assembly = mr.collect_assembly(run)
     taxonomy = mr.collect_tormes_taxonomy(run)
-    integration = mr.collect_integration(run, samples, mags, metaphlan, mapping) or {}
+    integration = mr.collect_joint(run) or {}  # R.1 tables
     fate = integration.get("fate") or {}
+    joint_mags = {m["name"]: m for m in integration.get("mags") or []}
     shannon, richness = diversity_column(run, "shannon"), diversity_column(run, "richness")
 
     species = {s: {} for s in samples}
@@ -175,7 +182,9 @@ def summarize(run, pipeline_exit=None):
             "mags_kept": len(kept),
             "mag_mean_completeness": mean("completeness"),
             "mag_mean_contamination": mean("contamination"),
-            "kept_read_share": round(fate[s]["kept"], 3) if s in fate else None,
+            "kept_read_share": round(fate[s]["kept"], 3) if s in fate and fate[s]["kept"] is not None else None,
+            "kept_mags_metaphlan_species": sum(joint_mags.get(m["name"], {}).get("mpa_species") is not None for m in kept)
+                                           if integration else None,
             "mag_species": sorted((taxonomy.get(m["name"], {}).get("species") or "unclassified") for m in kept),
         }
 
@@ -216,7 +225,9 @@ def summarize(run, pipeline_exit=None):
         "between_samples": between_samples(run),
         "mags": [{"name": m["name"], "sample": m["sample"], "kept": m["passed"],
                   "completeness": m["completeness"], "contamination": m["contamination"],
-                  "size": m["size"], "species": taxonomy.get(m["name"], {}).get("species")} for m in mags],
+                  "size": m["size"], "species": taxonomy.get(m["name"], {}).get("species"),
+                  "metaphlan_name": joint_mags.get(m["name"], {}).get("mpa_name"),
+                  "metaphlan_species_pct": joint_mags.get(m["name"], {}).get("mpa_species")} for m in mags],
     }
 
 

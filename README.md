@@ -90,11 +90,11 @@ two branches:
 - **assembly-specific profiling**: assembly (metaSPAdes), binning into MAGs
   (MetaBAT2), MAG quality (CheckM2) and annotation of the good MAGs (TORMES).
 
-A final joint step (R.1) brings the two branches together in one interactive
-report. It reads the outputs of every step (dashed purple lines in the
-figure) and adds a section that combines them: how much of each community
-the MAGs capture, and whether the MAGs match the species the community
-profiles found.
+A joint step (R.1) combines the results of the two branches: how much of
+each community the MAGs capture, and whether the MAGs match the species the
+community profiles found. It writes them as tables. The final step (R.2)
+brings everything together in one interactive report: it reads the outputs of
+every step (dashed purple lines in the figure) and the R.1 tables.
 
 Step IDs (blue in the figure) and artifact IDs (orange) are used throughout
 the docs, the scripts and the report. When a step writes both data passed to
@@ -120,7 +120,8 @@ name (`scripts/templates/template_<script>*.sh`), also used with `--from`/`--to`
 | A.5 | MAG completeness and contamination | CheckM2 1.0.2 | `12-13` | `13_checkm2/` |
 | A.6 | MAG filtering and metadata | awk | `14` | `14_MAGs_high_quality/` |
 | A.7 | MAG annotation | TORMES 1.3.0 | `15` | `15_tormes_MAGs/` |
-| R.1 | Integrated report of both branches | Python 3 (`scripts/report/make_report.py`) | `16` | `report/` |
+| R.1 | Joint analyses of both branches | Python 3 (`scripts/integration/integrate.py`) | `16` | `16_integration/` |
+| R.2 | Integrated report | Python 3 (`scripts/report/make_report.py`) | `17` | `report/` |
 
 Inputs, outputs, config keys and known issues of every step are in
 [`docs/steps.md`](docs/steps.md).
@@ -280,7 +281,8 @@ output/<run>/
 ├── 13_checkm2/              A.5  quality_report.tsv
 ├── 14_MAGs_high_quality/    A.6  MAGs passing the filter + TORMES metadata
 ├── 15_tormes_MAGs/          A.7  TORMES annotation and report
-└── report/                  R.1  report.html (both branches), <run>_report.zip (to share it)
+├── 16_integration/          R.1  read_fate.tsv (where each sample's reads end up), mags.tsv (MAGs vs MetaPhlAn)
+└── report/                  R.2  report.html (both branches), <run>_report.zip (to share it)
 ```
 
 `scripts/clean_output_folders.sh` deletes the bulky intermediate files of a

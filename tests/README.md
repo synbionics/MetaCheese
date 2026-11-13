@@ -47,7 +47,9 @@ not mean wrong. It lists what to look at.
 
 - Per sample: read counts, Shannon and richness, species profile, HUMAnN pathways
   and unmapped shares, assembly size and N50, mapping rate, MAG counts and
-  quality, share of reads in kept MAGs, species names of the kept MAGs.
+  quality, share of reads in kept MAGs, species names of the kept MAGs, and
+  how many kept MAGs have a species that MetaPhlAn finds in the same sample
+  (the last two from the joint analyses, R.1).
 - Between samples: Bray-Curtis.
 - Per run: expected files, table columns, completed steps, tool and database
   versions.

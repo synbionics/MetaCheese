@@ -50,7 +50,8 @@ function generate_scripts() {
         [step12_13]="template_12-13.checkm.sh                   scripts/pipeline/12-13.checkm.sh                12-13       var1=var1 var2=var2 var3=var3 par1=par1 par2=par2 par3=par3"
         [step14]="template_14.filter-metadata.sh                scripts/pipeline/14.filter-metadata.sh          14          var1=var1 var2=var2 var3=var3 var4=var4 var5=var5 var6=var6 var7=var7 var8=var8"
         [step15]="template_15.tormes_MAG.sh                     scripts/pipeline/15.tormes_MAG.sh               15          var1=var1 var2=var2 par1=par1 par2=par2"
-        [step16]="template_16.report.sh                         scripts/pipeline/16.report.sh                   16          dir1=dir1"
+        [step16]="template_16.integration.sh                    scripts/pipeline/16.integration.sh              16          dir1=dir1"
+        [step17]="template_17.report.sh                         scripts/pipeline/17.report.sh                   17          dir1=dir1"
     )
 
     # Separator after prefix (usually _)
@@ -71,6 +72,7 @@ function generate_scripts() {
         [step14]="_"
         [step15]="_"
         [step16]="_"
+        [step17]="_"
     )
 
     # Loop through all steps
@@ -127,7 +129,8 @@ STEPS_ORDERED=(
     12-13.checkm.sh
     14.filter-metadata.sh
     15.tormes_MAG.sh
-    16.report.sh
+    16.integration.sh
+    17.report.sh
 )
 
 ###############################################################################
@@ -226,10 +229,14 @@ if [[ $# -gt 0 ]]; then
         SECONDS=0
         if ! bash "$step_script"; then
             echo "Error in $step_script, stopping." >&2
-            # Still write the report for the steps that did run
-            if [[ "$step_script" != 16.report.sh && -f 16.report.sh ]]; then
+            # Still write the report for the steps that did run (with the joint
+            # analyses of what is there, unless they are what failed)
+            if [[ "$step_script" != 17.report.sh && -f 17.report.sh ]]; then
                 echo "Writing the report of the completed steps..." >&2
-                bash 16.report.sh || true
+                if [[ "$step_script" != 16.integration.sh && -f 16.integration.sh ]]; then
+                    bash 16.integration.sh || true
+                fi
+                bash 17.report.sh || true
             fi
             exit 1
         fi

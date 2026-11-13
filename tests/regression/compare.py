@@ -37,8 +37,11 @@ PER_SAMPLE = {
     "mapping_rate": "absolute",
     "mags_total": "absolute", "mags_kept": "absolute",
     "mag_mean_completeness": "absolute", "mag_mean_contamination": "absolute",
-    "kept_read_share": "absolute",
+    "kept_read_share": "absolute", "kept_mags_metaphlan_species": "absolute",
 }
+# Steps renamed since a stored baseline was made (old name -> new name): a step
+# counts as completed under either name.
+STEP_RENAMES = {"16.report.sh": "17.report.sh"}
 # A species at this abundance (%) or above that is absent from the other run.
 MAJOR_SPECIES_PCT = 1.0
 # Used when turning observed noise into a limit, so that a value that happened
@@ -88,7 +91,7 @@ def compare(base, new, limits):
         if s not in base["samples"]:
             add("CHECK", "new sample", s)
     for step in base.get("steps", []):
-        if step not in new.get("steps", []):
+        if step not in new.get("steps", []) and STEP_RENAMES.get(step) not in new.get("steps", []):
             add("FAIL", "step not completed", step)
     for path, present in base["files"].items():
         if present and not new["files"].get(path):

@@ -9,7 +9,7 @@ to `scripts/pipeline/` inside the container.
 Execution order (`STEPS_ORDERED` in `scripts/run_pipeline.sh`):
 
 ```
-00 → 00-01 → 03 → 04 → 04b-1 → 04b-last → 05 → 06 → 06b → 07 → 08-09 → 10-11 → 12-13 → 14 → 15 → 16
+00 → 00-01 → 03 → 04 → 04b-1 → 04b-last → 05 → 06 → 06b → 07 → 08-09 → 10-11 → 12-13 → 14 → 15 → 16 → 17
 ```
 
 ---
@@ -164,15 +164,25 @@ Execution order (`STEPS_ORDERED` in `scripts/run_pipeline.sh`):
 | Output | `15_tormes_MAGs/` (TORMES HTML report, annotation, MLST, resistance and virulence genes, ...) |
 | Config | `step15.var1` working dir, `var2` metadata, `par1` output folder, `par2` threads |
 
-## R.1: Integrated report, both branches (`16`)
+## R.1: Joint analyses of both branches (`16`)
 
 | | |
 |---|---|
-| Template | `template_16.report.sh`, which runs `scripts/report/make_report.py` (Python 3 standard library only) |
-| Input | the outputs of every step of both branches (dashed purple lines in the figure): Q.1 `00_fastqc/*_fastqc.zip`, P.1.2 `01_AdapterRemoval/*.settings`, P.2.2 `03_bowtie2_output/*.bowtie2.log`, C.1.1 `04_metaphlan_output/<s>.txt`, C.2.1-C.2.2 `merged_abundance_table.txt` and `diversity/`, C.3-C.4 `04b_humann_output/`, A.1-A.2 `05_spades_output/contigs/`, A.8 `06b_quast/transposed_report.tsv`, A.3.2 `08_mapping_coverage/*_bowtie2.log`, A.4.1 `11_metabat_MAG/`, A.4.2 `10_metabat_depth/*.depth.txt`, A.5 `13_checkm2/`, A.6 `14_MAGs_high_quality/`, A.7 `15_tormes_MAGs/` (Kraken2 taxonomy, links to the per-MAG reports); plus `config.yml`, `step_times.tsv` and the run log |
-| Output | `report/report.html`: the interactive report (no internet needed). `report/<run>_report.zip`: to share it, the report with the MultiQC, QUAST and TORMES pages it links to; unzip it and open `report.html` |
+| Template | `template_16.integration.sh`, which runs `scripts/integration/integrate.py` (Python 3 standard library only; it reads the other steps' files with the report's parsers) |
+| Input | C.1.1 `04_metaphlan_output/merged_abundance_table.txt`, A.3.2 `08_mapping_coverage/*_bowtie2.log`, A.4.1 `11_metabat_MAG/`, A.4.2 `10_metabat_depth/*.depth.txt`, A.5 `13_checkm2/quality_report.tsv`, A.6 `14_MAGs_high_quality/`, A.7 `15_tormes_MAGs/**/taxonomic-identification-kraken2.txt` |
+| Output | `16_integration/read_fate.tsv`: one row per sample, the % of its microbial reads in kept MAGs, other bins, unbinned contigs and not assembled. `16_integration/mags.tsv`: one row per bin, with kept (yes/no), completeness, contamination, % of the sample's microbial reads, Kraken2 species and genus, MetaPhlAn name, MetaPhlAn species and genus %. `16_integration/notes.txt`: how names were matched (empty if nothing special) |
 | Config | `step16.dir1` run folder |
-| Notes | One section per step, then a joint section that combines the branches: a per-sample summary (microbial reads, species, Shannon, pathways, contig N50, mapping rate, bins, kept MAGs); the share of each sample's microbial reads that ends up in kept MAGs, other bins, unbinned contigs or is not assembled (contig length × depth from `10_metabat_depth/`, scaled by the A.3 mapping rate); and each MAG's share of the reads next to the MetaPhlAn abundance of the same species and genus in the same sample (MAG taxonomy from TORMES' Kraken2, `15_tormes_MAGs/**/taxonomic-identification-kraken2.txt`; Kraken2 uses the *Lactobacillus* names from before the 2020 genus split, so a MAG is also matched to a MetaPhlAn species of the new genera with the same epithet, e.g. *Lactobacillus rhamnosus* = *Lacticaseibacillus rhamnosus*; if no species matches, the genus value sums *Lactobacillus* and the genera split from it). It also runs when an earlier step fails, so a partial run still gets a report. Regenerate it with `bash scripts/run_pipeline.sh --name <run> --from 16`, or on the host with `python3 scripts/report/make_report.py output/<run>`. |
+| Notes | Read fate: contig length × depth from `10_metabat_depth/`, split by where each contig ended up, scaled by the A.3 mapping rate. MAGs vs MetaPhlAn: a MAG matches when MetaPhlAn detects its Kraken2 species in the same sample. Kraken2 uses the *Lactobacillus* names from before the 2020 genus split, so a MAG is also matched to a MetaPhlAn species of the new genera with the same epithet, e.g. *Lactobacillus rhamnosus* = *Lacticaseibacillus rhamnosus*; if no species matches, the genus value sums *Lactobacillus* and the genera split from it (`RENAMED_GENERA` in the script). Missing inputs give empty tables. Rerun it on the host with `python3 scripts/integration/integrate.py output/<run>`. |
+
+## R.2: Integrated report (`17`)
+
+| | |
+|---|---|
+| Template | `template_17.report.sh`, which runs `scripts/report/make_report.py` (Python 3 standard library only) |
+| Input | the outputs of every step of both branches (dashed purple lines in the figure): Q.1 `00_fastqc/*_fastqc.zip`, P.1.2 `01_AdapterRemoval/*.settings`, P.2.2 `03_bowtie2_output/*.bowtie2.log`, C.1.1 `04_metaphlan_output/<s>.txt`, C.2.1-C.2.2 `merged_abundance_table.txt` and `diversity/`, C.3-C.4 `04b_humann_output/`, A.1-A.2 `05_spades_output/contigs/`, A.8 `06b_quast/transposed_report.tsv`, A.3.2 `08_mapping_coverage/*_bowtie2.log`, A.4.1 `11_metabat_MAG/`, A.5 `13_checkm2/`, A.6 `14_MAGs_high_quality/`, A.7 `15_tormes_MAGs/` (links to the per-MAG reports), R.1 `16_integration/`; plus `config.yml`, `step_times.tsv` and the run log |
+| Output | `report/report.html`: the interactive report (no internet needed). `report/<run>_report.zip`: to share it, the report with the MultiQC, QUAST and TORMES pages it links to; unzip it and open `report.html` |
+| Config | `step17.dir1` run folder |
+| Notes | One section per step, then the joint section: a per-sample summary that puts the numbers of both branches side by side (microbial reads, species, Shannon, pathways, contig N50, mapping rate, bins, kept MAGs), and the R.1 results (where the microbial reads end up, MAGs against the community profile). If a step fails, R.1 (unless it is what failed) and the report still run, so a partial run still gets a report. Regenerate it with `bash scripts/run_pipeline.sh --name <run> --from 16`, or on the host with `python3 scripts/integration/integrate.py output/<run> && python3 scripts/report/make_report.py output/<run>`. |
 
 ## A.8: Assembly quality (`06b`)
 

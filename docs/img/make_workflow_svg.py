@@ -7,7 +7,7 @@ the README and in the scripts. Edit this file and run
 import sys
 from xml.sax.saxutils import escape
 
-W, H = 1100, 1440
+W, H = 1100, 1550
 out = []
 add = out.append
 
@@ -63,7 +63,7 @@ def arrow(points, dashed=False):
     add(f'<path d="{d}" fill="none" stroke="#1d2b36" stroke-width="1.4" marker-end="url(#ah)"{dash}/>')
 
 
-REPORT = "#7b4fbf"  # lines into the integrated report (R.1)
+REPORT = "#7b4fbf"  # lines into the integrated report (R.2)
 
 
 def feed(points, end=False):
@@ -94,7 +94,7 @@ add('<rect x="20" y="20" width="170" height="114" rx="10" fill="#f4f7fa" stroke=
 text(32, 40, "Legend", size=13, weight="bold", anchor="start", fill="#1f6aa5")
 add(f'<rect x="32" y="47" width="26" height="13" rx="4" fill="{STEP_FILL}"/>'); text(66, 58, "computational step", size=11, anchor="start")
 add(f'<rect x="32" y="66" width="26" height="13" fill="{ART_FILL}" stroke="{ART_STROKE}"/>'); text(66, 77, "artifact (files)", size=11, anchor="start")
-add(f'<path d="M32,90 h26" stroke="{REPORT}" stroke-width="1.5" stroke-dasharray="4 3"/>'); text(66, 94, "read by report R.1", size=11, anchor="start")
+add(f'<path d="M32,90 h26" stroke="{REPORT}" stroke-width="1.5" stroke-dasharray="4 3"/>'); text(66, 94, "read by report R.2", size=11, anchor="start")
 badge(45, 112, "X.n", STEP_ID); badge(85, 112, "X.n", ART_ID); text(108, 116, "step / artifact ID", size=11, anchor="start")
 
 # ---------------------------------------------------------------- top row: QC and host index
@@ -212,11 +212,18 @@ arrow([(605, 1094), (605, 1122)])
 artifact(780, 1131, 90, 54, "A.7", ["GFF, html", "Kraken2 txt"], "annotated MAGs,\nannotation reports")
 arrow([(710, 1156), (777, 1156)])
 
-# ---------------------------------------------------------------- joint step: both branches
-step(420, 1271, 260, 66, "R.1", ["Integrated report", "(both branches)"], "16")
-artifact(745, 1277, 85, 54, "R.1", ["HTML"], "interactive\nreport")
-arrow([(680, 1304), (742, 1304)])
-# R.1 reads the files of almost every step (scripts/report/make_report.py).
+# ---------------------------------------------------------------- joint steps: both branches
+# R.1 combines results of both branches (scripts/integration/integrate.py);
+# its inputs are listed under it rather than drawn, to keep the figure legible.
+step(170, 1265, 240, 62, "R.1", ["Joint analyses", "(both branches)"], "16")
+text(290, 1346, "reads C.1.1, A.3.2, A.4, A.5, A.6, A.7", size=11)
+artifact(500, 1269, 85, 54, "R.1", ["tsv"], "joint\ntables")
+arrow([(410, 1296), (497, 1296)])
+step(420, 1380, 260, 66, "R.2", ["Integrated report", "(both branches)"], "17")
+arrow([(542, 1323), (542, 1377)])
+artifact(745, 1386, 85, 54, "R.2", ["HTML"], "interactive\nreport")
+arrow([(680, 1413), (742, 1413)])
+# R.2 reads the files of almost every step (scripts/report/make_report.py).
 # Each dot is an artifact read by the report; the dots join two collector
 # lines (drawn below, outside this group): one in the gap between the two
 # branches, one on the right edge.
@@ -238,9 +245,9 @@ feed([(990, 1155), (RB, 1155)])                             # A.7 TORMES
 
 add("</g>")
 
-# collector lines into R.1 (absolute coordinates) and the feeds above the group
-feed([(LB, 372), (LB, 1268 + DY)], end=True)                       # left collector
-feed([(RB, 10), (RB, 1257 + DY), (650, 1257 + DY), (650, 1268 + DY)], end=True)  # right collector
+# collector lines into R.2 (absolute coordinates) and the feeds above the group
+feed([(LB, 372), (LB, 1377 + DY)], end=True)                       # left collector
+feed([(RB, 10), (RB, 1366 + DY), (650, 1366 + DY), (650, 1377 + DY)], end=True)  # right collector
 feed([(500, 36), (500, 10), (RB, 10)])                      # Q.1 QC reports
 feed([(360, 364), (360, 372), (LB, 372)])                   # P.1.2 trimming settings
 feed([(842, 336), (RB, 336)])                               # P.2.2 host-removal log

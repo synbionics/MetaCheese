@@ -997,9 +997,10 @@ const tilesEl = $("#tiles");
 
 // ============================================================= R.1 joint: both branches
 (function () {
-  const sec = section("r1", "R.1", "Both branches together", "MetaCheese report",
-    [["What this step does", "Joins the community-level profiles (C.1–C.4), built from all reads, with the genomes reconstructed by the assembly branch (A.1–A.7). For every sample it measures how much of the microbial community the MAGs capture, and checks each MAG against the abundance MetaPhlAn gives to the same organism."],
+  const sec = section("r1", "R.1", "Both branches together", "MetaCheese joint analyses · 16_integration/",
+    [["What this step does", "Joins the community-level profiles (C.1–C.4), built from all reads, with the genomes reconstructed by the assembly branch (A.1–A.7). For every sample it measures how much of the microbial community the MAGs capture, and checks each MAG against the abundance MetaPhlAn gives to the same organism. The results are also saved as tables in 16_integration/ (read_fate.tsv, mags.tsv); the per-sample summary below only puts the numbers of both branches side by side."],
      ["How to read it", "The bars split each sample's microbial reads by where they end up: in kept MAGs, in other (lower-quality) bins, in contigs that were not binned, or not assembled at all. A large 'kept MAGs' share means the genomes describe most of the community. In the MAG table, a MAG of a species that MetaPhlAn also finds abundant confirms both branches; a MAG with no MetaPhlAn match may be an organism missing from the marker database, or the same organism under a different name in the two tools' databases."]], "joint");
+  const igRun = !!D.integration;
   const ig = D.integration || { fate: {}, mags: [] };
   const mp = D.metaphlan, hu = D.humann || {}, dv = D.diversity, as = D.assembly || {}, mpg = D.mapping || {};
   const host = D.host || {};
@@ -1013,6 +1014,7 @@ const tilesEl = $("#tiles");
   findings(sec, [
     !hasAsm ? "The assembly branch has no results yet: only the community-level columns are filled." : null,
     !hasCom ? "The community-level branch has no results yet: only the assembly columns are filled." : null,
+    !igRun ? "The joint analyses (step 16) have no results in this run folder: only the per-sample summary is shown." : null,
     fx.length ? `Share of the microbial reads captured by kept MAGs: ${fx.map(x => `${x} ${pct(fate[x].kept, 1)}`).join(", ")}.` : null,
     ig.taxonomy && ig.mags.some(m => m.passed) ? (() => {
       const kept = ig.mags.filter(m => m.passed);

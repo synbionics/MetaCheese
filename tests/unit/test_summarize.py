@@ -32,7 +32,7 @@ def tiny_run(run):
     write(run, "14_MAGs_high_quality/S1.unmapped.2.fa", ">d\nACGT\n")
     write(run, "15_tormes_MAGs/taxonomic_identification/taxonomic-identification-kraken2.txt",
           "Isolate\tFamily\tGenus\tSpecies\nS1.unmapped.1\tF (100%)\tG (100%)\tG sp (99.0%)\n")
-    write(run, "step_times.tsv", "00.fastqc.sh\t3\n16.report.sh\t4\n")
+    write(run, "step_times.tsv", "00.fastqc.sh\t3\n17.report.sh\t4\n")
     write(run, "versions.tsv", "Tool\t1.0\n")
 
 
@@ -65,11 +65,24 @@ class Summarize(unittest.TestCase):
         self.assertEqual(self.s1["mag_mean_completeness"], 75.0)
         self.assertEqual(self.s1["mag_species"], ["G sp", "unclassified"])
 
+    def test_joint_values_need_step_16(self):
+        self.assertIsNone(self.s1["kept_read_share"])
+        self.assertIsNone(self.s1["kept_mags_metaphlan_species"])
+        write(self.run, "16_integration/read_fate.tsv",
+              "sample\tkept_mags_pct\tother_bins_pct\tunbinned_pct\tnot_assembled_pct\nS1\t40\t10\t30\t20\n")
+        write(self.run, "16_integration/mags.tsv",
+              "mag\tsample\tkept\tcompleteness\tcontamination\tread_share_pct\tkraken2_species\tkraken2_genus\t"
+              "metaphlan_name\tmetaphlan_species_pct\tmetaphlan_genus_pct\n"
+              "S1.unmapped.1\tS1\tyes\t90\t2\t30\tG sp\tG\tG sp\t100\t100\n"
+              "S1.unmapped.2\tS1\tyes\t60\t4\t10\t\t\t\t\t\n")
+        s1 = su.summarize(self.run, 0)["per_sample"]["S1"]
+        self.assertEqual((s1["kept_read_share"], s1["kept_mags_metaphlan_species"]), (40.0, 1))
+
     def test_files_and_steps(self):
         files = self.summary["files"]
         self.assertTrue(files["01_AdapterRemoval/S1.settings"])
         self.assertFalse(files["08_mapping_coverage/S1.unmapped.sorted.bam"])
-        self.assertEqual(self.summary["steps"], ["00.fastqc.sh", "16.report.sh"])
+        self.assertEqual(self.summary["steps"], ["00.fastqc.sh", "17.report.sh"])
         self.assertEqual(self.summary["versions"], {"Tool": "1.0"})
 
 

@@ -113,4 +113,7 @@ step15:
   par2: 24                                              # threads
 
 step16:
+  dir1: "../../output/@output_folder@"                      # run folder (joint analyses go to <run>/16_integration/)
+
+step17:
   dir1: "../../output/@output_folder@"                      # run folder (report goes to <run>/report/)

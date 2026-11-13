@@ -51,6 +51,14 @@ class Compare(unittest.TestCase):
         new["steps"] = ["00"]
         self.assertEqual(statuses(new), [("FAIL", "step not completed")])
 
+    def test_renamed_step_counts_as_completed(self):
+        base, new = summary(), summary()
+        base["steps"] = ["00", "16.report.sh"]
+        new["steps"] = ["00", "16.integration.sh", "17.report.sh"]
+        self.assertEqual([r for r in c.compare(base, new, LIMITS) if r["status"] != "PASS"], [])
+        new["steps"] = ["00", "16.report.sh"]  # a run made before the rename
+        self.assertEqual([r for r in c.compare(base, new, LIMITS) if r["status"] != "PASS"], [])
+
     def test_changed_columns_fail(self):
         new = summary()
         new["columns"]["t.tsv"] = ["a"]

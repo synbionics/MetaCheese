@@ -102,7 +102,7 @@ Measured on a 16-core / 62 GB workstation (Docker, local SSD/HDD):
 | 12-13 | CheckM2 | 5 min |
 | 14 | MAG filter | < 1 min |
 | 15 | TORMES | 34 min |
-| 16 | report | < 1 min |
+| 16-17 | joint analyses, report | < 1 min |
 | **Total** | | **about 9 h** |
 
 Peak memory was set by metaSPAdes (`step05.par2`) and HUMAnN (DIAMOND block

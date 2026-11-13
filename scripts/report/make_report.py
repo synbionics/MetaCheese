@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""Build the MetaCheese run report (workflow step R.1, pipeline script 16).
+"""Build the MetaCheese run report (workflow step R.2, pipeline script 17).
 
-Collects the results of every pipeline step from a run folder, joins the two
-branches (community-level and assembly-specific profiling) and writes one
+Collects the results of every pipeline step from a run folder, including the
+joint analyses of the two branches (step R.1, 16_integration/), and writes one
 interactive HTML file (no internet connection or extra software needed to open
 it), meant to be read in a browser. To share it, send <run>_report.zip, written
 next to it: it also holds the pages the report links to.
@@ -29,24 +29,6 @@ import zipfile
 HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.dirname(os.path.dirname(HERE))
 
-# Genera that reference databases of different ages name differently. A MAG whose
-# TORMES genus is a key here also matches a detected species of the same epithet
-# in any genus accepted by "current". If no species matches, its genus abundance
-# is the sum of those genera, because the old name cannot say which new genus the
-# MAG belongs to. Add an entry when another split matters.
-RENAMED_GENERA = {
-    "lactobacillus": {
-        "current": re.compile(r"^(\w*lactobacillus|lacti\w*bacillus)$"),
-        "note": "TORMES' Kraken2 database uses the names from before the 2020 split of Lactobacillus "
-                "(Zheng et al. 2020; e.g. Lactobacillus rhamnosus), while MetaPhlAn uses the new genera "
-                "(Lacticaseibacillus rhamnosus). These MAGs are matched by species epithet across the "
-                "split, and the MetaPhlAn name is shown when it differs.",
-        "genus_note": "For a Lactobacillus MAG with no MetaPhlAn name, the MetaPhlAn genus value is the sum of "
-                      "Lactobacillus and the genera split from it, because the old name cannot say which new "
-                      "genus the MAG belongs to.",
-    },
-}
-
 # Tool versions installed in the metacheese image (see Dockerfile / README)
 TOOLS = [
     ("Q.1", "FastQC", "0.12.1"),
@@ -62,7 +44,8 @@ TOOLS = [
     ("A.4", "MetaBAT2", "2.17"),
     ("A.5", "CheckM2", "1.0.2"),
     ("A.7", "TORMES", "1.3.0"),
-    ("R.1", "MetaCheese report", "Python 3 standard library"),
+    ("R.1", "MetaCheese joint analyses", "Python 3 standard library"),
+    ("R.2", "MetaCheese report", "Python 3 standard library"),
 ]
 
 # Pipeline scripts in execution order, with workflow IDs and output folders
@@ -82,7 +65,8 @@ STEPS = [
     ("12-13.checkm", "A.5", "MAG quality", ["13_checkm2"]),
     ("14.filter-metadata", "A.6", "MAG filtering and metadata", ["14_MAGs_high_quality"]),
     ("15.tormes_MAG", "A.7", "MAG annotation", ["15_tormes_MAGs"]),
-    ("16.report", "R.1", "Integrated report", ["report"]),
+    ("16.integration", "R.1", "Joint analyses of both branches", ["16_integration"]),
+    ("17.report", "R.2", "Integrated report", ["report"]),
 ]
 
 RANKS = {"p": "phylum", "c": "class", "o": "order", "f": "family", "g": "genus", "s": "species"}
@@ -622,103 +606,36 @@ def write_package(path, run, name, page, pages):
     os.replace(tmp, path)
 
 
-def collect_integration(run, samples, mags, metaphlan, mapping):
-    """R.1: join the two branches.
-
-    For each sample, the reads that mapped to the sample's own contigs (A.3)
-    are split by where their contigs ended up: kept MAGs (A.6), other bins
-    (A.4), contigs that were not binned. Contig depth x length (A.3 depth
-    file) approximates the mapped bases. Each MAG gets its share of the
-    microbial reads and, when TORMES classified it (A.7), the abundance that
-    MetaPhlAn (C.1) gives to the same species or genus in the same sample.
-    """
-    bins = {}
-    for d, kept in (("11_metabat_MAG", False), ("14_MAGs_high_quality", True)):
-        for f in glob.glob(os.path.join(run, d, "*.fa")):
-            name = os.path.basename(f)[:-3]
-            s = match_sample(name, samples)
-            for c in fasta_ids(f):
-                bins[(s, c)] = (name, kept)  # SPAdes contig names repeat across samples
-    fate, mag_share = {}, {}
-    for f in glob.glob(os.path.join(run, "10_metabat_depth", "*.depth.txt")):
-        s = match_sample(os.path.basename(f), samples)
-        rows = read_tsv(f)
-        if not rows:
-            continue
-        tot = kept = other = 0.0
-        per_bin = {}
-        for r in rows[1:]:
-            ln, dp = to_float(r[1]), to_float(r[2])
-            if ln is None or dp is None:
-                continue
-            b = ln * dp
-            tot += b
-            hit = bins.get((s, r[0]))
-            if hit:
-                per_bin[hit[0]] = per_bin.get(hit[0], 0.0) + b
-                if hit[1]:
-                    kept += b
-                else:
-                    other += b
-        if not tot:
-            continue
-        mapped = mapping.get(s)
-        scale = (mapped if mapped is not None else 100.0) / tot
-        fate[s] = {"kept": kept * scale, "other_bins": other * scale, "unbinned": (tot - kept - other) * scale,
-                   "not_assembled": 100.0 - mapped if mapped is not None else None}
-        for n, b in per_bin.items():
-            mag_share[n] = b * scale
-
-    tax = collect_tormes_taxonomy(run)
-    prof = {}
-    if metaphlan:
-        cols = metaphlan["samples"]
-        for rank in ("species", "genus"):
-            for t in metaphlan["profiles"].get(rank, []):
-                for i, x in enumerate(cols):
-                    # The merged table lists every taxon in every sample: keep
-                    # only those MetaPhlAn really finds in this sample.
-                    if (t["values"][i] or 0) > 0:
-                        prof[(rank, x, t["taxon"].lower())] = t["values"][i]
-    norm = lambda x: re.sub(r"\s+", " ", (x or "").replace("_", " ")).strip().lower()
-    by_epithet = {}
-    for (rank, x, taxon) in prof:
-        w = taxon.split(" ")
-        if rank == "species" and len(w) == 2:
-            for old, rule in RENAMED_GENERA.items():
-                if rule["current"].match(w[0]):
-                    by_epithet[(old, x, w[1])] = taxon
-    name_notes = []
-    out_mags = []
-    for m in mags:
-        t = tax.get(m["name"], {})
-        sp, gn = norm(t.get("species")), norm(t.get("genus"))
-        mpa_name = sp if sp and ("species", m["sample"], sp) in prof else None
-        if not mpa_name and gn in RENAMED_GENERA and len(sp.split(" ")) == 2:
-            mpa_name = by_epithet.get((gn, m["sample"], sp.split(" ")[1]))
-            note = RENAMED_GENERA[gn]["note"]
-            if mpa_name and note not in name_notes:
-                name_notes.append(note)
-        mpa_sp = prof.get(("species", m["sample"], mpa_name)) if mpa_name else None
-        mpa_gn = None
-        if mpa_name:
-            mpa_gn = prof.get(("genus", m["sample"], mpa_name.split(" ")[0]))
-        if mpa_gn is None and gn in RENAMED_GENERA:
-            rule = RENAMED_GENERA[gn]
-            parts = [v for (rank, x, taxon), v in prof.items()
-                     if rank == "genus" and x == m["sample"] and rule["current"].match(taxon)]
-            if parts:
-                mpa_gn = sum(parts)
-                if rule["genus_note"] not in name_notes:
-                    name_notes.append(rule["genus_note"])
-        elif mpa_gn is None and gn:
-            mpa_gn = prof.get(("genus", m["sample"], gn))
-        out_mags.append({"name": m["name"], "sample": m["sample"], "passed": m["passed"],
-                         "completeness": m["completeness"], "contamination": m["contamination"],
-                         "share": mag_share.get(m["name"]), "species": t.get("species"), "genus": t.get("genus"),
-                         "mpa_name": mpa_name[0].upper() + mpa_name[1:] if mpa_name else None,
-                         "mpa_species": mpa_sp, "mpa_genus": mpa_gn})
-    return {"fate": fate, "mags": out_mags, "taxonomy": bool(tax), "name_notes": name_notes}
+def collect_joint(run):
+    """R.1: the joint analyses of both branches, as written by step 16
+    (scripts/integration/integrate.py) in 16_integration/. None if not run."""
+    d = os.path.join(run, "16_integration")
+    fate_f, mags_f = os.path.join(d, "read_fate.tsv"), os.path.join(d, "mags.tsv")
+    if not (os.path.isfile(fate_f) and os.path.isfile(mags_f)):
+        return None
+    rows = read_tsv(fate_f)
+    fate = {}
+    for r in rows[1:]:
+        rec = dict(zip(rows[0], r))
+        fate[rec["sample"]] = {"kept": to_float(rec.get("kept_mags_pct")),
+                               "other_bins": to_float(rec.get("other_bins_pct")),
+                               "unbinned": to_float(rec.get("unbinned_pct")),
+                               "not_assembled": to_float(rec.get("not_assembled_pct"))}
+    rows = read_tsv(mags_f)
+    mags = []
+    for r in rows[1:]:
+        rec = dict(zip(rows[0], r))
+        mags.append({"name": rec["mag"], "sample": rec["sample"], "passed": rec.get("kept") == "yes",
+                     "completeness": to_float(rec.get("completeness")),
+                     "contamination": to_float(rec.get("contamination")),
+                     "share": to_float(rec.get("read_share_pct")),
+                     "species": rec.get("kraken2_species") or None, "genus": rec.get("kraken2_genus") or None,
+                     "mpa_name": rec.get("metaphlan_name") or None,
+                     "mpa_species": to_float(rec.get("metaphlan_species_pct")),
+                     "mpa_genus": to_float(rec.get("metaphlan_genus_pct"))})
+    notes = [l for l in (read_text(os.path.join(d, "notes.txt"), "") or "").splitlines() if l.strip()]
+    return {"fate": fate, "mags": mags, "taxonomy": any(m["species"] or m["genus"] for m in mags),
+            "name_notes": notes}
 
 
 # --------------------------------------------------------------------------- main
@@ -767,7 +684,7 @@ def main():
         "quast": collect_quast(run, samples),
         "mapping": mapping,
         "mags": mags,
-        "integration": collect_integration(run, samples, mags, metaphlan, mapping),
+        "integration": collect_joint(run),
         "tormes": collect_tormes(run),
         "tools": [{"id": a, "tool": b, "version": c} for a, b, c in TOOLS],
         "config": config_text,

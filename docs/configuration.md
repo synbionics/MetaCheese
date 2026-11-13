@@ -121,8 +121,9 @@ have to do it yourself (`sudo chown -R $USER output/<run>`).
 a menu: start a new run (it asks for the input folder and a code, and creates
 `output/<date>_<code>/`) or continue an existing one from a given step.
 
-### Regenerating only the report
+### Regenerating only the joint analyses and the report
 
 ```bash
-python3 scripts/report/make_report.py output/<run>     # on the host, Python 3 only
+python3 scripts/integration/integrate.py output/<run>  # R.1, on the host, Python 3 only
+python3 scripts/report/make_report.py output/<run>     # R.2
 ```
