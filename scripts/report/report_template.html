@@ -72,7 +72,11 @@ a:focus-visible, button:focus-visible, select:focus-visible, summary:focus-visib
   padding-right: max(16px, env(safe-area-inset-right, 0px));
 }
 /* ---------- rail */
-.rail { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 24px); align-self: start; }
+.rail { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 24px); align-self: start;
+  /* the menu scrolls on its own when it is taller than the window */
+  max-height: calc(100vh - env(safe-area-inset-top, 0px) - 48px);
+  max-height: calc(100dvh - env(safe-area-inset-top, 0px) - 48px);
+  overflow-y: auto; overscroll-behavior: contain; scrollbar-gutter: stable; padding-right: 4px; }
 .rail .brand { font: 700 var(--step-2)/1.1 var(--font-display); letter-spacing: -0.01em; margin-bottom: 18px; }
 .rail .brand small { display: block; font: 500 var(--step-0)/1.4 var(--font-mono); color: var(--muted); letter-spacing: 0; margin-top: 4px; }
 .rail ol { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
@@ -168,7 +172,7 @@ pre.config { font: 0.78rem/1.5 var(--font-mono); background: var(--surface); bor
 footer { margin-top: 56px; color: var(--muted); font-size: 0.85rem; }
 @media (max-width: 860px) {
   .page { grid-template-columns: minmax(0, 1fr); gap: 8px; padding-block: 16px 60px; }
-  .rail { position: static; }
+  .rail { position: static; max-height: none; overflow: visible; padding-right: 0; }
   .rail ol { display: flex; overflow-x: auto; gap: 4px; padding-bottom: 6px; }
   .rail .phase { display: none; }
   .rail a { grid-template-columns: auto; white-space: nowrap; background: var(--surface); border: 1px solid var(--line); }

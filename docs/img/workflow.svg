@@ -349,7 +349,26 @@
 <text x="174" y="1271" font-family="Helvetica, Arial, sans-serif" font-size="10" font-weight="bold" text-anchor="middle" fill="#fff" >R.1</text>
 <text x="290.0" y="1292.0" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="bold" text-anchor="middle" fill="#0b3954" >Joint analyses</text>
 <text x="290.0" y="1308.0" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="normal" text-anchor="middle" fill="#0b3954" >(both branches)</text>
-<text x="290" y="1346" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="normal" text-anchor="middle" fill="#1d2b36" >reads C.1.1, C.3, C.4, A.3.2, A.4-A.7</text>
+<path d="M110,674 L40,674" fill="none" stroke="#1d2b36" stroke-width="1.4"/>
+<circle cx="40" cy="674" r="2.6" fill="#1d2b36"/>
+<path d="M195,868 L40,868" fill="none" stroke="#1d2b36" stroke-width="1.4"/>
+<circle cx="40" cy="868" r="2.6" fill="#1d2b36"/>
+<path d="M205,1058 L40,1058" fill="none" stroke="#1d2b36" stroke-width="1.4"/>
+<circle cx="40" cy="1058" r="2.6" fill="#1d2b36"/>
+<path d="M40,674 L40,1296 L167,1296" fill="none" stroke="#1d2b36" stroke-width="1.4" marker-end="url(#ah)"/>
+<path d="M520,797 L480,797" fill="none" stroke="#1d2b36" stroke-width="1.4"/>
+<circle cx="480" cy="797" r="2.6" fill="#1d2b36"/>
+<path d="M700,827 L700,925 L480,925" fill="none" stroke="#1d2b36" stroke-width="1.4"/>
+<circle cx="480" cy="925" r="2.6" fill="#1d2b36"/>
+<path d="M560,1052 L480,1052" fill="none" stroke="#1d2b36" stroke-width="1.4"/>
+<circle cx="480" cy="1052" r="2.6" fill="#1d2b36"/>
+<path d="M900,1005 L900,1100 L1066,1100" fill="none" stroke="#1d2b36" stroke-width="1.4"/>
+<circle cx="1066" cy="1100" r="2.6" fill="#1d2b36"/>
+<path d="M822,1177 L822,1253" fill="none" stroke="#1d2b36" stroke-width="1.4"/>
+<circle cx="822" cy="1253" r="2.6" fill="#1d2b36"/>
+<path d="M1045,781 L1045,800 L1066,800 L1066,1253 L480,1253" fill="none" stroke="#1d2b36" stroke-width="1.4"/>
+<circle cx="480" cy="1253" r="2.6" fill="#1d2b36"/>
+<path d="M480,797 L480,1278 L413,1278" fill="none" stroke="#1d2b36" stroke-width="1.4" marker-end="url(#ah)"/>
 <path d="M508,1261 h85 v46 q-21.25,-8 -42.5,0 t-42.5,0 z" fill="#ffd43b" stroke="#b08900" stroke-width="1"/>
 <path d="M504,1265 h85 v46 q-21.25,-8 -42.5,0 t-42.5,0 z" fill="#ffd43b" stroke="#b08900" stroke-width="1"/>
 <path d="M500,1269 h85 v46 q-21.25,-8 -42.5,0 t-42.5,0 z" fill="#ffd43b" stroke="#b08900" stroke-width="1"/>
