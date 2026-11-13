@@ -216,7 +216,7 @@ arrow([(710, 1156), (777, 1156)])
 # R.1 combines results of both branches (scripts/integration/integrate.py);
 # its inputs are listed under it rather than drawn, to keep the figure legible.
 step(170, 1265, 240, 62, "R.1", ["Joint analyses", "(both branches)"], "16")
-text(290, 1346, "reads C.1.1, A.3.2, A.4, A.5, A.6, A.7", size=11)
+text(290, 1346, "reads C.1.1, C.3, C.4, A.3.2, A.4-A.7", size=11)
 artifact(500, 1269, 85, 54, "R.1", ["tsv"], "joint\ntables")
 arrow([(410, 1296), (497, 1296)])
 step(420, 1380, 260, 66, "R.2", ["Integrated report", "(both branches)"], "17")

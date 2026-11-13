@@ -1,5 +1,5 @@
 {
- "_note": "From compare.py --suggest-limits on test_baseline vs test_repeat (same image metacheese:baseline-2026-11, 2026-11-07). Only two runs: MAG-based limits may need widening. kept_mags_metaphlan_species added 2026-11-13 from the same two runs (step R.1).",
+ "_note": "From compare.py --suggest-limits on test_baseline vs test_repeat (same image metacheese:baseline-2026-11, 2026-11-07). Only two runs: MAG-based limits may need widening. kept_mags_metaphlan_species, kept_mags_humann_species and kept_mags_ec_share added 2026-11-13 from the same two runs (step R.1).",
  "trim_pairs": 0,
  "retained_reads": 0,
  "microbial_pairs": 0,
@@ -22,5 +22,7 @@
  "mag_mean_completeness": 3.3,
  "mag_mean_contamination": 0.01,
  "kept_read_share": 6.3,
- "kept_mags_metaphlan_species": 0.0
+ "kept_mags_metaphlan_species": 0.0,
+ "kept_mags_humann_species": 0.0,
+ "kept_mags_ec_share": 0.26
 }

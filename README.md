@@ -91,8 +91,9 @@ two branches:
   (MetaBAT2), MAG quality (CheckM2) and annotation of the good MAGs (TORMES).
 
 A joint step (R.1) combines the results of the two branches: how much of
-each community the MAGs capture, and whether the MAGs match the species the
-community profiles found. It writes them as tables. The final step (R.2)
+each community the MAGs capture, whether the MAGs match the species the
+community profiles found, and how the functions annotated in each MAG compare
+with the functional profile of its species and of the community. It writes them as tables. The final step (R.2)
 brings everything together in one interactive report: it reads the outputs of
 every step (dashed purple lines in the figure) and the R.1 tables.
 
@@ -281,7 +282,8 @@ output/<run>/
 ├── 13_checkm2/              A.5  quality_report.tsv
 ├── 14_MAGs_high_quality/    A.6  MAGs passing the filter + TORMES metadata
 ├── 15_tormes_MAGs/          A.7  TORMES annotation and report
-├── 16_integration/          R.1  read_fate.tsv (where each sample's reads end up), mags.tsv (MAGs vs MetaPhlAn)
+├── 16_integration/          R.1  read_fate.tsv (where each sample's reads end up), mags.tsv (MAGs vs MetaPhlAn),
+│                                 mag_functions.tsv, mag_pathways.tsv, mag_ecs.tsv, ec_coverage.tsv (MAGs vs HUMAnN)
 └── report/                  R.2  report.html (both branches), <run>_report.zip (to share it)
 ```
 

@@ -12,6 +12,31 @@ in <run>/16_integration/, read by the final report (R.2) and usable on their own
                    MetaPhlAn gives to the same species and genus in the same sample
     notes.txt      notes on how names were matched (one per line, may be empty)
 
+Functions of the kept MAGs (A.7, Prokka annotation by TORMES) against the
+functional profiles (C.3, HUMAnN), linked in two ways:
+
+    by species     HUMAnN splits each sample's pathways and gene families by the
+                   species they come from; a MAG is linked to the HUMAnN species
+                   with the same name as its Kraken2 species (both databases use
+                   the names from before the 2020 split of Lactobacillus)
+    by EC number   the EC numbers Prokka finds in the MAG against those HUMAnN
+                   finds in the sample, for the MAG's species and for the whole
+                   community (C.4 table merged_table_ec.tsv, which keeps the
+                   species split of C.3)
+
+    mag_functions.tsv  one row per kept MAG: the linked HUMAnN species, its
+                       pathways and gene families and their share of the sample,
+                       and EC counts (in the MAG, in HUMAnN's species, in both,
+                       in only one, in the community)
+    mag_pathways.tsv   one row per MAG and pathway HUMAnN gives to its species:
+                       abundance, and share of the pathway's community abundance
+    mag_ecs.tsv        one row per MAG and EC number found in the MAG or in
+                       HUMAnN's species: in the MAG or not, CPM in the species
+                       and in the community
+    ec_coverage.tsv    one row per sample: EC numbers of the community, how many
+                       the kept MAGs encode, and the share of the community's EC
+                       abundance they encode
+
 Usage:
     python3 scripts/integration/integrate.py output/<run> [--samplesheet TSV]
 
@@ -159,6 +184,191 @@ def mags_vs_metaphlan(run, mags, metaphlan, mag_share):
     return out, notes
 
 
+SPECIAL_ROWS = ("UNMAPPED", "UNINTEGRATED", "UNGROUPED")
+FULL_EC = re.compile(r"^\d+\.\d+\.\d+\.\d+$")  # partial ECs (1.1.1.-) cannot be matched
+
+
+def species_key(name):
+    """Comparable species name: 'g__Lactobacillus.s__Lactobacillus_casei' and
+    'Lactobacillus casei' both give 'lactobacillus casei'."""
+    name = (name or "").split(".s__")[-1]
+    return re.sub(r"\s+", " ", name.replace("_", " ")).strip().lower()
+
+
+def species_label(strat):
+    """HUMAnN stratum to a display name; None for 'unclassified'."""
+    if not strat or strat == "unclassified":
+        return None
+    return strat.split(".s__")[-1].replace("_", " ")
+
+
+def humann_by_species(run, samples):
+    """C.3 per-sample tables split by species. For each sample: pathway
+    abundances per species and for the community, and gene-family counts and
+    abundances per species."""
+    out = {}
+    base = os.path.join(run, "04b_humann_output")
+    for f in glob.glob(os.path.join(base, "*_pathabundance.tsv")):
+        s = mr.match_sample(os.path.basename(f), samples)
+        rec = out.setdefault(s, {})
+        community, per, names, total = {}, {}, {}, 0.0
+        for r in mr.read_tsv(f, comment="#"):
+            if len(r) < 2:
+                continue
+            feat, _, strat = r[0].partition("|")
+            if feat in SPECIAL_ROWS:
+                continue
+            v = mr.to_float(r[1]) or 0.0
+            ident, _, desc = feat.partition(": ")
+            names[ident] = desc or ident
+            if not strat:
+                community[ident] = v
+                continue
+            total += v
+            label = species_label(strat)
+            if label and v > 0:
+                per.setdefault(species_key(label), {"label": label, "values": {}})["values"][ident] = v
+        rec.update({"pathways": per, "pathway_community": community, "pathway_names": names,
+                    "pathway_stratified_total": total})
+    for f in glob.glob(os.path.join(base, "*_genefamilies.tsv")):
+        s = mr.match_sample(os.path.basename(f), samples)
+        rec = out.setdefault(s, {})
+        per, total = {}, 0.0
+        with open(f, errors="replace") as fh:
+            for line in fh:
+                if line.startswith("#"):
+                    continue
+                r = line.rstrip("\n").split("\t")
+                if len(r) < 2:
+                    continue
+                v = mr.to_float(r[1]) or 0.0
+                feat, _, strat = r[0].partition("|")
+                if not strat:
+                    total += v  # all reads, UNMAPPED included
+                    continue
+                label = species_label(strat)
+                if label and v > 0:
+                    acc = per.setdefault(species_key(label), [0, 0.0])
+                    acc[0] += 1
+                    acc[1] += v
+        rec.update({"genefamilies": per, "genefamily_total": total})
+    return out
+
+
+def humann_ecs(run, samples):
+    """EC numbers per sample (CPM) from the C.4 regrouped table, which keeps
+    HUMAnN's species split: community values, values per species, names."""
+    f = os.path.join(run, "04b_humann_output", "merged_tables", "merged_table_ec.tsv")
+    if not os.path.isfile(f):
+        return None
+    rows = mr.read_tsv(f)
+    cols = [mr.match_sample(c, samples) for c in rows[0][1:]]
+    community = {s: {} for s in cols}
+    per = {s: {} for s in cols}
+    names = {}
+    for r in rows[1:]:
+        feat, _, strat = r[0].partition("|")
+        if feat in SPECIAL_ROWS:
+            continue
+        ec, _, desc = feat.partition(": ")
+        names[ec] = desc or ec
+        label = species_label(strat) if strat else None
+        for s, x in zip(cols, r[1:]):
+            v = mr.to_float(x) or 0.0
+            if v <= 0:
+                continue
+            if not strat:
+                community[s][ec] = v
+            elif label:
+                per[s].setdefault(species_key(label), {})[ec] = v
+    return {"community": community, "species": per, "names": names}
+
+
+def mag_ecs(run):
+    """Full EC numbers of each MAG from TORMES' Prokka tables."""
+    out = {}
+    for f in glob.glob(os.path.join(run, "15_tormes_MAGs", "annotation", "*_annotation", "*.tsv")):
+        rows = mr.read_tsv(f)
+        if not rows or "EC_number" not in rows[0]:
+            continue
+        i = rows[0].index("EC_number")
+        ecs = set()
+        for r in rows[1:]:
+            if len(r) > i:
+                ecs.update(e for e in re.split(r"[\s,;]+", r[i]) if FULL_EC.match(e))
+        out[os.path.basename(f)[:-4]] = ecs
+    return out
+
+
+def mag_functions(run, samples, joint):
+    """Kept MAGs against the functional profiles: by species and by EC number.
+    Returns the rows of mag_functions, mag_pathways, mag_ecs and ec_coverage."""
+    hum = humann_by_species(run, samples)
+    ec = humann_ecs(run, samples)
+    annotated = mag_ecs(run)
+    summary, pathways, ecs = [], [], []
+    kept = [m for m in joint if m["passed"]]
+    for m in kept:
+        s, key = m["sample"], species_key(m["species"])
+        h = hum.get(s, {})
+        pw = h.get("pathways", {}).get(key) if key else None
+        gf = h.get("genefamilies", {}).get(key) if key else None
+        sp_ecs = (ec["species"].get(s, {}).get(key) if ec and key else None)
+        linked = pw is not None or gf is not None or sp_ecs is not None
+        own = annotated.get(m["name"])
+        community = ec["community"].get(s, {}) if ec else {}
+        row = {"mag": m["name"], "sample": s, "kraken2_species": m["species"],
+               "humann_species": (pw or {}).get("label") or (species_label(m["species"]) if linked else None)}
+        if pw is not None:
+            tot = h.get("pathway_stratified_total") or 0.0
+            row["humann_pathways"] = len(pw["values"])
+            row["humann_pathway_share_pct"] = 100 * sum(pw["values"].values()) / tot if tot else None
+            com = h.get("pathway_community", {})
+            for ident, v in sorted(pw["values"].items(), key=lambda kv: -kv[1]):
+                pathways.append([m["name"], s, ident, h["pathway_names"].get(ident, ident), v,
+                                 100 * v / com[ident] if com.get(ident) else None])
+        elif linked:
+            row["humann_pathways"] = 0
+        if gf is not None:
+            tot = h.get("genefamily_total") or 0.0
+            row["humann_gene_families"] = gf[0]
+            row["humann_gene_family_share_pct"] = 100 * gf[1] / tot if tot else None
+        elif linked:
+            row["humann_gene_families"] = 0
+        if own is not None:
+            row["mag_ecs"] = len(own)
+            if ec:
+                row["mag_ecs_in_community"] = len(own & set(community))
+        if sp_ecs is not None or (linked and ec):
+            sp = set(sp_ecs or {})
+            row["humann_species_ecs"] = len(sp)
+            if own is not None:
+                row.update({"ecs_in_both": len(own & sp), "ecs_humann_species_only": len(sp - own),
+                            "ecs_mag_only": len(own - sp)})
+        if own is not None or sp_ecs:
+            for e in sorted((own or set()) | set(sp_ecs or {})):
+                ecs.append([m["name"], s, e, (ec["names"].get(e) if ec else None) or "",
+                            None if own is None else (e in own),
+                            (sp_ecs or {}).get(e, 0.0) if (linked and ec) else None,
+                            community.get(e, 0.0) if ec else None])
+        summary.append(row)
+    coverage = []
+    if ec and annotated:
+        for s in [x for x in samples if x in ec["community"]] + sorted(set(ec["community"]) - set(samples)):
+            com = ec["community"][s]
+            encoded = set().union(*[annotated.get(m["name"], set()) for m in kept if m["sample"] == s])
+            tot = sum(com.values())
+            coverage.append([s, len(com), len(set(com) & encoded),
+                             100 * sum(v for e, v in com.items() if e in encoded) / tot if tot else None])
+    return summary, pathways, ecs, coverage
+
+
+FUNCTION_COLUMNS = ["mag", "sample", "kraken2_species", "humann_species", "humann_pathways",
+                    "humann_pathway_share_pct", "humann_gene_families", "humann_gene_family_share_pct",
+                    "mag_ecs", "humann_species_ecs", "ecs_in_both", "ecs_humann_species_only", "ecs_mag_only",
+                    "mag_ecs_in_community"]
+
+
 def cell(v):
     if v is None:
         return ""
@@ -206,9 +416,19 @@ def main():
               [[m[k] for k, _ in MAG_COLUMNS] for m in joint])
     with open(os.path.join(out, "notes.txt"), "w") as fh:
         fh.write("".join(n + "\n" for n in notes))
+    functions, pathways, ecs, coverage = mag_functions(run, samples, joint)
+    write_tsv(os.path.join(out, "mag_functions.tsv"), FUNCTION_COLUMNS,
+              [[r.get(c) for c in FUNCTION_COLUMNS] for r in functions])
+    write_tsv(os.path.join(out, "mag_pathways.tsv"),
+              ["mag", "sample", "pathway", "pathway_name", "abundance", "share_of_community_pct"], pathways)
+    write_tsv(os.path.join(out, "mag_ecs.tsv"),
+              ["mag", "sample", "ec", "ec_name", "in_mag", "humann_species_cpm", "humann_community_cpm"], ecs)
+    write_tsv(os.path.join(out, "ec_coverage.tsv"),
+              ["sample", "community_ecs", "community_ecs_in_kept_mags", "ec_abundance_in_kept_mags_pct"], coverage)
     print(f"Joint analyses written to {out}: {len(fate)} samples, {len(joint)} MAGs "
           f"({sum(m['passed'] for m in joint)} kept, {sum(m['mpa_species'] is not None for m in joint if m['passed'])} "
-          f"of them matching a MetaPhlAn species)")
+          f"of them matching a MetaPhlAn species); {sum(r.get('humann_species') is not None for r in functions)} "
+          f"kept MAGs linked to a HUMAnN species")
 
 
 if __name__ == "__main__":

@@ -105,6 +105,57 @@ class Integration(unittest.TestCase):
         self.assertTrue(joint["taxonomy"])
         self.assertEqual(joint["name_notes"], [])
 
+    def functions_run(self):
+        """One kept MAG of Streptococcus thermophilus in S1, with HUMAnN tables."""
+        write(self.run, "15_tormes_MAGs/annotation/S1.unmapped.1_annotation/S1.unmapped.1.tsv",
+              "locus_tag\tftype\tlength_bp\tgene\tEC_number\tCOG\tproduct\n"
+              "a\tCDS\t9\t\t1.1.1.1\t\tx\nb\tCDS\t9\t\t2.2.2.2\t\tx\nc\tCDS\t9\t\t3.6.3.-\t\tx\n"
+              "d\tCDS\t9\t\t\t\tx\ne\tCDS\t9\t\t1.1.1.1\t\tx\n")
+        write(self.run, "04b_humann_output/S1.unmapped.fq_pathabundance.tsv",
+              "# Pathway\tS1\nUNMAPPED\t10\nUNINTEGRATED\t50\nUNINTEGRATED|g__Streptococcus.s__Streptococcus_thermophilus\t30\n"
+              "PWY-1: one\t40\nPWY-1: one|g__Streptococcus.s__Streptococcus_thermophilus\t30\nPWY-1: one|unclassified\t10\n"
+              "PWY-2: two\t20\nPWY-2: two|g__Other.s__Other_sp\t20\n")
+        write(self.run, "04b_humann_output/S1.unmapped.fq_genefamilies.tsv",
+              "# Gene Family\tS1\nUNMAPPED\t50\nU1\t30\nU1|g__Streptococcus.s__Streptococcus_thermophilus\t30\n"
+              "U2\t20\nU2|g__Other.s__Other_sp\t20\n")
+        write(self.run, "04b_humann_output/merged_tables/merged_table_ec.tsv",
+              "# Gene Family\tS1.unmapped.fq_Abundance-CPM\nUNMAPPED\t100\nUNGROUPED\t500\n"
+              "1.1.1.1: A\t300\n1.1.1.1: A|g__Streptococcus.s__Streptococcus_thermophilus\t300\n"
+              "3.3.3.3: C\t50\n3.3.3.3: C|g__Streptococcus.s__Streptococcus_thermophilus\t50\n"
+              "4.4.4.4: D\t50\n4.4.4.4: D|g__Other.s__Other_sp\t50\n")
+        joint = [dict(mag("S1.unmapped.1"), species="Streptococcus thermophilus"),
+                 dict(mag("S1.unmapped.2"), species="Lactobacillus kefiri"),
+                 dict(mag("S1.unmapped.3", passed=False), species=None)]
+        return ig.mag_functions(self.run, ["S1"], joint)
+
+    def test_mag_linked_to_humann_species(self):
+        summary, pathways, _, _ = self.functions_run()
+        st = summary[0]
+        self.assertEqual(len(summary), 2)  # kept MAGs only
+        self.assertEqual(st["humann_species"], "Streptococcus thermophilus")
+        self.assertEqual((st["humann_pathways"], st["humann_pathway_share_pct"]), (1, 50.0))  # 30 of 60 stratified
+        self.assertEqual((st["humann_gene_families"], st["humann_gene_family_share_pct"]), (1, 30.0))  # 30 of 100
+        self.assertEqual(pathways, [["S1.unmapped.1", "S1", "PWY-1", "one", 30.0, 75.0]])
+
+    def test_mag_without_humann_species(self):
+        summary, _, ecs, _ = self.functions_run()
+        k = summary[1]
+        self.assertIsNone(k["humann_species"])
+        self.assertNotIn("humann_pathways", k)
+        self.assertNotIn("S1.unmapped.2", [r[0] for r in ecs])  # not annotated, not linked
+
+    def test_ec_comparison(self):
+        summary, _, ecs, coverage = self.functions_run()
+        st = summary[0]
+        # MAG: 1.1.1.1, 2.2.2.2 (partial 3.6.3.- ignored); HUMAnN species: 1.1.1.1, 3.3.3.3
+        self.assertEqual((st["mag_ecs"], st["humann_species_ecs"], st["ecs_in_both"],
+                          st["ecs_humann_species_only"], st["ecs_mag_only"], st["mag_ecs_in_community"]), (2, 2, 1, 1, 1, 1))
+        self.assertEqual(ecs, [["S1.unmapped.1", "S1", "1.1.1.1", "A", True, 300.0, 300.0],
+                               ["S1.unmapped.1", "S1", "2.2.2.2", "", True, 0.0, 0.0],
+                               ["S1.unmapped.1", "S1", "3.3.3.3", "C", False, 50.0, 50.0]])
+        # community ECs 1.1.1.1 (300), 3.3.3.3 (50), 4.4.4.4 (50): the MAG encodes 300 of 400
+        self.assertEqual(coverage, [["S1", 3, 1, 75.0]])
+
     def test_report_without_step_16(self):
         self.assertIsNone(mr.collect_joint(self.run))
 

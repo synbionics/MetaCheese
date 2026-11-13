@@ -998,7 +998,7 @@ const tilesEl = $("#tiles");
 // ============================================================= R.1 joint: both branches
 (function () {
   const sec = section("r1", "R.1", "Both branches together", "MetaCheese joint analyses · 16_integration/",
-    [["What this step does", "Joins the community-level profiles (C.1–C.4), built from all reads, with the genomes reconstructed by the assembly branch (A.1–A.7). For every sample it measures how much of the microbial community the MAGs capture, and checks each MAG against the abundance MetaPhlAn gives to the same organism. The results are also saved as tables in 16_integration/ (read_fate.tsv, mags.tsv); the per-sample summary below only puts the numbers of both branches side by side."],
+    [["What this step does", "Joins the community-level profiles (C.1–C.4), built from all reads, with the genomes reconstructed by the assembly branch (A.1–A.7). For every sample it measures how much of the microbial community the MAGs capture, checks each MAG against the abundance MetaPhlAn gives to the same organism, and compares the functions annotated in each MAG with the functional profile HUMAnN gives to its species and to the whole community. The results are also saved as tables in 16_integration/; the per-sample summary below only puts the numbers of both branches side by side."],
      ["How to read it", "The bars split each sample's microbial reads by where they end up: in kept MAGs, in other (lower-quality) bins, in contigs that were not binned, or not assembled at all. A large 'kept MAGs' share means the genomes describe most of the community. In the MAG table, a MAG of a species that MetaPhlAn also finds abundant confirms both branches; a MAG with no MetaPhlAn match may be an organism missing from the marker database, or the same organism under a different name in the two tools' databases."]], "joint");
   const igRun = !!D.integration;
   const ig = D.integration || { fate: {}, mags: [] };
@@ -1022,6 +1022,11 @@ const tilesEl = $("#tiles");
       const gn = kept.filter(m => m.mpa_species == null && m.mpa_genus != null).length;
       return `${sp} of ${kept.length} kept MAGs have a species that MetaPhlAn detects in the same sample` + (gn ? `; ${gn} more match at genus level only, so their species names need checking.` : ".");
     })() : null,
+    (ig.functions || []).length ? (() => {
+      const f = ig.functions, n = f.filter(r => r.humann_species).length;
+      return `${n} of ${f.length} kept MAGs have their species in HUMAnN's functional profile of the same sample` + (n < f.length ? " (HUMAnN only profiles species that MetaPhlAn detects)." : ".");
+    })() : null,
+    Object.keys(ig.ec_coverage || {}).length ? `Share of the community's EC abundance encoded by kept MAGs: ${ordered.filter(x => (ig.ec_coverage[x] || {}).share != null).map(x => `${x} ${pct(ig.ec_coverage[x].share, 1)}`).join(", ")}.` : null,
   ]);
   // per-sample summary across both branches
   const c = card(sec);
@@ -1059,6 +1064,33 @@ const tilesEl = $("#tiles");
         m.species || m.genus || null, m.mpa_name && m.mpa_name.toLowerCase() !== (m.species || "").toLowerCase() ? m.mpa_name : (m.mpa_name ? "same" : null),
         m.mpa_species != null ? fmt(m.mpa_species, 2) : null, m.mpa_genus != null ? fmt(m.mpa_genus, 2) : null]), [3, 4, 5, 8, 9]);
     (ig.name_notes || []).forEach(n => h("p", { class: "tool" }, c3, n));
+  }
+  // functions of the kept MAGs against the functional profiles (C.3 / C.4 vs A.7)
+  const fn = ig.functions || [], ecc = ig.ec_coverage || {};
+  const ex = ordered.filter(x => ecc[x] && ecc[x].share != null);
+  if (fn.length || ex.length) {
+    const c4 = card(sec);
+    h("h3", {}, c4, "MAG functions against the functional profiles");
+    h("p", { class: "tool" }, c4, "By species: the pathways and gene families HUMAnN (C.3) assigns to the MAG's species in the same sample, and their share of the sample (pathways: of the abundance HUMAnN splits by species; gene families: of all reads). By EC number: the EC numbers Prokka finds in the MAG (A.7) against those HUMAnN finds for the same species (C.4 EC table). EC numbers only in HUMAnN's species may be missing from an incomplete MAG or absent from this strain; EC numbers only in the MAG may be genes HUMAnN's reference genomes lack. Per MAG and per EC: 16_integration/mag_pathways.tsv and mag_ecs.tsv.");
+    if (ex.length) {
+      const ch = h("div", { class: "chart" }, c4);
+      live(() => hbars(ch, ex.map(x => ({ label: x, sub: groupLabel(groupOf[x]), dot: groupColor(groupOf[x]),
+        parts: [{ name: "EC abundance encoded by kept MAGs", value: ecc[x].share, color: css("--good"), ink: "#fff" }] })),
+        { aria: "Share of the community's EC abundance encoded by kept MAGs", max: 100, ticks: [0, 25, 50, 75, 100], tickFmt: t => t + "%",
+          valueFmt: v => pct(v, 1), inside: v => v >= 8 ? pct(v, 0) : null }));
+      h("p", { class: "tool" }, c4, "Share of each community's EC abundance (C.4, CPM, EC-assigned reads only) whose EC number is encoded by at least one kept MAG of the sample.");
+    }
+    if (fn.length) {
+      table(h("div", { class: "tablewrap" }, c4),
+        ["MAG", "Sample", "HUMAnN species", "Pathways", "Pathway share %", "Gene families", "Gene family share %", "ECs in MAG", "ECs of species (HUMAnN)", "In both", "Only HUMAnN", "Only MAG", "MAG ECs in community"],
+        fn.map(r => [r.mag, r.sample, r.humann_species || (r.kraken2_species ? `none (${r.kraken2_species})` : null),
+          r.humann_pathways != null ? fmt(r.humann_pathways) : null, r.humann_pathway_share_pct != null ? fmt(r.humann_pathway_share_pct, 1) : null,
+          r.humann_gene_families != null ? fmt(r.humann_gene_families) : null, r.humann_gene_family_share_pct != null ? fmt(r.humann_gene_family_share_pct, 1) : null,
+          r.mag_ecs != null ? fmt(r.mag_ecs) : null, r.humann_species_ecs != null ? fmt(r.humann_species_ecs) : null,
+          r.ecs_in_both != null ? fmt(r.ecs_in_both) : null, r.ecs_humann_species_only != null ? fmt(r.ecs_humann_species_only) : null,
+          r.ecs_mag_only != null ? fmt(r.ecs_mag_only) : null, r.mag_ecs_in_community != null ? fmt(r.mag_ecs_in_community) : null]),
+        [3, 4, 5, 6, 7, 8, 9, 10, 11, 12]);
+    }
   }
 })();
 

@@ -634,8 +634,24 @@ def collect_joint(run):
                      "mpa_species": to_float(rec.get("metaphlan_species_pct")),
                      "mpa_genus": to_float(rec.get("metaphlan_genus_pct"))})
     notes = [l for l in (read_text(os.path.join(d, "notes.txt"), "") or "").splitlines() if l.strip()]
+    functions, coverage = [], {}
+    f = os.path.join(d, "mag_functions.tsv")
+    if os.path.isfile(f):
+        rows = read_tsv(f)
+        for r in rows[1:]:
+            rec = dict(zip(rows[0], r))
+            text = ("mag", "sample", "kraken2_species", "humann_species")
+            functions.append({k: (v or None) if k in text else to_float(v) for k, v in rec.items()})
+    f = os.path.join(d, "ec_coverage.tsv")
+    if os.path.isfile(f):
+        rows = read_tsv(f)
+        for r in rows[1:]:
+            rec = dict(zip(rows[0], r))
+            coverage[rec["sample"]] = {"ecs": to_float(rec.get("community_ecs")),
+                                       "in_mags": to_float(rec.get("community_ecs_in_kept_mags")),
+                                       "share": to_float(rec.get("ec_abundance_in_kept_mags_pct"))}
     return {"fate": fate, "mags": mags, "taxonomy": any(m["species"] or m["genus"] for m in mags),
-            "name_notes": notes}
+            "name_notes": notes, "functions": functions, "ec_coverage": coverage}
 
 
 # --------------------------------------------------------------------------- main

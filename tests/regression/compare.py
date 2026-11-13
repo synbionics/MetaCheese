@@ -38,6 +38,7 @@ PER_SAMPLE = {
     "mags_total": "absolute", "mags_kept": "absolute",
     "mag_mean_completeness": "absolute", "mag_mean_contamination": "absolute",
     "kept_read_share": "absolute", "kept_mags_metaphlan_species": "absolute",
+    "kept_mags_humann_species": "absolute", "kept_mags_ec_share": "absolute",
 }
 # Steps renamed since a stored baseline was made (old name -> new name): a step
 # counts as completed under either name.

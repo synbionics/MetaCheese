@@ -51,6 +51,10 @@ RUN_FILES = [
     "15_tormes_MAGs/taxonomic_identification/taxonomic-identification-kraken2.txt",
     "16_integration/read_fate.tsv",
     "16_integration/mags.tsv",
+    "16_integration/mag_functions.tsv",
+    "16_integration/mag_pathways.tsv",
+    "16_integration/mag_ecs.tsv",
+    "16_integration/ec_coverage.tsv",
     "report/report.html",
 ]
 # The columns of these tables must not change.
@@ -62,6 +66,10 @@ COLUMN_TABLES = {
     "04b_humann_output/merged_tables/merged_table_ec.tsv": None,
     "16_integration/read_fate.tsv": None,
     "16_integration/mags.tsv": None,
+    "16_integration/mag_functions.tsv": None,
+    "16_integration/mag_pathways.tsv": None,
+    "16_integration/mag_ecs.tsv": None,
+    "16_integration/ec_coverage.tsv": None,
 }
 # Kept as they are, for reading and for summarising again later.
 COPIED_TABLES = [
@@ -75,6 +83,8 @@ COPIED_TABLES = [
     "15_tormes_MAGs/taxonomic_identification/taxonomic-identification-kraken2.txt",
     "16_integration/read_fate.tsv",
     "16_integration/mags.tsv",
+    "16_integration/mag_functions.tsv",
+    "16_integration/ec_coverage.tsv",
     "step_times.tsv",
     "versions.tsv",
 ]
@@ -145,6 +155,7 @@ def summarize(run, pipeline_exit=None):
     integration = mr.collect_joint(run) or {}  # R.1 tables
     fate = integration.get("fate") or {}
     joint_mags = {m["name"]: m for m in integration.get("mags") or []}
+    functions, ec_cov = integration.get("functions") or [], integration.get("ec_coverage") or {}
     shannon, richness = diversity_column(run, "shannon"), diversity_column(run, "richness")
 
     species = {s: {} for s in samples}
@@ -185,6 +196,9 @@ def summarize(run, pipeline_exit=None):
             "kept_read_share": round(fate[s]["kept"], 3) if s in fate and fate[s]["kept"] is not None else None,
             "kept_mags_metaphlan_species": sum(joint_mags.get(m["name"], {}).get("mpa_species") is not None for m in kept)
                                            if integration else None,
+            "kept_mags_humann_species": sum(1 for r in functions if r["sample"] == s and r["humann_species"])
+                                        if functions else None,
+            "kept_mags_ec_share": round(ec_cov[s]["share"], 3) if ec_cov.get(s, {}).get("share") is not None else None,
             "mag_species": sorted((taxonomy.get(m["name"], {}).get("species") or "unclassified") for m in kept),
         }
 

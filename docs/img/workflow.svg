@@ -349,7 +349,7 @@
 <text x="174" y="1271" font-family="Helvetica, Arial, sans-serif" font-size="10" font-weight="bold" text-anchor="middle" fill="#fff" >R.1</text>
 <text x="290.0" y="1292.0" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="bold" text-anchor="middle" fill="#0b3954" >Joint analyses</text>
 <text x="290.0" y="1308.0" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="normal" text-anchor="middle" fill="#0b3954" >(both branches)</text>
-<text x="290" y="1346" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="normal" text-anchor="middle" fill="#1d2b36" >reads C.1.1, A.3.2, A.4, A.5, A.6, A.7</text>
+<text x="290" y="1346" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="normal" text-anchor="middle" fill="#1d2b36" >reads C.1.1, C.3, C.4, A.3.2, A.4-A.7</text>
 <path d="M508,1261 h85 v46 q-21.25,-8 -42.5,0 t-42.5,0 z" fill="#ffd43b" stroke="#b08900" stroke-width="1"/>
 <path d="M504,1265 h85 v46 q-21.25,-8 -42.5,0 t-42.5,0 z" fill="#ffd43b" stroke="#b08900" stroke-width="1"/>
 <path d="M500,1269 h85 v46 q-21.25,-8 -42.5,0 t-42.5,0 z" fill="#ffd43b" stroke="#b08900" stroke-width="1"/>
