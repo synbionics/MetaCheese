@@ -986,13 +986,26 @@ const tilesEl = $("#tiles");
 // ============================================================= A.7 TORMES
 (function () {
   const sec = section("a7", "A.7", "MAG annotation", "TORMES 1.3.0",
-    [["What this step does", "TORMES annotates each kept MAG: genes (Prokka), taxonomy, MLST, antimicrobial resistance and virulence genes, plasmids. It writes an HTML report per run."],
-     ["How to read it", "Open each MAG's report from the links below. " + linkHelp]], "asm");
+    [["What this step does", "TORMES annotates each kept MAG: genes (Prokka), taxonomy, MLST, antimicrobial resistance and virulence genes, plasmids, and a pangenome of all kept MAGs. It writes one summary report for the run and the genome statistics of each MAG (QUAST)."],
+     ["How to read it", "Start from the TORMES summary report: one page with the results of every MAG. The genome statistics of each MAG are below it. " + linkHelp]], "asm");
   const t = D.tormes;
-  if (!t || !t.reports.length) return missing(sec, (D.mags || []).length && !(D.mags || []).some(m => m.passed) ? "No MAG passed the quality filter, so TORMES was not run." : null);
+  if (!t || (!t.summary && !t.reports.length)) return missing(sec, (D.mags || []).length && !(D.mags || []).some(m => m.passed) ? "No MAG passed the quality filter, so TORMES was not run." : null);
   const c = card(sec);
-  const ul = h("ul", {}, c);
-  t.reports.forEach(r => { const li = h("li", {}, ul); h("a", { href: D.link_base + r, target: "_blank", rel: "noopener" }, li, r); });
+  h("h3", {}, c, "TORMES summary report (all MAGs)");
+  if (t.summary) {
+    const p = h("p", {}, c);
+    h("a", { href: D.link_base + t.summary, target: "_blank", rel: "noopener" }, p, t.summary);
+    h("span", {}, p, ": taxonomy, MLST, antimicrobial resistance and virulence genes, annotation and pangenome of every kept MAG.");
+  } else {
+    h("p", { class: "tool" }, c, t.summary_failed
+      ? "TORMES could not build its summary report in this run (see 15_tormes_MAGs/tormes.log). The per-MAG results in 15_tormes_MAGs/ are complete."
+      : "No TORMES summary report (15_tormes_MAGs/tormes_report.html) in this run folder.");
+  }
+  if (t.reports.length) {
+    h("h3", {}, c, "Genome statistics of each MAG (QUAST, run by TORMES)");
+    const ul = h("ul", {}, c);
+    t.reports.forEach(r => { const li = h("li", {}, ul); h("a", { href: D.link_base + r, target: "_blank", rel: "noopener" }, li, r); });
+  }
 })();
 
 // ============================================================= R.1 joint: both branches

@@ -161,8 +161,9 @@ Execution order (`STEPS_ORDERED` in `scripts/run_pipeline.sh`):
 | Template | `template_15.tormes_MAG.sh` |
 | Tool | TORMES 1.3.0 (`tormes-1.3.0`) |
 | Input | `14_MAGs_high_quality/my-metadata2.txt` |
-| Output | `15_tormes_MAGs/` (TORMES HTML report, annotation, MLST, resistance and virulence genes, ...) |
+| Output | `15_tormes_MAGs/` (`tormes_report.html` summary report of all MAGs, linked first in the final report; annotation, MLST, resistance and virulence genes, pangenome, per-MAG genome statistics `genome_stats/<mag>_genome_stats/report.html`, ...) |
 | Config | `step15.var1` working dir, `var2` metadata, `par1` output folder, `par2` threads |
+| Notes | TORMES 1.3.0 cannot build `tormes_report.html` when the MAGs have MLST schemes with different numbers of loci (e.g. two *Streptococcus thermophilus* schemes, or species with and without a scheme): R reads `mlst.tab` with the column count of its first lines, longer rows wrap, and two wrapped rows starting with the same locus stop the report (`duplicate 'row.names'`; `tormes.log` says "html report file could not be created"). The step then pads the report's copy `report_files/mlst.tab` to one column count (TORMES' own `mlst/mlst.tab` is not changed) and runs TORMES' `report_files/render_report.sh` again; its output is in `report_files/render_report.log`. |
 
 ## R.1: Joint analyses of both branches (`16`)
 

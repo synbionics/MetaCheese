@@ -517,8 +517,15 @@ def collect_tormes(run):
     d = os.path.join(run, "15_tormes_MAGs")
     if not os.path.isdir(d):
         return None
-    reports = sorted(glob.glob(os.path.join(d, "**", "*.html"), recursive=True))
-    return {"reports": [os.path.relpath(p, run) for p in reports]}
+    summary = os.path.join(d, "tormes_report.html")
+    # per-MAG pages (QUAST genome statistics); report_files/ holds TORMES' own
+    # working copy of the summary report
+    reports = sorted(p for p in glob.glob(os.path.join(d, "**", "*.html"), recursive=True)
+                     if p != summary and os.sep + "report_files" + os.sep not in p)
+    log = read_text(os.path.join(d, "tormes.log"), "") or ""
+    return {"summary": os.path.relpath(summary, run) if os.path.isfile(summary) else None,
+            "summary_failed": "html report file could not be created" in log and not os.path.isfile(summary),
+            "reports": [os.path.relpath(p, run) for p in reports]}
 
 
 def collect_quast(run, samples):
@@ -731,7 +738,8 @@ def main():
         package = os.path.join(os.path.dirname(os.path.abspath(out)), f"{name}_report.zip")
         write_package(package, run, f"{name}_report", render(""),
                       ([data["multiqc"]] if data["multiqc"] else [])
-                      + (data["quast"] or {}).get("links", []) + (data["tormes"] or {}).get("reports", []))
+                      + (data["quast"] or {}).get("links", [])
+                      + [p for p in [(data["tormes"] or {}).get("summary")] if p] + (data["tormes"] or {}).get("reports", []))
         print(f"Package to share written to {package} ({os.path.getsize(package) / 1024 ** 2:.0f} MB)")
 
 

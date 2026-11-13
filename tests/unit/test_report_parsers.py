@@ -49,6 +49,25 @@ class Parsers(unittest.TestCase):
             got = mr.collect_trimming(run)["S1"]
         self.assertEqual((got["pairs"], got["retained_reads"], got["adapters"], got["avg_length"]), (100, 190, 7, 148.5))
 
+    def test_collect_tormes_puts_the_summary_report_apart(self):
+        with tempfile.TemporaryDirectory() as run:
+            for rel in ("15_tormes_MAGs/tormes_report.html", "15_tormes_MAGs/report_files/tormes_report.html",
+                        "15_tormes_MAGs/genome_stats/M1_genome_stats/report.html"):
+                os.makedirs(os.path.dirname(os.path.join(run, rel)), exist_ok=True)
+                open(os.path.join(run, rel), "w").close()
+            got = mr.collect_tormes(run)
+        self.assertEqual(got["summary"], "15_tormes_MAGs/tormes_report.html")
+        self.assertEqual(got["reports"], ["15_tormes_MAGs/genome_stats/M1_genome_stats/report.html"])
+        self.assertFalse(got["summary_failed"])
+
+    def test_collect_tormes_notes_a_failed_summary_report(self):
+        with tempfile.TemporaryDirectory() as run:
+            os.mkdir(os.path.join(run, "15_tormes_MAGs"))
+            with open(os.path.join(run, "15_tormes_MAGs", "tormes.log"), "w") as fh:
+                fh.write("Tormes report started\nWARNING: html report file could not be created\n")
+            got = mr.collect_tormes(run)
+        self.assertEqual((got["summary"], got["summary_failed"], got["reports"]), (None, True, []))
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -139,7 +139,10 @@ All numbers come from `output/example_small/report/report.html`.
 - In D_GP_02, kept MAGs hold only 21% of the reads, and the top species
   *L. delbrueckii* has no kept MAG: two bins holding 35% of the reads fail on
   completeness (48% and 37%) at this depth.
-- TORMES' own summary report (`15_tormes_MAGs/*.html`) is not written: its R
-  script fails on the MLST table when MAGs of species with and without an
-  MLST scheme are mixed. The per-MAG results (annotation, MLST, resistance
-  and virulence genes, `genome_stats/*/report.html`) are complete.
+- TORMES 1.3.0 could not write its own summary report
+  (`15_tormes_MAGs/tormes_report.html`): its R script fails on the MLST table
+  when the MAGs have MLST schemes with different numbers of loci (here two
+  *S. thermophilus* schemes). Step 15 now repairs the report's copy of the
+  table and builds the report again (see `docs/steps.md`, A.7); for this run
+  it was built afterwards in the same way. The final report links it first in
+  section A.7.
