@@ -36,4 +36,7 @@ db db_MetaPhlAn /main/db/metaphlan
 db db_ChocoPhlAn /main/db/humann/chocophlan
 db db_UniRef /main/db/humann/uniref
 db db_CheckM2 /main/db/checkm2
-db db_Kraken2 /opt/conda/envs/tormes-1.3.0/db/minikraken-DB
+# the database TORMES really uses (its config), named by its folder, which carries the build date
+kraken_db="$(awk -F'\t' '$1 == "KRAKEN-DATABASE" {print $2}' /opt/conda/envs/tormes-1.3.0/files/config_file.txt)"
+printf 'db_Kraken2\t%s (%s bytes)\n' "$(basename "$kraken_db")" \
+    "$(find "$kraken_db/" -type f -printf '%s\n' | awk '{n+=$1} END {printf "%.0f", n}')"

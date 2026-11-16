@@ -195,6 +195,33 @@ def species_key(name):
     return re.sub(r"\s+", " ", name.replace("_", " ")).strip().lower()
 
 
+def renamed_family(genus):
+    """The RENAMED_GENERA key whose old or current genus names include this
+    genus (lower case), or None."""
+    for old, rule in RENAMED_GENERA.items():
+        if genus == old or rule["current"].match(genus):
+            return old
+    return None
+
+
+def humann_key(key, available):
+    """The HUMAnN species (key) a MAG species links to: the same name, or else
+    the only species with the same epithet across a genus split, in either
+    direction (HUMAnN's ChocoPhlAn v201901 uses the names from before the 2020
+    split of Lactobacillus; a newer Kraken2 database uses the current ones)."""
+    if not key:
+        return None
+    if key in available:
+        return key
+    w = key.split(" ")
+    family = renamed_family(w[0]) if len(w) == 2 else None
+    if not family:
+        return None
+    hits = [k for k in available
+            if len(k.split(" ")) == 2 and k.split(" ")[1] == w[1] and renamed_family(k.split(" ")[0]) == family]
+    return hits[0] if len(hits) == 1 else None
+
+
 def species_label(strat):
     """HUMAnN stratum to a display name; None for 'unclassified'."""
     if not strat or strat == "unclassified":
@@ -309,8 +336,11 @@ def mag_functions(run, samples, joint):
     summary, pathways, ecs = [], [], []
     kept = [m for m in joint if m["passed"]]
     for m in kept:
-        s, key = m["sample"], species_key(m["species"])
+        s = m["sample"]
         h = hum.get(s, {})
+        available = set(h.get("pathways", {})) | set(h.get("genefamilies", {})) | \
+            set((ec["species"].get(s, {}) if ec else {}))
+        key = humann_key(species_key(m["species"]), available)
         pw = h.get("pathways", {}).get(key) if key else None
         gf = h.get("genefamilies", {}).get(key) if key else None
         sp_ecs = (ec["species"].get(s, {}).get(key) if ec and key else None)
@@ -318,7 +348,7 @@ def mag_functions(run, samples, joint):
         own = annotated.get(m["name"])
         community = ec["community"].get(s, {}) if ec else {}
         row = {"mag": m["name"], "sample": s, "kraken2_species": m["species"],
-               "humann_species": (pw or {}).get("label") or (species_label(m["species"]) if linked else None)}
+               "humann_species": (pw or {}).get("label") or (key[0].upper() + key[1:] if linked else None)}
         if pw is not None:
             tot = h.get("pathway_stratified_total") or 0.0
             row["humann_pathways"] = len(pw["values"])

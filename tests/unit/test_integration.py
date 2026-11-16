@@ -156,6 +156,16 @@ class Integration(unittest.TestCase):
         # community ECs 1.1.1.1 (300), 3.3.3.3 (50), 4.4.4.4 (50): the MAG encodes 300 of 400
         self.assertEqual(coverage, [["S1", 3, 1, 75.0]])
 
+    def test_humann_link_across_the_lactobacillus_split(self):
+        old = {"lactobacillus rhamnosus", "streptococcus thermophilus"}
+        self.assertEqual(ig.humann_key("lacticaseibacillus rhamnosus", old), "lactobacillus rhamnosus")
+        self.assertEqual(ig.humann_key("streptococcus thermophilus", old), "streptococcus thermophilus")
+        self.assertIsNone(ig.humann_key("streptococcus rhamnosus", old))  # outside the split: names must agree
+        new = {"lacticaseibacillus rhamnosus"}
+        self.assertEqual(ig.humann_key("lactobacillus rhamnosus", new), "lacticaseibacillus rhamnosus")
+        # two candidates with the same epithet: no guess
+        self.assertIsNone(ig.humann_key("lactobacillus casei", {"lacticaseibacillus casei", "lactobacillus casei group"} | {"loigolactobacillus casei"}))
+
     def test_report_without_step_16(self):
         self.assertIsNone(mr.collect_joint(self.run))
 

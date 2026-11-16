@@ -77,9 +77,9 @@ def feed(points, end=False):
 
 
 def src(points):
-    """Black line from an artifact R.1 reads to a collector line, with a dot where it joins."""
+    """Black dashed line from an artifact R.1 reads to a collector line, with a dot where it joins."""
     d = "M" + " L".join(f"{px},{py}" for px, py in points)
-    add(f'<path d="{d}" fill="none" stroke="#1d2b36" stroke-width="1.4"/>')
+    add(f'<path d="{d}" fill="none" stroke="#1d2b36" stroke-width="1.4" stroke-dasharray="5 4"/>')
     px, py = points[-1]
     add(f'<circle cx="{px}" cy="{py}" r="2.6" fill="#1d2b36"/>')
 
@@ -223,20 +223,20 @@ arrow([(710, 1156), (777, 1156)])
 # ---------------------------------------------------------------- joint steps: both branches
 # R.1 combines results of both branches (scripts/integration/integrate.py).
 step(170, 1265, 240, 62, "R.1", ["Joint analyses", "(both branches)"], "16")
-# its inputs (black): community artifacts join a line on the left edge of the
+# its inputs (black, dashed): community artifacts join a line on the left edge of the
 # community panel; assembly artifacts join a line in the gap left of the
 # assembly steps (x=480) and one on the right edge of the assembly panel
 src([(110, 674), (40, 674)])                                # C.2.1 merged abundance
 src([(195, 868), (40, 868)])                                # C.3 functional profiles
 src([(205, 1058), (40, 1058)])                              # C.4 merged functional tables
-arrow([(40, 674), (40, 1296), (167, 1296)])
+arrow([(40, 674), (40, 1296), (167, 1296)], dashed=True)
 src([(520, 797), (480, 797)])                               # A.4.1 bins
 src([(700, 827), (700, 925), (480, 925)])                   # A.4.2 contig depth
 src([(560, 1052), (480, 1052)])                             # A.6 kept MAGs
 src([(900, 1005), (900, 1100), (1066, 1100)])               # A.5 CheckM2 table
 src([(822, 1177), (822, 1253)])                             # A.7 Kraken2 taxonomy, Prokka
 src([(1045, 781), (1045, 800), (1066, 800), (1066, 1253), (480, 1253)])  # A.3.2 mapping log
-arrow([(480, 797), (480, 1278), (413, 1278)])
+arrow([(480, 797), (480, 1278), (413, 1278)], dashed=True)
 artifact(500, 1269, 85, 54, "R.1", ["tsv"], "joint\ntables")
 arrow([(410, 1296), (497, 1296)])
 step(420, 1380, 260, 66, "R.2", ["Integrated report", "(both branches)"], "17")

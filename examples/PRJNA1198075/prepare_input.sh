@@ -30,6 +30,8 @@ while IFS=$'\t' read -r name run biosample title group fq1 fq2 pairs; do
         [[ -e "$dst" ]] && continue
         ln "$src" "$dst" 2>/dev/null || cp "$src" "$dst"
     done
+    # ENA's group is NONPDO; the report shows it as written, so use the small example's label
+    [[ "$group" == "NONPDO" ]] && group="non-PDO"
     printf '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' "$name" "$run" "$biosample" "$title" "$group" \
         "${name}_1.fq.gz" "${name}_2.fq.gz" "$pairs" >> "$OUT/samplesheet.tsv"
 done < <(tail -n +2 "$SHEET")

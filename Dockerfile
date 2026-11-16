@@ -200,6 +200,30 @@ RUN conda create -y -n quastenv -c conda-forge -c bioconda python=3.10 quast=5.3
     conda clean -afy
 
 # ======================================
+# Kraken2 database of TORMES (step 15 / diagram A.7: MAG taxonomy).
+# tormes-setup installs minikraken_8GB_20200312, which uses the Lactobacillus
+# names from before the 2020 split. Replace it with the Standard-8 build of
+# 2026-10-22 (same 8 GB size class, RefSeq archaea/bacteria/viral/plasmid/
+# human/UniVec_Core), from https://benlangmead.github.io/aws-indexes/k2.
+# The build's published checksum file (standard_08_GB.md5) checks the
+# download and then the extracted files. Own layer after the databases, so the
+# layers above stay as they are.
+# ======================================
+
+ARG KRAKEN2_DB=k2_standard_08_GB_20261022
+ARG KRAKEN2_MD5=standard_08_GB_20261022/standard_08_GB.md5
+RUN set -e; db=/opt/conda/envs/tormes-1.3.0/db; mkdir -p "$db/$KRAKEN2_DB" && cd "$db/$KRAKEN2_DB" && \
+    wget -q "https://genome-idx.s3.amazonaws.com/kraken/$KRAKEN2_MD5" -O checksums.md5 && \
+    wget -q "https://genome-idx.s3.amazonaws.com/kraken/$KRAKEN2_DB.tar.gz" && \
+    grep " $KRAKEN2_DB.tar.gz\$" checksums.md5 | md5sum -c --quiet && \
+    tar -xzf "$KRAKEN2_DB.tar.gz" && rm "$KRAKEN2_DB.tar.gz" && \
+    test -s hash.k2d -a -s opts.k2d -a -s taxo.k2d && \
+    grep -E ' (hash|opts|taxo)\.k2d$' checksums.md5 | md5sum -c --quiet && \
+    rm -rf "$db/minikraken-DB" && \
+    sed -i "s|^KRAKEN-DATABASE\t.*|KRAKEN-DATABASE\t$db/$KRAKEN2_DB|" /opt/conda/envs/tormes-1.3.0/files/config_file.txt && \
+    grep -q "^KRAKEN-DATABASE	$db/$KRAKEN2_DB$" /opt/conda/envs/tormes-1.3.0/files/config_file.txt
+
+# ======================================
 # COPIA LE CARTELLE DEL TUO PROGETTO (DOPO i DB, così non li sovrascrivi MAI!)
 # ======================================
 
