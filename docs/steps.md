@@ -138,7 +138,7 @@ Execution order (`STEPS_ORDERED` in `scripts/run_pipeline.sh`):
 | | |
 |---|---|
 | Template | `template_12-13.checkm.sh` |
-| Tool | CheckM2 1.0.2 (`checkm2env`, database `uniref100.KO.1.dmnd`); CheckM 1 is installed but not run |
+| Tool | CheckM2 1.1.0 (`checkm2env`, Python 3.12, DIAMOND 2.1.11, database v3 `uniref100.KO.1.dmnd`); CheckM 1 is installed but not run |
 | Input | `11_metabat_MAG/*.fa` |
 | Output | `13_checkm2/quality_report.tsv` (Name, Completeness, Contamination, Completeness_Model_Used, Contig_N50, Genome_Size, GC_Content, ...) |
 | Config | `step12_13.var1` MAGs, `var2` CheckM output, `var3` CheckM2 output, `par1`/`par2` CheckM threads, `par3` CheckM2 threads |

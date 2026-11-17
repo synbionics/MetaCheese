@@ -246,6 +246,28 @@ RUN set -e; conda list -n bioenv --export > /tmp/bioenv.before && \
     rm -f /tmp/bioenv.before /tmp/bioenv.after && conda clean -afy
 
 # ======================================
+# CheckM2 1.1.0 + DIAMOND database v3 (step 12-13 / diagram A.5). Replaces
+# CheckM2 1.0.2 + database v2. checkm2env is rebuilt: the 1.1.0 build for
+# Python 3.8 (pyh7e72e81_0) is broken (TensorFlow 2.4 cannot load its
+# .keras model), so build pyh7e72e81_1 is used (Python 3.12, TensorFlow 2.17,
+# DIAMOND 2.1.11). The base image has glibc 2.27 and conda does not report
+# it, so CONDA_OVERRIDE_GLIBC states it. `database --download` takes the
+# newest database this CheckM2 accepts (v3, zenodo 14897628) and records its
+# path; `testrun` checks the install on CheckM2's own test genomes.
+# ======================================
+
+ARG CHECKM2_SPEC=checkm2=1.1.0=pyh7e72e81_1
+RUN set -e; conda env remove -y -n checkm2env && \
+    CONDA_OVERRIDE_GLIBC=2.27 conda create -y -n checkm2env -c conda-forge -c bioconda "$CHECKM2_SPEC" && \
+    conda run -n checkm2env checkm2 --version | grep -qx "1.1.0" && \
+    echo "checkm2env packages:" && conda list -n checkm2env | grep -E '^(python|tensorflow|keras|diamond|prodigal|lightgbm|scikit-learn|numpy|pandas) ' && \
+    rm -rf /main/db/checkm2/* && \
+    conda run -n checkm2env checkm2 database --download --path /main/db/checkm2 && \
+    test -s /main/db/checkm2/CheckM2_database/uniref100.KO.1.dmnd && \
+    conda run -n checkm2env checkm2 testrun --threads 4 && \
+    conda clean -afy
+
+# ======================================
 # COPIA LE CARTELLE DEL TUO PROGETTO (DOPO i DB, così non li sovrascrivi MAI!)
 # ======================================
 

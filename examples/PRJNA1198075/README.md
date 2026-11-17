@@ -25,7 +25,7 @@ the machine that runs the example. Only the repository is in git.
 | What | Size | How to get it there |
 |------|------|---------------------|
 | Repository | small | `git clone` / `git pull` of the commit to run |
-| Docker image `metacheese` | 152 GB | copy the tested image (below), or `docker build -t metacheese .` (downloads every database again; tool versions that are not pinned may differ from the tested image) |
+| Docker image `metacheese` | 156 GB | copy the tested image (below), or `docker build -t metacheese .` (downloads every database again; tool versions that are not pinned may differ from the tested image) |
 | Reads, `PRJNA1198075_data/` | 116 GB, 56 FASTQ files | copy the downloaded folder, or run `download_PRJNA1198075.sh` again (it checks every file's MD5) |
 | Host index, `data/gene/Bos_taurus/` | 6.3 GB (3.7 GB without the FASTA) | copy the folder, or build it with `scripts/build_bowtie2_index.sh` (about 40 min) |
 
@@ -33,7 +33,7 @@ Copying the image keeps the exact tools and databases that passed the
 regression test (`tests/`):
 
 ```bash
-# on the first machine (docker save needs 152 GB of free disk)
+# on the first machine (docker save needs 156 GB of free disk)
 docker save -o metacheese.tar metacheese
 rsync -av --progress metacheese.tar <server>:/data/
 rsync -av --progress <data_dir>/PRJNA1198075_data <server>:/data/

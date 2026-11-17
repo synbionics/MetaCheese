@@ -118,7 +118,7 @@ name (`scripts/templates/template_<script>*.sh`), also used with `--from`/`--to`
 | A.8 | Assembly quality (all samples side by side) | QUAST 5.3.0 | `06b` | `06b_quast/` |
 | A.3 | Read mapping to the contigs | Bowtie2, samtools 1.6 | `07`, `08-09` | `07_Bowtie_Index/`, `08_mapping_coverage/` |
 | A.4 | Contig coverage and binning into MAGs | MetaBAT2 2.17 | `10-11` | `10_metabat_depth/`, `11_metabat_MAG/` |
-| A.5 | MAG completeness and contamination | CheckM2 1.0.2 | `12-13` | `13_checkm2/` |
+| A.5 | MAG completeness and contamination | CheckM2 1.1.0 | `12-13` | `13_checkm2/` |
 | A.6 | MAG filtering and metadata | awk | `14` | `14_MAGs_high_quality/` |
 | A.7 | MAG annotation | TORMES 1.3.0 | `15` | `15_tormes_MAGs/` |
 | R.1 | Joint analyses of both branches | Python 3 (`scripts/integration/integrate.py`) | `16` | `16_integration/` |
@@ -133,7 +133,7 @@ Inputs, outputs, config keys and known issues of every step are in
 
 - Linux with **Docker** ≥ 20.10 (Docker Desktop on macOS/Windows works, with
   slower disk access).
-- **Disk**: about **120 GB for the image** (the MetaPhlAn, HUMAnN, CheckM2 and
+- **Disk**: about **156 GB for the image** (the MetaPhlAn, HUMAnN, CheckM2 and
   TORMES databases are inside it), plus 3-5 times the size of your compressed
   FASTQ files for the results.
 - **CPU / RAM**: 16 cores and 64 GB RAM for the small example. On full
