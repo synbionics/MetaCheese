@@ -24,7 +24,7 @@ output_dir="@04b_1_var3@"
 
 mkdir -p "$output_dir"
 
-# HUMAnN uses the taxonomic profiles from step 04 (MetaPhlAn 4.1.0, bioenv), but
+# HUMAnN uses the taxonomic profiles from step 04 (MetaPhlAn 4.1.1, bioenv), but
 # still checks the MetaPhlAn version before starting. The metaphlan 4.2.x that
 # conda installs in humannenv prints an extra "No complete MetaPhlAn Bowtie2
 # database found" line, which breaks that check ("Can not call software version

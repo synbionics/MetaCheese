@@ -1,46 +1,46 @@
 mag	sample	kept	completeness	contamination	read_share_pct	kraken2_species	kraken2_genus	metaphlan_name	metaphlan_species_pct	metaphlan_genus_pct
-D_GP_01.unmapped.1	D_GP_01	yes	98.19	0.94	2.83942	Schleiferilactobacillus harbinensis	Schleiferilactobacillus	Schleiferilactobacillus harbinensis	3.30054	3.30054
-D_GP_01.unmapped.2	D_GP_01	yes	82.54	0.03	17.3997	Lactobacillus delbrueckii	Lactobacillus	Lactobacillus delbrueckii	32.8328	43.133
-D_GP_01.unmapped.3	D_GP_01	yes	93.81	0.34	2.79535	Lacticaseibacillus casei	Lacticaseibacillus			18.9621
-D_GP_01.unmapped.4	D_GP_01	yes	56.1	0.4	3.82371	Lactobacillus helveticus	Lactobacillus	Lactobacillus helveticus	10.3002	43.133
+D_GP_01.unmapped.1	D_GP_01	yes	98.19	0.94	2.83942	Schleiferilactobacillus harbinensis	Schleiferilactobacillus	Schleiferilactobacillus harbinensis	3.30056	3.30056
+D_GP_01.unmapped.2	D_GP_01	yes	82.54	0.03	17.3997	Lactobacillus delbrueckii	Lactobacillus	Lactobacillus delbrueckii	32.833	43.1333
+D_GP_01.unmapped.3	D_GP_01	yes	93.81	0.34	2.79535	Lacticaseibacillus casei	Lacticaseibacillus			18.9616
+D_GP_01.unmapped.4	D_GP_01	yes	56.1	0.4	3.82371	Lactobacillus helveticus	Lactobacillus	Lactobacillus helveticus	10.3003	43.1333
 D_GP_01.unmapped.5	D_GP_01	no	35.92	0.1	1.82932					
-D_GP_01.unmapped.6	D_GP_01	yes	86.57	0.03	13.4193	Lacticaseibacillus paracasei	Lacticaseibacillus	Lacticaseibacillus paracasei	17.731	18.9621
+D_GP_01.unmapped.6	D_GP_01	yes	86.57	0.03	13.4193	Lacticaseibacillus paracasei	Lacticaseibacillus	Lacticaseibacillus paracasei	17.7306	18.9616
 D_GP_01.unmapped.7	D_GP_01	no	42.45	0.23	9.06854					
 D_GP_01.unmapped.8	D_GP_01	no	38.18	0.05	9.1324					
 D_GP_01.unmapped.9	D_GP_01	no	6.31	0	0.718526					
-D_GP_02.unmapped.1	D_GP_02	yes	99.36	0.81	2.24908	Lentilactobacillus buchneri	Lentilactobacillus	Lentilactobacillus buchneri	2.87943	2.90002
-D_GP_02.unmapped.2	D_GP_02	yes	95.17	0.42	13.7261	Lacticaseibacillus rhamnosus	Lacticaseibacillus	Lacticaseibacillus rhamnosus	18.1783	23.9196
+D_GP_02.unmapped.1	D_GP_02	yes	99.36	0.81	2.24908	Lentilactobacillus buchneri	Lentilactobacillus	Lentilactobacillus buchneri	2.87955	2.90014
+D_GP_02.unmapped.2	D_GP_02	yes	95.17	0.42	13.7261	Lacticaseibacillus rhamnosus	Lacticaseibacillus	Lacticaseibacillus rhamnosus	18.1791	23.9206
 D_GP_02.unmapped.3	D_GP_02	no	48.21	0.08	14.7046					
 D_GP_02.unmapped.4	D_GP_02	no	16.93	0.62	0.614889					
-D_GP_02.unmapped.5	D_GP_02	yes	97.9	2.08	5.04006	Lactobacillus helveticus	Lactobacillus	Lactobacillus helveticus	10.224	69.5526
+D_GP_02.unmapped.5	D_GP_02	yes	97.9	2.08	5.04006	Lactobacillus helveticus	Lactobacillus	Lactobacillus helveticus	10.2244	69.5525
 D_GP_02.unmapped.6	D_GP_02	no	97.53	36.26	3.03977					
 D_GP_02.unmapped.7	D_GP_02	no	37.14	0.35	19.7102					
-D_GP_02.unmapped.8	D_GP_02	yes	99.78	2.19	2.30072	Schleiferilactobacillus harbinensis	Schleiferilactobacillus	Schleiferilactobacillus harbinensis	2.83653	2.83653
-D_GP_03.unmapped.1	D_GP_03	no	44.25	1.79	0.575523					
-D_GP_03.unmapped.2	D_GP_03	yes	81.92	0.31	1.92677	Limosilactobacillus fermentum	Limosilactobacillus	Limosilactobacillus fermentum	4.60824	4.60824
-D_GP_03.unmapped.3	D_GP_03	no	35.66	0.14	20.5793					
-D_GP_03.unmapped.4	D_GP_03	yes	87.16	0.19	8.02434	Lactobacillus delbrueckii	Lactobacillus	Lactobacillus delbrueckii	16.1951	21.6027
-D_GP_03.unmapped.5	D_GP_03	yes	93.3	2.69	2.72699	Lactobacillus helveticus	Lactobacillus	Lactobacillus helveticus	5.40759	21.6027
-D_GP_03.unmapped.6	D_GP_03	yes	56.47	0.05	20.9402	Lacticaseibacillus rhamnosus	Lacticaseibacillus	Lacticaseibacillus rhamnosus	61.2565	71.6564
-D_GP_03.unmapped.7	D_GP_03	no	99.92	67.62	10.0011					
+D_GP_02.unmapped.8	D_GP_02	yes	99.78	2.19	2.30072	Schleiferilactobacillus harbinensis	Schleiferilactobacillus	Schleiferilactobacillus harbinensis	2.83665	2.83665
+D_GP_03.unmapped.1	D_GP_03	no	43.91	1.71	0.574342					
+D_GP_03.unmapped.2	D_GP_03	yes	81.92	0.31	1.92677	Limosilactobacillus fermentum	Limosilactobacillus	Limosilactobacillus fermentum	4.60874	4.60874
+D_GP_03.unmapped.3	D_GP_03	yes	93.3	2.69	2.72699	Lactobacillus helveticus	Lactobacillus	Lactobacillus helveticus	5.40753	21.6024
+D_GP_03.unmapped.4	D_GP_03	yes	50.28	0.05	17.8538	Lacticaseibacillus rhamnosus	Lacticaseibacillus	Lacticaseibacillus rhamnosus	61.2564	71.6562
+D_GP_03.unmapped.5	D_GP_03	yes	87.16	0.19	8.02434	Lactobacillus delbrueckii	Lactobacillus	Lactobacillus delbrueckii	16.1949	21.6024
+D_GP_03.unmapped.6	D_GP_03	no	99.95	67.65	9.86861					
+D_GP_03.unmapped.7	D_GP_03	no	42.32	0.08	23.6279					
 ND_GP_1.unmapped.1	ND_GP_1	no	49.69	0.01	0.545545					
-ND_GP_1.unmapped.2	ND_GP_1	yes	87.52	0.84	8.21396	Lactobacillus delbrueckii	Lactobacillus	Lactobacillus delbrueckii	19.6813	49.8134
+ND_GP_1.unmapped.2	ND_GP_1	yes	87.52	0.84	8.21396	Lactobacillus delbrueckii	Lactobacillus	Lactobacillus delbrueckii	19.6811	49.8135
 ND_GP_1.unmapped.3	ND_GP_1	no	5.55	0.01	0.469716					
 ND_GP_1.unmapped.4	ND_GP_1	no	97.19	93.92	19.9623					
-ND_GP_1.unmapped.5	ND_GP_1	yes	88.71	1.37	12.0754	Lactobacillus helveticus	Lactobacillus	Lactobacillus helveticus	30.132	49.8134
-ND_GP_1.unmapped.6	ND_GP_1	yes	54.25	0.07	7.11136	Lacticaseibacillus rhamnosus	Lacticaseibacillus	Lacticaseibacillus rhamnosus	24.088	45.5921
+ND_GP_1.unmapped.5	ND_GP_1	yes	88.71	1.37	12.0754	Lactobacillus helveticus	Lactobacillus	Lactobacillus helveticus	30.1324	49.8135
+ND_GP_1.unmapped.6	ND_GP_1	yes	54.25	0.07	7.11136	Lacticaseibacillus rhamnosus	Lacticaseibacillus	Lacticaseibacillus rhamnosus	24.0891	45.5919
 ND_GP_1.unmapped.7	ND_GP_1	no	10.18	1.23	0.993377					
-ND_GP_2.unmapped.1	ND_GP_2	yes	85.01	0.54	9.22338	Lactobacillus delbrueckii	Lactobacillus	Lactobacillus delbrueckii	19.1274	37.7452
-ND_GP_2.unmapped.2	ND_GP_2	yes	93.37	0.76	9.44694	Lactobacillus helveticus	Lactobacillus	Lactobacillus helveticus	18.6178	37.7452
-ND_GP_2.unmapped.3	ND_GP_2	yes	64.68	1.48	1.1071	Lacticaseibacillus casei	Lacticaseibacillus			57.8972
-ND_GP_2.unmapped.4	ND_GP_2	yes	66.74	2.04	0.79792	Streptococcus thermophilus	Streptococcus	Streptococcus thermophilus	1.49127	1.49127
-ND_GP_2.unmapped.5	ND_GP_2	yes	86.71	0.34	5.41286	Lacticaseibacillus rhamnosus	Lacticaseibacillus	Lacticaseibacillus rhamnosus	7.30492	57.8972
-ND_GP_2.unmapped.6	ND_GP_2	yes	98.87	0	37.2028	Lacticaseibacillus paracasei	Lacticaseibacillus	Lacticaseibacillus paracasei	49.7918	57.8972
-ND_GP_2.unmapped.7	ND_GP_2	yes	92.96	1.62	1.89036	Lentilactobacillus parabuchneri	Lentilactobacillus	Lentilactobacillus parabuchneri	2.40881	2.85872
+ND_GP_2.unmapped.1	ND_GP_2	yes	85.01	0.54	9.22338	Lactobacillus delbrueckii	Lactobacillus	Lactobacillus delbrueckii	19.1275	37.745
+ND_GP_2.unmapped.2	ND_GP_2	yes	93.36	0.76	9.43931	Lactobacillus helveticus	Lactobacillus	Lactobacillus helveticus	18.6175	37.745
+ND_GP_2.unmapped.3	ND_GP_2	yes	65.02	1.48	1.10921	Lacticaseibacillus casei	Lacticaseibacillus			57.8974
+ND_GP_2.unmapped.4	ND_GP_2	yes	66.55	2.02	0.793413	Streptococcus thermophilus	Streptococcus	Streptococcus thermophilus	1.49128	1.49128
+ND_GP_2.unmapped.5	ND_GP_2	yes	86.71	0.34	5.41286	Lacticaseibacillus rhamnosus	Lacticaseibacillus	Lacticaseibacillus rhamnosus	7.30495	57.8974
+ND_GP_2.unmapped.6	ND_GP_2	yes	98.74	0.01	37.1584	Lacticaseibacillus paracasei	Lacticaseibacillus	Lacticaseibacillus paracasei	49.7919	57.8974
+ND_GP_2.unmapped.7	ND_GP_2	yes	92.89	1.62	1.88837	Lentilactobacillus parabuchneri	Lentilactobacillus	Lentilactobacillus parabuchneri	2.40882	2.85873
 ND_GP_3.unmapped.1	ND_GP_3	no	6.48	0.01	1.84107					
-ND_GP_3.unmapped.2	ND_GP_3	yes	86.16	0.79	1.85745	Lactobacillus delbrueckii	Lactobacillus	Lactobacillus delbrueckii	3.2907	13.4601
+ND_GP_3.unmapped.2	ND_GP_3	yes	86.16	0.79	1.85745	Lactobacillus delbrueckii	Lactobacillus	Lactobacillus delbrueckii	3.29068	13.4601
 ND_GP_3.unmapped.3	ND_GP_3	no	92.17	18.13	29.259					
-ND_GP_3.unmapped.4	ND_GP_3	yes	69	0	22.1516	Lacticaseibacillus rhamnosus	Lacticaseibacillus	Lacticaseibacillus rhamnosus	49.4219	83.8937
+ND_GP_3.unmapped.4	ND_GP_3	yes	69	0	22.1516	Lacticaseibacillus rhamnosus	Lacticaseibacillus	Lacticaseibacillus rhamnosus	49.4223	83.8938
 ND_GP_3.unmapped.5	ND_GP_3	yes	92.69	2.34	4.97824	Lactobacillus helveticus	Lactobacillus	Lactobacillus helveticus	10.1694	13.4601
-ND_GP_3.unmapped.6	ND_GP_3	no	8.53	2.21	1.34117					
-ND_GP_3.unmapped.7	ND_GP_3	yes	55.79	2.08	0.683963	Chryseobacterium manosquense	Chryseobacterium	Chryseobacterium manosquense	1.55586	1.55586
+ND_GP_3.unmapped.6	ND_GP_3	no	8.52	2.2	1.32808					
+ND_GP_3.unmapped.7	ND_GP_3	yes	55.79	2.08	0.683963	Chryseobacterium manosquense	Chryseobacterium	Chryseobacterium manosquense	1.55585	1.55585

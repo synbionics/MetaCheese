@@ -224,6 +224,28 @@ RUN set -e; db=/opt/conda/envs/tormes-1.3.0/db; mkdir -p "$db/$KRAKEN2_DB" && cd
     grep -q "^KRAKEN-DATABASE	$db/$KRAKEN2_DB$" /opt/conda/envs/tormes-1.3.0/files/config_file.txt
 
 # ======================================
+# MetaPhlAn 4.1.1 + database mpa_vJun23_CHOCOPhlAnSGB_202403 (step 04 /
+# diagram C.1). Replaces 4.1.0 + vJun23_202307. Stays on vJun23: HUMAnN 3.9
+# maps vJun23 SGBs to ChocoPhlAn (humann3_sgb_map.Jun23.tsv) and cannot use
+# vJan25. --freeze-installed keeps the other bioenv packages (SPAdes,
+# AdapterRemoval, MetaBAT2, R) as they are; the diff of the package list is
+# printed in the build log to check that. Own layer after the databases, so
+# the layers above stay as they are.
+# ======================================
+
+ARG MPA_VERSION=4.1.1
+ARG MPA_INDEX=mpa_vJun23_CHOCOPhlAnSGB_202403
+RUN set -e; conda list -n bioenv --export > /tmp/bioenv.before && \
+    conda install -y -n bioenv --freeze-installed "metaphlan=$MPA_VERSION" && \
+    conda list -n bioenv --export > /tmp/bioenv.after && \
+    echo "bioenv package changes:" && (diff /tmp/bioenv.before /tmp/bioenv.after || true) && \
+    conda run -n bioenv metaphlan --version 2>&1 | grep -q "version $MPA_VERSION" && \
+    rm -rf /main/db/metaphlan/* && \
+    conda run -n bioenv metaphlan --install --index "$MPA_INDEX" --bowtie2db /main/db/metaphlan && \
+    test -s "/main/db/metaphlan/$MPA_INDEX.pkl" && \
+    rm -f /tmp/bioenv.before /tmp/bioenv.after && conda clean -afy
+
+# ======================================
 # COPIA LE CARTELLE DEL TUO PROGETTO (DOPO i DB, così non li sovrascrivi MAI!)
 # ======================================
 

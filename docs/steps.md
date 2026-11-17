@@ -62,7 +62,7 @@ Execution order (`STEPS_ORDERED` in `scripts/run_pipeline.sh`):
 | | |
 |---|---|
 | Template | `template_04.metaphlan.sh` + `data/calculate_diversity.R` |
-| Tool | MetaPhlAn 4.1.0 with database `mpa_vJun23_CHOCOPhlAnSGB_202307` (`/main/db/metaphlan`), R 4.3.3 |
+| Tool | MetaPhlAn 4.1.1 with database `mpa_vJun23_CHOCOPhlAnSGB_202403` (`/main/db/metaphlan`), R 4.3.3 |
 | Input | `03_bowtie2_output/<s>.unmapped.fq.{1,2}.gz` (both mates, comma-separated) |
 | Output | `04_metaphlan_output/<s>.unmapped.txt` (profile), `.bowtie2.bz2`, `.sam.bz2`; `merged_abundance_table.txt` (all samples, `merge_metaphlan_tables.py`); `diversity/merged_abundance_table_<metric>.tsv` |
 | Config | `step04.dir2` input, `dir3` output, `rscript`, `par1` threads |
@@ -77,7 +77,7 @@ Execution order (`STEPS_ORDERED` in `scripts/run_pipeline.sh`):
 | Input | `03_bowtie2_output/<s>.unmapped.fq.1.gz` (**read 1 only**) and the MetaPhlAn profile `04_metaphlan_output/<s>.unmapped.txt` (`--taxonomic-profile`) |
 | Output | `04b_humann_output/<s>.unmapped.fq_genefamilies.tsv`, `_pathabundance.tsv`, `_pathcoverage.tsv`, one set per sample (the temporary folder with HUMAnN's own log is deleted, `--remove-temp-output`) |
 | Config | `step04b_1.dir1` profiles, `dir2` reads, `dir3` output, `par1` threads, `par2` DIAMOND block size |
-| Notes | HUMAnN is pointed to the MetaPhlAn 4.1.0 of `bioenv` (the one that made the profiles): the MetaPhlAn 4.2 pulled into `humannenv` by conda breaks HUMAnN's version check. The profiles were made with database vJun23, which HUMAnN 3.9 maps to ChocoPhlAn via `humann3_sgb_map.Jun23.tsv`. DIAMOND search dominates the run time. `--memory-use maximum` keeps HUMAnN's alignment tables in memory (faster post-processing, same results); `step04b_1.par2` sets DIAMOND's `--block-size` (default 2; larger blocks are faster and use roughly 6 GB of RAM per unit, without changing the hits). Samples whose three tables exist are skipped, so an interrupted step can be resumed. `template_04b-2` is an old SLURM version, not used. |
+| Notes | HUMAnN is pointed to the MetaPhlAn 4.1.1 of `bioenv` (the one that made the profiles): the MetaPhlAn 4.2 pulled into `humannenv` by conda breaks HUMAnN's version check. The profiles were made with database vJun23, which HUMAnN 3.9 maps to ChocoPhlAn via `humann3_sgb_map.Jun23.tsv`. DIAMOND search dominates the run time. `--memory-use maximum` keeps HUMAnN's alignment tables in memory (faster post-processing, same results); `step04b_1.par2` sets DIAMOND's `--block-size` (default 2; larger blocks are faster and use roughly 6 GB of RAM per unit, without changing the hits). Samples whose three tables exist are skipped, so an interrupted step can be resumed. `template_04b-2` is an old SLURM version, not used. |
 
 ## C.4: Community-level aggregation (`04b-last`)
 

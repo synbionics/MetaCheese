@@ -109,7 +109,7 @@ name (`scripts/templates/template_<script>*.sh`), also used with `--from`/`--to`
 | I.2 | Host genome index (once per host) | Bowtie2 2.3.3.1 | `scripts/build_bowtie2_index.sh` | the host's folder |
 | P.1 | Adapter and quality trimming | AdapterRemoval 2.3.3 | `00-01` | `01_AdapterRemoval/` |
 | P.2 | Host DNA removal | Bowtie2 2.3.3.1 | `03` | `03_bowtie2_output/` |
-| C.1 | Taxonomic profiling | MetaPhlAn 4.1.0, db `mpa_vJun23_CHOCOPhlAnSGB_202307` | `04` | `04_metaphlan_output/` |
+| C.1 | Taxonomic profiling | MetaPhlAn 4.1.1, db `mpa_vJun23_CHOCOPhlAnSGB_202403` | `04` | `04_metaphlan_output/` |
 | C.2 | Merged abundances, alpha/beta diversity | MetaPhlAn utils, R 4.3 | `04` | `04_metaphlan_output/diversity/` |
 | C.3 | Functional profiling (per sample) | HUMAnN 3.9 (ChocoPhlAn v201901_v31, UniRef90) | `04b-1` | `04b_humann_output/` |
 | C.4 | Community-level aggregation of the functional profiles | HUMAnN 3.9 utilities | `04b-last` | `04b_humann_output/merged_tables/` |

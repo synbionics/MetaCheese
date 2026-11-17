@@ -35,7 +35,7 @@ TOOLS = [
     ("Q.1", "MultiQC", "1.35"),
     ("P.1", "AdapterRemoval", "2.3.3"),
     ("I.2, P.2, A.3", "Bowtie2", "2.3.3.1"),
-    ("C.1", "MetaPhlAn", "4.1.0 (database mpa_vJun23_CHOCOPhlAnSGB_202307)"),
+    ("C.1", "MetaPhlAn", "4.1.1 (database mpa_vJun23_CHOCOPhlAnSGB_202403)"),
     ("C.2", "R + vegan / rbiom", "R 4.3.3"),
     ("C.3", "HUMAnN", "3.9 (ChocoPhlAn v201901_v31, UniRef90 DIAMOND)"),
     ("A.1", "metaSPAdes", "3.13.0"),
