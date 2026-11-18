@@ -10,67 +10,61 @@ scripts on 6 samples and finishes in hours instead of days.
 
 ## Requirements
 
-- the `metacheese` Docker image (see the main [README](../../README.md#quick-start));
+- the `metacheese` Docker image, built from the repository's `Dockerfile`;
 - a server with **≥ 32 cores and ≥ 128 GB RAM** ([`Config.yml`](Config.yml) uses
   32 threads and 120 GB for metaSPAdes; adjust `par*` keys to your machine);
 - about **1 TB of free disk**: 125 GB of FASTQ, plus intermediate files
   (trimmed and host-filtered reads, assemblies, BAM files);
-- the *Bos taurus* genome in `data/gene/Bos_taurus/` (see the main README).
+- the *Bos taurus* genome in `data/gene/Bos_taurus/` (`download_host_genome.sh`).
 
 ## Preparing another machine
 
-The repository, the Docker image, the reads and the host index are needed on
-the machine that runs the example. Only the repository is in git.
+Everything is rebuilt on the server from the repository: the image from the
+`Dockerfile`, the reads and the host genome from their public archives. Nothing
+has to be copied from another machine.
 
-| What | Size | How to get it there |
-|------|------|---------------------|
-| Repository | small | `git clone` / `git pull` of the commit to run |
-| Docker image `metacheese` | 157 GB | copy the tested image (below), or `docker build -t metacheese .` (downloads every database again; tool versions that are not pinned may differ from the tested image) |
-| Reads, `PRJNA1198075_data/` | 116 GB, 56 FASTQ files | copy the downloaded folder, or run `download_PRJNA1198075.sh` again (it checks every file's MD5) |
-| Host index, `data/gene/Bos_taurus/` | 6.3 GB (3.7 GB without the FASTA) | copy the folder, or build it with `scripts/build_bowtie2_index.sh` (about 40 min) |
+| What | Size | How |
+|------|------|-----|
+| Repository | small | `git clone` of the commit to run |
+| Docker image `metacheese` | about 130 GB, several hours to build (mostly database downloads) | `docker build -t metacheese .` |
+| Reads, `PRJNA1198075_data/` | 116 GB, 56 FASTQ files | `download_PRJNA1198075.sh` (checks every file's MD5) |
+| Host genome, `data/gene/Bos_taurus/` | 2.8 GB (plus 3.5 GB of index, built on the first run in about 40 min) | `download_host_genome.sh` (checks NCBI's MD5 and the FASTA's) |
 
-Copying the image keeps the exact tools and databases that passed the
-regression test (`tests/`):
+The build gives the same tools and databases as the image that passed the
+regression test (`tests/`): every conda environment is installed from the
+exact package list of that image (`docker/envs/`), the databases are
+downloaded at fixed versions, and TORMES's extra files at fixed commits
+(`docker/tormes/setup.sh`). `check_server.sh` compares the built image's tool
+and database versions with the tested ones.
+
+On the server, from a directory with room for the data (`/data` below):
 
 ```bash
-# on the first machine (docker save needs 157 GB of free disk)
-docker save -o metacheese.tar metacheese
-rsync -av --progress metacheese.tar <server>:/data/
-rsync -av --progress <data_dir>/PRJNA1198075_data <server>:/data/
-rsync -av --progress data/gene/Bos_taurus <server>:<repo>/data/gene/
-
-# on the server
-docker load -i /data/metacheese.tar
+git clone <repository URL> MetaCheese && cd MetaCheese
+docker build -t metacheese . 2>&1 | tee build.log
+bash examples/PRJNA1198075/download_host_genome.sh
+bash examples/PRJNA1198075/download_PRJNA1198075.sh PRJNA1198075 /data/PRJNA1198075_data 4
+bash examples/PRJNA1198075/prepare_input.sh /data/PRJNA1198075_data
 ```
 
-Then, on the server, from the repository root:
+Then:
 
 1. Set threads and memory in [`Config.yml`](Config.yml) for the server: every
    `par*` thread count at most the number of cores, and metaSPAdes memory
    (`step05.par2`, GB) below the RAM, with room for the system. The deepest
    sample (ND_GP_2, 85M read pairs) needs the most.
-2. `bash examples/PRJNA1198075/prepare_input.sh /data/PRJNA1198075_data`
-3. `bash examples/PRJNA1198075/check_server.sh`: checks the image and its
-   Kraken2 database, cores and memory against the config, free disk, the 28
-   samples and the host index. It changes nothing. Fix every FAIL before
-   starting; a WARN is for you to judge.
+2. `bash examples/PRJNA1198075/check_server.sh`: checks the image (tool and
+   database versions against the tested ones), cores and memory against the
+   config, free disk, the 28 samples and the host genome. It changes nothing.
+   Fix every FAIL before starting; a WARN is for you to judge.
 
 ## Run it
 
 From the repository root:
 
 ```bash
-# 1. Download all FASTQ files from ENA, with metadata and sample groups
-#    (resumes interrupted downloads and verifies every file's MD5)
-bash examples/PRJNA1198075/download_PRJNA1198075.sh PRJNA1198075 /data/PRJNA1198075_data 4
-
-# 2. Link (or copy) them into input/PRJNA1198075/ with the pipeline's naming
-bash examples/PRJNA1198075/prepare_input.sh /data/PRJNA1198075_data
-
-# 3. Check the machine (see "Preparing another machine")
-bash examples/PRJNA1198075/check_server.sh
-
-# 4. Run (output in output/example_PRJNA1198075/); use nohup/tmux, it takes days
+# After "Preparing another machine" and a check_server.sh without FAIL.
+# Output in output/example_PRJNA1198075/; use nohup/tmux, it takes days.
 nohup bash examples/PRJNA1198075/run_example.sh > example_full.out 2>&1 &
 ```
 

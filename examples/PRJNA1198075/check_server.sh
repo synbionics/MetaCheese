@@ -13,7 +13,7 @@ cd "$(dirname "${BASH_SOURCE[0]}")/../.."
 IMAGE="${IMAGE:-metacheese}"
 RUN_NAME="${RUN_NAME:-example_PRJNA1198075}"
 SAMPLES=28
-KRAKEN2_TESTED=k2_standard_08_GB_20261022   # database of the image the regression test passed with
+TESTED=tests/regression/baseline/tables/versions.tsv   # tools and databases the regression test passed with
 fails=0 warns=0
 ok()   { printf 'OK    %s\n' "$*"; }
 warn() { printf 'WARN  %s\n' "$*"; warns=$((warns + 1)); }
@@ -34,15 +34,22 @@ echo "== Docker image ($IMAGE)"
 if ! command -v docker >/dev/null; then
     bad "docker not found"
 elif ! docker image inspect "$IMAGE" >/dev/null 2>&1; then
-    bad "image $IMAGE not found: load it (docker load -i <file>) or build it (docker build -t $IMAGE .)"
+    bad "image $IMAGE not found: build it: docker build -t $IMAGE ."
 else
     ok "image $IMAGE: $(docker image inspect -f '{{.Id}} created {{.Created}}' "$IMAGE" | cut -c8-19,72-)"
-    db="$(docker run --rm --entrypoint awk "$IMAGE" -F'\t' '$1 == "KRAKEN-DATABASE" {print $2}' \
-        /opt/conda/envs/tormes-1.3.0/files/config_file.txt 2>/dev/null)"
-    if [[ "$(basename "${db:-none}")" == "$KRAKEN2_TESTED" ]]; then
-        ok "TORMES Kraken2 database: $KRAKEN2_TESTED"
+    # Tool and database versions against the tested ones (versions.sh prints
+    # the same lines the regression test stores)
+    found="$(docker run --rm -i "$IMAGE" bash -s < tests/regression/versions.sh 2>/dev/null)"
+    if [[ -z "$found" ]]; then
+        bad "could not read the tool versions of $IMAGE"
     else
-        warn "TORMES Kraken2 database is $(basename "${db:-unknown}"), not $KRAKEN2_TESTED (the one tested)"
+        diffs="$(awk -F'\t' 'NR == FNR { t[$1] = $2; next } ($1 in t) && t[$1] != $2 { print "  " $1 ": " $2 " (tested: " t[$1] ")" }' \
+            "$TESTED" - <<< "$found")"
+        if [[ -z "$diffs" ]]; then
+            ok "tool and database versions as tested ($(wc -l < "$TESTED") checked)"
+        else
+            warn "versions differ from the tested image:"; echo "$diffs"
+        fi
     fi
 fi
 
@@ -106,8 +113,11 @@ case "$index" in
 esac
 if compgen -G "$index_host.1.bt2*" >/dev/null; then
     ok "Bowtie2 host index $index_host"
+elif compgen -G "${index_host%/*}/*.fna" >/dev/null || compgen -G "${index_host%/*}/*.fa" >/dev/null \
+     || compgen -G "${index_host%/*}/*.fasta" >/dev/null; then
+    ok "host FASTA in ${index_host%/*}/: the index is built at the start of the run (about 40 min)"
 else
-    bad "no Bowtie2 index $index_host.1.bt2: copy data/gene/Bos_taurus/ from the first machine or run scripts/build_bowtie2_index.sh"
+    bad "no host genome in ${index_host%/*}/: run bash examples/PRJNA1198075/download_host_genome.sh"
 fi
 [[ -s data/calculate_diversity.R ]] && ok "data/calculate_diversity.R" || bad "data/calculate_diversity.R missing (it is in git)"
 

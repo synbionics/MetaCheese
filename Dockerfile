@@ -1,5 +1,21 @@
 # ======================================
-# BASE IMAGE E AMBIENTE
+# MetaCheese image
+#
+# Every conda environment is created from docker/envs/<env>.txt: the exact
+# package list (URL + MD5) of the image that passed the regression test
+# (tests/regression, 2026-11), so a new build installs the same packages.
+# Databases are downloaded at fixed versions. To change a tool, change its
+# list (or the version below), rebuild and run the regression test.
+#
+# Tools and databases (diagram ids as in the README):
+#   bioenv       AdapterRemoval 2.3.3, MetaPhlAn 4.1.1, MetaBAT2 2.17, R
+#                (SPAdes 3.13.0 is also in it, not used)
+#   humannenv    HUMAnN 3.9
+#   bowtieenv    Bowtie2 2.5.5, samtools 1.25
+#   spadesenv    metaSPAdes 4.3.0
+#   checkm2env   CheckM2 1.1.0 (checkmenv: CheckM 1.2.2, installed, not run)
+#   tormes-1.3.0 TORMES 1.3.0 + Kraken2 Standard-8 2026-10-22
+#   qcenv        FastQC 0.12.1;  multiqcenv MultiQC 1.35;  quastenv QUAST 5.3.0
 # ======================================
 
 FROM ubuntu:18.04
@@ -7,7 +23,7 @@ FROM ubuntu:18.04
 ENV DEBIAN_FRONTEND=noninteractive
 
 # ======================================
-# PACCHETTI DI SISTEMA
+# System packages
 # ======================================
 
 RUN apt-get update && \
@@ -30,19 +46,12 @@ RUN apt-get update && \
         gnupg2 && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# ======================================
-# LOCALE UTF-8
-# ======================================
-
 RUN locale-gen en_US.UTF-8
 ENV LANG=en_US.UTF-8
 ENV LANGUAGE=en_US:en
 ENV LC_ALL=en_US.UTF-8
 
-# ======================================
-# R (DA CRAN UFFICIALE)
-# ======================================
-
+# R from CRAN (bionic-cran40)
 RUN wget -qO- https://cloud.r-project.org/bin/linux/ubuntu/marutter_pubkey.asc | gpg --dearmor > /etc/apt/trusted.gpg.d/cran-r.gpg && \
     echo "deb https://cloud.r-project.org/bin/linux/ubuntu bionic-cran40/" >> /etc/apt/sources.list && \
     apt-get update && \
@@ -50,7 +59,8 @@ RUN wget -qO- https://cloud.r-project.org/bin/linux/ubuntu/marutter_pubkey.asc |
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # ======================================
-# INSTALLA MINICONDA E CONFIGURA CANALI
+# Miniconda (conda 25.3.1, kept as installed: the environments come from
+# explicit package lists, so no solver runs)
 # ======================================
 
 ENV CONDA_DIR=/opt/conda
@@ -66,150 +76,88 @@ RUN conda tos accept --override-channels --channel https://repo.anaconda.com/pkg
 
 RUN conda config --add channels defaults && \
     conda config --add channels conda-forge && \
-    conda config --add channels bioconda && \
-    conda update -n base -c defaults conda -y
+    conda config --add channels bioconda
 
-# ======================================
-# TOOL YQ (YAML parser CLI)
-# ======================================
-
+# yq (YAML parser used by the pipeline scripts)
 RUN wget -qO /usr/local/bin/yq \
     https://github.com/mikefarah/yq/releases/download/v4.34.1/yq_linux_amd64 && \
     chmod +x /usr/local/bin/yq
 
-# ======================================
-# AMBIENTI CONDA PER TOOL BIOINFO
-# ======================================
-
-# Ambiente bioinfo generico con molti tool
-RUN conda create -y -n bioenv python=3.8 && \
-    conda run -n bioenv conda install -y \
-        r-vegan \
-        r-optparse \
-        r-ape \
-        r-rbiom \
-        r-compositions \
-        bioconductor-microbiome \
-        adapterremoval=2.3.3 \
-        metaphlan=4.1.0 \
-        spades=3.13.0 \
-        metabat2=2.17
-
-# Link simbolici per Nextflow
-RUN ln -s /opt/conda/envs/bioenv/bin/metaphlan /usr/local/bin/metaphlan
-RUN ln -s /opt/conda/envs/bioenv/bin/merge_metaphlan_tables.py /usr/local/bin/merge_metaphlan_tables.py
-
-# ======================================
-# AMBIENTE HUMAnN + DATABASE (workaround bioconda/pip bug)
-# ======================================
-# Prepara le cartelle database HUMAnN
-RUN mkdir -p /main/db/humann/chocophlan && \
-    mkdir -p /main/db/humann/uniref
-
-RUN conda create -y -n humannenv python=3.7
-RUN conda run -n humannenv conda install -y -c bioconda humann=3.9
-RUN conda run -n humannenv pip install humann
-RUN conda run -n humannenv humann --version
-RUN conda run -n humannenv humann_databases --help
-RUN conda run -n humannenv humann_databases --download chocophlan full /main/db/humann/chocophlan
-RUN conda run -n humannenv humann_databases --download uniref uniref90_diamond /main/db/humann/uniref
-
-# ======================================
-# ALTRI AMBIENTI CONDA
-# ======================================
-
-# Bowtie2 + Samtools legacy
-RUN conda create -y -n bowtieenv python=2.7 bowtie2=2.3.3.1 samtools=1.6
-
-# CheckM legacy
-RUN conda create -y -n checkmenv python=3.7 && \
-    conda run -n checkmenv conda install -y -c conda-forge -c bioconda checkm-genome=1.2.2
-
-# CheckM2
-RUN conda create -y -n checkm2env python=3.8 && \
-    conda run -n checkm2env conda install -y -c bioconda checkm2=1.0.2 && \
-    conda run -n checkm2env pip install numpy==1.23.5 'pandas>=1.3,<2' --no-cache-dir && \
-    conda run -n checkm2env pip install --upgrade checkm2 && \
-    conda run -n checkm2env conda install -y -c bioconda prodigal diamond
-
-# TORMES
-RUN wget https://raw.githubusercontent.com/biobrad/Tormes-Meta-Create/main/tormes-1.3.0.yml && \
-    CONDA_CHANNEL_PRIORITY=flexible conda env create -n tormes-1.3.0 --file tormes-1.3.0.yml && \
-    rm tormes-1.3.0.yml
-
-# ======================================
-# INSTALLA PANDOC
-# ======================================
-
+# pandoc (report rendering)
 RUN wget https://github.com/jgm/pandoc/releases/download/2.19.2/pandoc-2.19.2-1-amd64.deb && \
     dpkg -i pandoc-2.19.2-1-amd64.deb && \
     rm pandoc-2.19.2-1-amd64.deb
 
 # ======================================
-# SCARICA TUTTI I DATABASE BIOINFO RESTANTI
+# Conda environments, from the exact package lists
 # ======================================
 
-RUN mkdir -p /main/db/metaphlan && \
-    mkdir -p /main/db/checkm2
+COPY docker/envs /tmp/envs
+RUN set -e; for env in bioenv humannenv bowtieenv spadesenv checkmenv checkm2env \
+                       tormes-1.3.0 qcenv multiqcenv quastenv; do \
+        conda create -y -n "$env" --file "/tmp/envs/$env.txt"; \
+    done && \
+    rm -rf /tmp/envs && conda clean -afy
 
-# Metaphlan DB
-RUN conda run -n bioenv metaphlan --install --index mpa_vJun23_CHOCOPhlAnSGB_202307 --bowtie2db /main/db/metaphlan
+# HUMAnN 3.9 is used from pip, on Python 3.7 (the conda package of the list
+# goes to a python3.12 folder that this env does not run)
+RUN conda run -n humannenv pip install --no-deps --no-cache-dir humann==3.9 && \
+    conda run -n humannenv humann --version 2>&1 | grep -qx "humann v3.9"
 
-# CheckM2 database
-RUN conda run -n checkm2env checkm2 database --download --path /main/db/checkm2
+RUN ln -s /opt/conda/envs/bioenv/bin/metaphlan /usr/local/bin/metaphlan && \
+    ln -s /opt/conda/envs/bioenv/bin/merge_metaphlan_tables.py /usr/local/bin/merge_metaphlan_tables.py
 
-# TORMES setup (DB vengono gestiti dal tool interno)
-RUN conda run -n tormes-1.3.0 tormes-setup
-
-# ======================================
-# QUALITY CONTROL OF RAW READS (FastQC, step 00 / diagram Q.1)
-# Own environment so it cannot change the versions pinned in bioenv.
-# Placed after the databases so adding it does not invalidate their layers.
-# ======================================
-
-RUN conda create -y -n qcenv -c conda-forge -c bioconda fastqc=0.12.1 && \
-    conda clean -afy
-
-# ======================================
-# HUMAnN utility mapping files (step 04b-last / diagram C.3)
-# The default install only maps UniRef90 -> MetaCyc reactions. The full set
-# adds UniRef90 -> KEGG Orthology, EC, GO, Pfam and eggNOG, needed to regroup
-# gene families into KOs/ECs. --update-config makes HUMAnN find them.
-# ======================================
-
-RUN mkdir -p /main/db/humann/utility_mapping && \
-    conda run -n humannenv humann_databases --download utility_mapping full \
-        /main/db/humann/utility_mapping --update-config yes
-
-# ======================================
-# MultiQC (step 00 / diagram Q.1): merges the per-file FastQC reports into
-# one page. Own environment, and its own layer placed after the databases so
-# adding it does not invalidate them.
-# ======================================
-
-RUN conda create -y -n multiqcenv -c conda-forge -c bioconda multiqc=1.35 && \
-    conda clean -afy
+# Install checks: versions, and each tool's own test where it has one
+RUN set -e; \
+    conda run -n bioenv metaphlan --version 2>&1 | grep -q "version 4.1.1" && \
+    conda run -n checkm2env checkm2 --version | grep -qx "1.1.0" && \
+    conda run -n bowtieenv bowtie2 --version | head -1 | grep -q "version 2.5.5$" && \
+    conda run -n bowtieenv samtools --version | head -1 | grep -qx "samtools 1.25" && \
+    conda run -n spadesenv spades.py --version | grep -qx "SPAdes genome assembler v4.3.0" && \
+    mkdir /tmp/bt && cd /tmp/bt && \
+    python3 -c "import random; random.seed(1); s=''.join(random.choice('ACGT') for _ in range(5000)); open('r.fa','w').write('>r\n'+s+'\n'); open('q.fq','w').write(''.join('@q%d\n%s\n+\n%s\n'%(i,s[i*40:i*40+100],'I'*100) for i in range(100)))" && \
+    conda run -n bowtieenv bowtie2-build -q r.fa r && \
+    conda run -n bowtieenv bash -c "bowtie2 -x r -U q.fq 2>/dev/null | samtools view -c -F 4 -" | grep -qx 100 && \
+    cd /tmp && rm -rf /tmp/bt && \
+    conda run -n spadesenv spades.py --test > spades_test.log 2>&1 && \
+    grep -q "TEST PASSED CORRECTLY" spades_test.log && \
+    rm -rf /tmp/spades_test /tmp/spades_test.log
 
 # ======================================
-# QUAST (step 06b / diagram A.8): quality of the filtered assemblies. Own
-# environment and layer, after the databases. Run without a reference, so it
-# needs no download at run time.
+# Databases, at fixed versions
 # ======================================
 
-RUN conda create -y -n quastenv -c conda-forge -c bioconda python=3.10 quast=5.3.0 && \
-    conda clean -afy
+# HUMAnN 3.9 (step 04b / C.2-C.3): ChocoPhlAn, UniRef90 DIAMOND and the full
+# utility mapping (UniRef90 -> KO, EC, GO, Pfam, eggNOG, MetaCyc), with the
+# paths written to HUMAnN's config
+RUN set -e; mkdir -p /main/db/humann/chocophlan /main/db/humann/uniref /main/db/humann/utility_mapping && \
+    conda run -n humannenv humann_databases --download chocophlan full /main/db/humann/chocophlan --update-config yes && \
+    conda run -n humannenv humann_databases --download uniref uniref90_diamond /main/db/humann/uniref --update-config yes && \
+    conda run -n humannenv humann_databases --download utility_mapping full /main/db/humann/utility_mapping --update-config yes
 
-# ======================================
-# Kraken2 database of TORMES (step 15 / diagram A.7: MAG taxonomy).
-# tormes-setup installs minikraken_8GB_20200312, which uses the Lactobacillus
-# names from before the 2020 split. Replace it with the Standard-8 build of
-# 2026-10-22 (same 8 GB size class, RefSeq archaea/bacteria/viral/plasmid/
-# human/UniVec_Core), from https://benlangmead.github.io/aws-indexes/k2.
-# The build's published checksum file (standard_08_GB.md5) checks the
-# download and then the extracted files. Own layer after the databases, so the
-# layers above stay as they are.
-# ======================================
+# MetaPhlAn 4.1.1 (step 04 / C.1): vJun23_202403. Stays on vJun23: HUMAnN 3.9
+# maps vJun23 SGBs to ChocoPhlAn and cannot use vJan25.
+ARG MPA_INDEX=mpa_vJun23_CHOCOPhlAnSGB_202403
+RUN set -e; mkdir -p /main/db/metaphlan && \
+    conda run -n bioenv metaphlan --install --index "$MPA_INDEX" --bowtie2db /main/db/metaphlan && \
+    test -s "/main/db/metaphlan/$MPA_INDEX.pkl"
 
+# CheckM2 1.1.0 (step 12-13 / A.5): DIAMOND database v3 (zenodo 14897628,
+# the newest this CheckM2 accepts); `testrun` checks the install
+RUN set -e; mkdir -p /main/db/checkm2 && \
+    conda run -n checkm2env checkm2 database --download --path /main/db/checkm2 && \
+    test -s /main/db/checkm2/CheckM2_database/uniref100.KO.1.dmnd && \
+    conda run -n checkm2env checkm2 testrun --threads 4
+
+# TORMES 1.3.0 (step 15 / A.6-A.7): pinned replacement of tormes-setup (see
+# docker/tormes/setup.sh)
+COPY docker/tormes /tmp/tormes
+RUN bash /tmp/tormes/setup.sh && rm -rf /tmp/tormes
+
+# Kraken2 database of TORMES (A.7: MAG taxonomy): Standard-8 build of
+# 2026-10-22 (RefSeq archaea/bacteria/viral/plasmid/human/UniVec_Core), from
+# https://benlangmead.github.io/aws-indexes/k2, checked against the build's
+# published MD5 file. TORMES's config_file.txt points to it.
 ARG KRAKEN2_DB=k2_standard_08_GB_20261022
 ARG KRAKEN2_MD5=standard_08_GB_20261022/standard_08_GB.md5
 RUN set -e; db=/opt/conda/envs/tormes-1.3.0/db; mkdir -p "$db/$KRAKEN2_DB" && cd "$db/$KRAKEN2_DB" && \
@@ -219,105 +167,16 @@ RUN set -e; db=/opt/conda/envs/tormes-1.3.0/db; mkdir -p "$db/$KRAKEN2_DB" && cd
     tar -xzf "$KRAKEN2_DB.tar.gz" && rm "$KRAKEN2_DB.tar.gz" && \
     test -s hash.k2d -a -s opts.k2d -a -s taxo.k2d && \
     grep -E ' (hash|opts|taxo)\.k2d$' checksums.md5 | md5sum -c --quiet && \
-    rm -rf "$db/minikraken-DB" && \
-    sed -i "s|^KRAKEN-DATABASE\t.*|KRAKEN-DATABASE\t$db/$KRAKEN2_DB|" /opt/conda/envs/tormes-1.3.0/files/config_file.txt && \
     grep -q "^KRAKEN-DATABASE	$db/$KRAKEN2_DB$" /opt/conda/envs/tormes-1.3.0/files/config_file.txt
 
 # ======================================
-# MetaPhlAn 4.1.1 + database mpa_vJun23_CHOCOPhlAnSGB_202403 (step 04 /
-# diagram C.1). Replaces 4.1.0 + vJun23_202307. Stays on vJun23: HUMAnN 3.9
-# maps vJun23 SGBs to ChocoPhlAn (humann3_sgb_map.Jun23.tsv) and cannot use
-# vJan25. --freeze-installed keeps the other bioenv packages (SPAdes,
-# AdapterRemoval, MetaBAT2, R) as they are; the diff of the package list is
-# printed in the build log to check that. Own layer after the databases, so
-# the layers above stay as they are.
-# ======================================
-
-ARG MPA_VERSION=4.1.1
-ARG MPA_INDEX=mpa_vJun23_CHOCOPhlAnSGB_202403
-RUN set -e; conda list -n bioenv --export > /tmp/bioenv.before && \
-    conda install -y -n bioenv --freeze-installed "metaphlan=$MPA_VERSION" && \
-    conda list -n bioenv --export > /tmp/bioenv.after && \
-    echo "bioenv package changes:" && (diff /tmp/bioenv.before /tmp/bioenv.after || true) && \
-    conda run -n bioenv metaphlan --version 2>&1 | grep -q "version $MPA_VERSION" && \
-    rm -rf /main/db/metaphlan/* && \
-    conda run -n bioenv metaphlan --install --index "$MPA_INDEX" --bowtie2db /main/db/metaphlan && \
-    test -s "/main/db/metaphlan/$MPA_INDEX.pkl" && \
-    rm -f /tmp/bioenv.before /tmp/bioenv.after && conda clean -afy
-
-# ======================================
-# CheckM2 1.1.0 + DIAMOND database v3 (step 12-13 / diagram A.5). Replaces
-# CheckM2 1.0.2 + database v2. checkm2env is rebuilt: the 1.1.0 build for
-# Python 3.8 (pyh7e72e81_0) is broken (TensorFlow 2.4 cannot load its
-# .keras model), so build pyh7e72e81_1 is used (Python 3.12, TensorFlow 2.17,
-# DIAMOND 2.1.11). The base image has glibc 2.27 and conda does not report
-# it, so CONDA_OVERRIDE_GLIBC states it. `database --download` takes the
-# newest database this CheckM2 accepts (v3, zenodo 14897628) and records its
-# path; `testrun` checks the install on CheckM2's own test genomes.
-# ======================================
-
-ARG CHECKM2_SPEC=checkm2=1.1.0=pyh7e72e81_1
-RUN set -e; conda env remove -y -n checkm2env && \
-    CONDA_OVERRIDE_GLIBC=2.27 conda create -y -n checkm2env -c conda-forge -c bioconda "$CHECKM2_SPEC" && \
-    conda run -n checkm2env checkm2 --version | grep -qx "1.1.0" && \
-    echo "checkm2env packages:" && conda list -n checkm2env | grep -E '^(python|tensorflow|keras|diamond|prodigal|lightgbm|scikit-learn|numpy|pandas) ' && \
-    rm -rf /main/db/checkm2/* && \
-    conda run -n checkm2env checkm2 database --download --path /main/db/checkm2 && \
-    test -s /main/db/checkm2/CheckM2_database/uniref100.KO.1.dmnd && \
-    conda run -n checkm2env checkm2 testrun --threads 4 && \
-    conda clean -afy
-
-# ======================================
-# Bowtie2 2.5.5 + samtools 1.25 (steps 03, 07, 08-09 and the host index).
-# Replaces Bowtie2 2.3.3.1 + samtools 1.6 in bowtieenv (Python 2.7, no
-# longer needed). MetaPhlAn, HUMAnN and TORMES use their own copies in their
-# own envs and are not changed. Bowtie2 2.x indexes stay valid, so the host
-# index in data/gene is not rebuilt. The last command builds a tiny index
-# and maps reads to it, to check the install.
-# ======================================
-
-ARG BOWTIE2_VERSION=2.5.5
-ARG SAMTOOLS_VERSION=1.25
-RUN set -e; conda env remove -y -n bowtieenv && \
-    CONDA_OVERRIDE_GLIBC=2.27 conda create -y -n bowtieenv -c conda-forge -c bioconda \
-        "bowtie2=$BOWTIE2_VERSION" "samtools=$SAMTOOLS_VERSION" && \
-    conda run -n bowtieenv bowtie2 --version | head -1 | grep -q "version $BOWTIE2_VERSION$" && \
-    conda run -n bowtieenv samtools --version | head -1 | grep -qx "samtools $SAMTOOLS_VERSION" && \
-    echo "bowtieenv packages:" && conda list -n bowtieenv | grep -E '^(python|perl|bowtie2|samtools|htslib|tbb) ' && \
-    mkdir /tmp/bt && cd /tmp/bt && \
-    python3 -c "import random; random.seed(1); s=''.join(random.choice('ACGT') for _ in range(5000)); open('r.fa','w').write('>r\n'+s+'\n'); open('q.fq','w').write(''.join('@q%d\n%s\n+\n%s\n'%(i,s[i*40:i*40+100],'I'*100) for i in range(100)))" && \
-    conda run -n bowtieenv bowtie2-build -q r.fa r && \
-    conda run -n bowtieenv bash -c "bowtie2 -x r -U q.fq 2>/dev/null | samtools view -c -F 4 -" | grep -qx 100 && \
-    cd / && rm -rf /tmp/bt && conda clean -afy
-
-# ======================================
-# metaSPAdes 4.3.0 (step 05 / diagram A.1). Replaces SPAdes 3.13.0 of bioenv,
-# which stays installed but is no longer used: SPAdes 4 gets its own env
-# (spadesenv) so the other bioenv tools are not touched, and step 05
-# activates spadesenv. `spades.py --test` assembles SPAdes's own toy data to
-# check the install.
-# ======================================
-
-ARG SPADES_VERSION=4.3.0
-RUN set -e; CONDA_OVERRIDE_GLIBC=2.27 conda create -y -n spadesenv -c conda-forge -c bioconda \
-        "spades=$SPADES_VERSION" && \
-    conda run -n spadesenv spades.py --version | grep -qx "SPAdes genome assembler v$SPADES_VERSION" && \
-    echo "spadesenv packages:" && conda list -n spadesenv | grep -E '^(python|spades) ' && \
-    cd /tmp && conda run -n spadesenv spades.py --test > spades_test.log 2>&1 && \
-    grep -q "TEST PASSED CORRECTLY" spades_test.log && \
-    rm -rf /tmp/spades_test /tmp/spades_test.log && cd / && conda clean -afy
-
-# ======================================
-# COPIA LE CARTELLE DEL TUO PROGETTO (DOPO i DB, così non li sovrascrivi MAI!)
+# Project files (after the databases, so changing them does not invalidate
+# the database layers)
 # ======================================
 
 COPY scripts /main/scripts
 COPY config /main/config
 COPY data /main/data
-
-# ======================================
-# WORKDIR E DEFAULT SHELL
-# ======================================
 
 WORKDIR /main
 CMD ["/bin/bash"]
