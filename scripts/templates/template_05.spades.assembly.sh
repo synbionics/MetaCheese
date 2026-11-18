@@ -2,7 +2,7 @@
 set -euo pipefail
 
 source /opt/conda/etc/profile.d/conda.sh
-conda activate bioenv
+conda activate spadesenv
 
 campioni_folder="@05_var1@"
 output_folder="@05_var2@"
@@ -20,7 +20,14 @@ for fq1 in "$campioni_folder"/*.fq.1.gz; do
 
     echo "Processing sample: $nome_campione"
 
-    if ! spades.py -1 "$fq1" -2 "$fq2" \
+    # SPAdes 4 accepts only known read extensions (.fq.gz, .fastq.gz, ...),
+    # not step 03's <sample>.fq.1.gz, so it reads them through links.
+    reads_dir="$output_folder/reads_links/$nome_campione"
+    mkdir -p "$reads_dir"
+    ln -sfn "$(realpath "$fq1")" "$reads_dir/R1.fq.gz"
+    ln -sfn "$(realpath "$fq2")" "$reads_dir/R2.fq.gz"
+
+    if ! spades.py -1 "$reads_dir/R1.fq.gz" -2 "$reads_dir/R2.fq.gz" \
         --meta -t @05_par1@ --memory @05_par2@ \
         --only-assembler \
         -o "$output_folder/$nome_campione"; then

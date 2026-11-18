@@ -268,6 +268,46 @@ RUN set -e; conda env remove -y -n checkm2env && \
     conda clean -afy
 
 # ======================================
+# Bowtie2 2.5.5 + samtools 1.25 (steps 03, 07, 08-09 and the host index).
+# Replaces Bowtie2 2.3.3.1 + samtools 1.6 in bowtieenv (Python 2.7, no
+# longer needed). MetaPhlAn, HUMAnN and TORMES use their own copies in their
+# own envs and are not changed. Bowtie2 2.x indexes stay valid, so the host
+# index in data/gene is not rebuilt. The last command builds a tiny index
+# and maps reads to it, to check the install.
+# ======================================
+
+ARG BOWTIE2_VERSION=2.5.5
+ARG SAMTOOLS_VERSION=1.25
+RUN set -e; conda env remove -y -n bowtieenv && \
+    CONDA_OVERRIDE_GLIBC=2.27 conda create -y -n bowtieenv -c conda-forge -c bioconda \
+        "bowtie2=$BOWTIE2_VERSION" "samtools=$SAMTOOLS_VERSION" && \
+    conda run -n bowtieenv bowtie2 --version | head -1 | grep -q "version $BOWTIE2_VERSION$" && \
+    conda run -n bowtieenv samtools --version | head -1 | grep -qx "samtools $SAMTOOLS_VERSION" && \
+    echo "bowtieenv packages:" && conda list -n bowtieenv | grep -E '^(python|perl|bowtie2|samtools|htslib|tbb) ' && \
+    mkdir /tmp/bt && cd /tmp/bt && \
+    python3 -c "import random; random.seed(1); s=''.join(random.choice('ACGT') for _ in range(5000)); open('r.fa','w').write('>r\n'+s+'\n'); open('q.fq','w').write(''.join('@q%d\n%s\n+\n%s\n'%(i,s[i*40:i*40+100],'I'*100) for i in range(100)))" && \
+    conda run -n bowtieenv bowtie2-build -q r.fa r && \
+    conda run -n bowtieenv bash -c "bowtie2 -x r -U q.fq 2>/dev/null | samtools view -c -F 4 -" | grep -qx 100 && \
+    cd / && rm -rf /tmp/bt && conda clean -afy
+
+# ======================================
+# metaSPAdes 4.3.0 (step 05 / diagram A.1). Replaces SPAdes 3.13.0 of bioenv,
+# which stays installed but is no longer used: SPAdes 4 gets its own env
+# (spadesenv) so the other bioenv tools are not touched, and step 05
+# activates spadesenv. `spades.py --test` assembles SPAdes's own toy data to
+# check the install.
+# ======================================
+
+ARG SPADES_VERSION=4.3.0
+RUN set -e; CONDA_OVERRIDE_GLIBC=2.27 conda create -y -n spadesenv -c conda-forge -c bioconda \
+        "spades=$SPADES_VERSION" && \
+    conda run -n spadesenv spades.py --version | grep -qx "SPAdes genome assembler v$SPADES_VERSION" && \
+    echo "spadesenv packages:" && conda list -n spadesenv | grep -E '^(python|spades) ' && \
+    cd /tmp && conda run -n spadesenv spades.py --test > spades_test.log 2>&1 && \
+    grep -q "TEST PASSED CORRECTLY" spades_test.log && \
+    rm -rf /tmp/spades_test /tmp/spades_test.log && cd / && conda clean -afy
+
+# ======================================
 # COPIA LE CARTELLE DEL TUO PROGETTO (DOPO i DB, così non li sovrascrivi MAI!)
 # ======================================
 

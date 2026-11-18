@@ -19,7 +19,7 @@ Execution order (`STEPS_ORDERED` in `scripts/run_pipeline.sh`):
 | | |
 |---|---|
 | Script | `scripts/build_bowtie2_index.sh [HOST] [THREADS]` (run once, not part of `STEPS_ORDERED`). `HOST` is `step03.dir3`, or a folder name inside `data/gene/` |
-| Tool | `bowtie2-build` (Bowtie2 2.3.3.1, `bowtieenv`) |
+| Tool | `bowtie2-build` (Bowtie2 2.5.5, `bowtieenv`) |
 | Input | `*.fa`, `*.fna` or `*.fasta` in the host's folder (downloaded by the user, see README) |
 | Output | `<index_name>.{1-4,rev.1,rev.2}.bt2` in the host's folder |
 | Notes | Without arguments it asks for the host. An existing index is kept, and then no FASTA is needed. *Bos taurus* ARS-UCD2.0 takes ~40 min with 16 threads and ~4 GB of index files. |
@@ -51,7 +51,7 @@ Execution order (`STEPS_ORDERED` in `scripts/run_pipeline.sh`):
 | | |
 |---|---|
 | Template | `template_03.bowtie-remove_host.sh` |
-| Tool | Bowtie2 2.3.3.1 (`bowtieenv`), default end-to-end mode |
+| Tool | Bowtie2 2.5.5 (`bowtieenv`), default end-to-end mode |
 | Input | `01_AdapterRemoval/<s>_cleaned_L{1,2}.fq.gz`, host index `step03.dir3` |
 | Output | `03_bowtie2_output/<s>.unmapped.fq.1.gz`, `<s>.unmapped.fq.2.gz` (pairs that do not align concordantly to the host), `<s>.bowtie2.log` (alignment summary) |
 | Config | `step03.dir1` input, `dir2` output, `dir3` index prefix, `par1` threads |
@@ -95,11 +95,11 @@ Execution order (`STEPS_ORDERED` in `scripts/run_pipeline.sh`):
 | | |
 |---|---|
 | Template | `template_05.spades.assembly.sh` |
-| Tool | metaSPAdes 3.13.0 (`spades.py --meta --only-assembler`) |
+| Tool | metaSPAdes 4.3.0 (`spadesenv`, `spades.py --meta --only-assembler`) |
 | Input | `03_bowtie2_output/<s>.unmapped.fq.{1,2}.gz` |
 | Output | `05_spades_output/<s>.unmapped/` (SPAdes folder: `contigs.fasta`, `scaffolds.fasta`, `spades.log`, ...) |
 | Config | `step05.var1` input, `var2` output, `par1` threads, `par2` memory limit in GB |
-| Notes | One assembly per sample (no co-assembly). Error correction is skipped (`--only-assembler`). Memory grows with depth and diversity; SPAdes stops when it reaches `par2`. |
+| Notes | One assembly per sample (no co-assembly). Error correction is skipped (`--only-assembler`). Memory grows with depth and diversity; SPAdes stops when it reaches `par2`. SPAdes 4 accepts only standard read extensions, so it reads the step 03 files through links in `05_spades_output/reads_links/<s>/` (`R1.fq.gz`, `R2.fq.gz`). |
 
 ## A.2: Contig filtering (`06`)
 
@@ -116,7 +116,7 @@ Execution order (`STEPS_ORDERED` in `scripts/run_pipeline.sh`):
 | | |
 |---|---|
 | Templates | `template_07.bowtie-MAG_database.sh`, `template_08-09.mapp_coverage.sh` |
-| Tool | Bowtie2 (`--very-sensitive-local`), samtools 1.6 |
+| Tool | Bowtie2 2.5.5 (`--very-sensitive-local`), samtools 1.25 (`bowtieenv`) |
 | Input | filtered contigs; `03_bowtie2_output/<s>.unmapped.fq.{1,2}.gz` |
 | Output | `07_Bowtie_Index/<s>.unmapped.fasta_sort_index_base.*.bt2` (built with `--threads`; note that `-p` in `bowtie2-build` means *packed*, not threads); `08_mapping_coverage/<s>.unmapped.bam`, `.sorted.bam`, `.sorted.bam.bai`, `.sorted.bam.idxstat`, `_bowtie2.log` |
 | Config | `step07.dir1` index output, `dir2` contigs, `par1` threads; `step08_09.dir1` reads, `dir2` indexes, `dir3` output, `par1` threads |
